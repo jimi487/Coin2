@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "648506903954",
+    "firebase_url": "https://coin-b80f5.firebaseio.com",
+    "project_id": "coin-b80f5",
+    "storage_bucket": "coin-b80f5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:648506903954:android:4cabf62307fd11d0",
+        "android_client_info": {
+          "package_name": "com.bohil.coin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "648506903954-a32s2hak1qumjlt3d1g20kcdstp3r40r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZbGrk5leTfWPgrhYsCgHamhzhJVGA87c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "648506903954-a32s2hak1qumjlt3d1g20kcdstp3r40r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

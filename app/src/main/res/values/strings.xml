@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Coin</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="capture_button_description">Icon to capture the picture</string>
+</resources>
