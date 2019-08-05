@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/nav_host"
-        app:startDestination="@id/previewActivity">
-    <activity android:id="@+id/previewActivity" android:name="com.bohil.coin.PreviewActivity"
-              android:label="PreviewActivity"/>
+        app:startDestination="@id/titleFragment">
+    <fragment android:id="@+id/titleFragment"
+              android:name="com.bohil.coin.TitleFragment"
+              tools:layout="@layout/fragment_title"
+              android:label="TitleFragment">
+        <action android:id="@+id/action_titleFragment_to_disclosureFragment" app:destination="@+id/disclosureFragment"
+                app:enterAnim="@anim/nav_default_enter_anim" app:exitAnim="@anim/nav_default_exit_anim"
+                app:popUpTo="@+id/titleFragment"/>
+    </fragment>
+
+    <fragment android:id="@+id/disclosureFragment"
+              android:name="com.bohil.coin.DisclaimerFragment"
+              android:label="DisclosureFragment"
+              tools:layout="@layout/disclaimer_fragment"/>
+
 </navigation>
