@@ -2,6 +2,8 @@ package com.bohil.coin.facedetection
 
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.bohil.coin.common.CameraImageGraphic
 import com.bohil.coin.common.FrameMetadata
 import com.bohil.coin.common.GraphicOverlay
@@ -15,11 +17,16 @@ import timber.log.Timber
 import java.io.IOException
 
 /**
- * Face Contour Demo.
+ * Detects the Faces
  */
 class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace>>() {
 
     private val detector: FirebaseVisionFaceDetector
+
+    // LiveData to hold the number of Faces in the preview
+    private var _numFaces = MutableLiveData<Int?>()
+    val numFaces : LiveData<Int?>
+    get() = _numFaces
 
     init {
         val options = FirebaseVisionFaceDetectorOptions.Builder()
@@ -55,11 +62,14 @@ class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace
             graphicOverlay.add(imageGraphic)
         }
 
+        // The list of faces
+        _numFaces.value = results.size
+
+        // Faces located
         results.forEach {
             val faceGraphic = FaceContourGraphic(graphicOverlay, it)
             graphicOverlay.add(faceGraphic)
         }
-
         graphicOverlay.postInvalidate()
     }
 
@@ -70,4 +80,5 @@ class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace
     companion object {
         private const val TAG = "FaceContourDetectorProc"
     }
+
 }

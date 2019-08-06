@@ -5,11 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bohil.coin.databinding.DisclaimerFragmentBinding
-import java.io.File
+
 
 class DisclaimerFragment: Fragment() {
 
@@ -19,6 +19,11 @@ class DisclaimerFragment: Fragment() {
 
         // Loading the Disclaimer text information into the TextView
         loadingDisclaimer(binding, context!!)
+
+        // On click to navigate to the Register Fragment
+        binding.confirmButton.setOnClickListener {
+            this.findNavController().navigate(DisclaimerFragmentDirections.actionDisclosureFragmentToRegisterFragment())
+        }
 
         // Adding logic to the scrollview to only enable
         agree(binding)
@@ -34,14 +39,13 @@ class DisclaimerFragment: Fragment() {
     // TODO Add this method to the ViewModel instead
     private fun agree(binding: DisclaimerFragmentBinding){
         // Checking whether the user is at the bottom of the scroll view
-        if(binding.disclosureVerticalView.measuredHeight <= binding.disclosureScrollView.scrollY +
-                binding.disclosureScrollView.height)
-            binding.confirmButton.visibility = View.VISIBLE
-
-        // Else the ScrollView is somewhere in the middle
-        else{
-
+        binding.disclaimerScrollView.viewTreeObserver.addOnScrollChangedListener {
+            if(binding.disclaimerScrollView.getChildAt(0).bottom <= (binding.disclaimerScrollView.height +
+                        binding.disclaimerScrollView.scrollY)){
+                binding.confirmButton.visibility = View.VISIBLE
+            }
         }
+        // Else the ScrollView is somewhere in the middle
     }
 
     /*
@@ -49,7 +53,7 @@ class DisclaimerFragment: Fragment() {
      */
     // TODO Add this method into the ViewModel instead
     private fun loadingDisclaimer(binding: DisclaimerFragmentBinding, context: Context){
-        binding.disclosureText.text = context.assets.open("disclaimer.txt").bufferedReader().use{
+        binding.disclaimerText.text = context.assets.open("disclaimer.txt").bufferedReader().use{
             it.readText()
         }
     }

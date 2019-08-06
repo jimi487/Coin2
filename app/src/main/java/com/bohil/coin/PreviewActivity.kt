@@ -23,7 +23,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import com.bohil.coin.common.CameraSource
+import com.bohil.coin.databinding.ActivityPreviewBinding
 import com.bohil.coin.facedetection.FaceContourDetectorProcessor
 import com.google.firebase.ml.common.FirebaseMLException
 import kotlinx.android.synthetic.main.activity_preview.*
@@ -36,6 +38,10 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
     //TODO replace this with Camera2 api
     private var cameraSource: CameraSource? = null
     private var selectedModel = FACE_CONTOUR
+
+    // Variable that handles saving faces
+    private lateinit var faceContourDetectorProcessor : FaceContourDetectorProcessor
+
 
     private val requiredPermissions: Array<String?>
         get() {
@@ -56,9 +62,16 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val binding : ActivityPreviewBinding = DataBindingUtil.setContentView(this, R.layout.activity_preview)
+        binding.lifecycleOwner =  this
         Timber.d("onCreate")
 
-        setContentView(R.layout.activity_preview)
+        // Creating the Face Contour View Model
+        faceContourDetectorProcessor = FaceContourDetectorProcessor()
+        binding.faceContourDetectorProcessor = faceContourDetectorProcessor
+        binding.numOfFaces.bringToFront()
+
 
         if (firePreview == null) {
             Timber.d("Preview is null")
@@ -81,7 +94,6 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
         } else {
             getRuntimePermissions()
         }
-
     }
 
     override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
@@ -89,9 +101,9 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
 
         cameraSource?.let {
             if (isChecked) {
-                it.setFacing(CameraSource.CAMERA_FACING_FRONT)
-            } else {
                 it.setFacing(CameraSource.CAMERA_FACING_BACK)
+            } else {
+                it.setFacing(CameraSource.CAMERA_FACING_FRONT)
             }
         }
         firePreview?.stop()
@@ -106,7 +118,7 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
 
         try {
             Timber.i("Using face detector Processor")
-            cameraSource?.setMachineLearningFrameProcessor(FaceContourDetectorProcessor())
+            cameraSource?.setMachineLearningFrameProcessor(faceContourDetectorProcessor)
         } catch (e: FirebaseMLException) {
             Timber.e("can not create camera source: ")
         }
@@ -163,7 +175,7 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
             }
         }
 
-        if (!allNeededPermissions.isEmpty()) {
+        if (allNeededPermissions.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 this, allNeededPermissions.toTypedArray(), PERMISSION_REQUESTS
             )
@@ -186,13 +198,11 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
         private fun isPermissionGranted(context: Context, permission: String): Boolean {
             if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
             ) {
-                Timber.i("Permisison granted: $permission")
+                Timber.i("Permission granted: $permission")
                 return true
             }
             Timber.i("Permission NOT granted: $permission")
             return false
         }
     }
-
-
 }

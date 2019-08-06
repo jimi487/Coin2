@@ -83,6 +83,7 @@ class FaceGraphic(
         }
 
         // Draws a bounding box around the face.
+        // TODO Change this to a circle
         val xOffset = scaleX(face.boundingBox.width() / 2.0f)
         val yOffset = scaleY(face.boundingBox.height() / 2.0f)
         val left = x - xOffset

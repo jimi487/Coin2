@@ -9,16 +9,17 @@
             tools:context=".TitleFragment">
 
         <VideoView
+                android:id="@+id/background_video"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/background_video"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintHorizontal_bias="1.0" app:layout_constraintVertical_bias="1.0"/>
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintVertical_bias="1.0"/>
         <EditText
-                android:id="@+id/emailField"
+                android:id="@+id/email_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
@@ -30,48 +31,49 @@
                 android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="8dp"
-                app:layout_constraintTop_toTopOf="@+id/loginGuideline"
-                android:hint="@string/emailAutohint"/>
+                app:layout_constraintTop_toTopOf="@+id/login_guideline"
+                android:hint="@string/email_autohint"/>
 
         <EditText
-                android:id="@+id/passwordField"
+                android:id="@+id/password_field"
                 android:inputType="textPassword"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/textColor"
                 android:textColorHint="@color/textColor"
                 android:ems="10"
-                android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/emailField"
+                android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/email_field"
                 android:layout_marginStart="8dp" app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
-                android:hint="@string/passwordAutohint"/>
+                android:hint="@string/password_autohint"/>
         <Button
-                android:id="@+id/loginButton"
+                android:id="@+id/login_button"
                 android:text="@string/login"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:layout_constraintTop_toBottomOf="@+id/forgotPassword" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/forgot_password" app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginEnd="8dp"/>
         <TextView
-                android:id="@+id/forgotPassword"
-                android:text="@string/passwordRecover"
+                android:id="@+id/forgot_password"
+                android:text="@string/password_recover"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/textColor"
-                app:layout_constraintTop_toBottomOf="@+id/passwordField" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/password_field" app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginEnd="8dp" app:layout_constraintHorizontal_bias="0.325"/>
+
         <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/login_guideline"
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" app:layout_constraintGuide_begin="400dp"
-                android:id="@+id/loginGuideline"/>
+                android:layout_height="wrap_content" app:layout_constraintGuide_begin="400dp"/>
         <TextView
-                android:id="@+id/appVersion"
-                android:text="Version: Alpha"
+                android:id="@+id/app_version"
+                android:text="@string/version"
                 android:textColor="@color/textColor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -79,12 +81,12 @@
                 app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="@+id/background_video"
                 android:layout_marginEnd="8dp"/>
         <Button
-                android:id="@+id/signupButton"
-                android:text="@string/signup"
+                android:id="@+id/signup_button"
+                android:text="@string/sign_up"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                app:layout_constraintTop_toBottomOf="@+id/loginButton"
+                app:layout_constraintTop_toBottomOf="@+id/login_button"
                 app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
                 app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>

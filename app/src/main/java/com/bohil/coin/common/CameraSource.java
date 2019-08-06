@@ -70,7 +70,7 @@ public class CameraSource {
 
     private Camera camera;
 
-    protected int facing = CAMERA_FACING_BACK;
+    protected int facing = CAMERA_FACING_FRONT;
 
     /**
      * Rotation of the device, and thus the associated preview images captured from the device. See
