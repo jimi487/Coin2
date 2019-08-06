@@ -163,7 +163,7 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
             }
         }
 
-        if (!allNeededPermissions.isEmpty()) {
+        if (allNeededPermissions.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 this, allNeededPermissions.toTypedArray(), PERMISSION_REQUESTS
             )
@@ -186,7 +186,7 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
         private fun isPermissionGranted(context: Context, permission: String): Boolean {
             if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
             ) {
-                Timber.i("Permisison granted: $permission")
+                Timber.i("Permission granted: $permission")
                 return true
             }
             Timber.i("Permission NOT granted: $permission")

@@ -3,18 +3,53 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="capture_button_description">Icon to capture the picture</string>
 
+    <!-- //TODO Change this to accurately and automatically reflect the correct version-->
+    <string name="version">Version: Alpha</string>
+
 
 
     <!-- Fragment Title Strings -->
     <string name = "login">Login</string>
-    <string name = "passwordRecover">Forgot Password?</string>
-    <string name = "signup">Sign Up</string>
-    <string name="emailAutohint">Enter Email</string>
-    <string name="passwordAutohint">Enter Password</string>
+    <string name = "password_recover">Forgot Password?</string>
+    <string name = "sign_up">Sign Up</string>
+    <string name="email_autohint">Enter Email</string>
+    <string name="password_autohint">Enter Password</string>
 
     <!-- Disclosure Strings -->
-    <string name = "disclosureTitle">Terms and Conditions</string>
-    <string name= "agreeButton">I AGREE</string>
-    <string name="disclosureText"> Your information is stored by the APP and only used in this app. You agree
+    <string name = "disclosure_title">Terms and Conditions</string>
+    <string name= "agree_button">I AGREE</string>
+    <string name="disclosure_text"> Your information is stored by the APP and only used in this app. You agree
     that you understand this.</string>
+
+    <!-- Register Fragment Strings -->
+
+    <string name = "face_image_content_description">Tap this image to be capture your picture</string>
+    <string name = "first_name_hint">First Name</string>
+    <string name = "last_name_hint">Last Name</string>
+    <string name = "age">Age</string>
+    <string name = "finish_button">Finish</string>
+
+    <string-array name = "sex_array">
+        <item>Female</item>
+        <item>Male</item>
+    </string-array>
+
+    <string-array name ="language_array">
+        <item>English</item>
+        <item>French</item>
+        <item>Japanese</item>
+        <item>German</item>
+    </string-array>
+
+    <string-array name="country_array">
+        <item>Canada</item>
+        <item>USA</item>
+        <item>Japan</item>
+        <item>Germany</item>
+    </string-array>
+
+    <string name = "first_name_autofill_hint">Type in your first name</string>
+    <string name = "last_name_autofill_hint">Type in your last name</string>
+    <string name = "age_autofill_hint">Enter your age</string>
+    <string name = "confirm_check">I agree the information provided is accurate, and does not depict any other persons</string>
 </resources>
