@@ -7,34 +7,44 @@
     <string name="version">Version: Alpha</string>
 
 
-
     <!-- Fragment Title Strings -->
-    <string name = "login">Login</string>
-    <string name = "password_recover">Forgot Password?</string>
-    <string name = "sign_up">Sign Up</string>
+    <string name="login">Login</string>
+    <string name="password_recover">Forgot Password?</string>
+    <string name="sign_up">Sign Up</string>
     <string name="email_autohint">Enter Email</string>
     <string name="password_autohint">Enter Password</string>
 
-    <!-- Disclosure Strings -->
-    <string name = "disclosure_title">Terms and Conditions</string>
-    <string name= "agree_button">I AGREE</string>
-    <string name="disclosure_text"> Your information is stored by the APP and only used in this app. You agree
-    that you understand this.</string>
+    <!-- Disclaimer Strings -->
+    <string name="disclaimer_title">Terms and Conditions</string>
+    <string name="agree_button">I AGREE</string>
+    <string name="disclaimer_text">Your information is stored by the APP and only used in this app. You agree
+        that you understand this.
+    </string>
 
-    <!-- Register Fragment Strings -->
+    <!-- Sign Up Strings -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="confirm_email">Confirm Email</string>
 
-    <string name = "face_image_content_description">Tap this image to be capture your picture</string>
-    <string name = "first_name_hint">First Name</string>
-    <string name = "last_name_hint">Last Name</string>
-    <string name = "age">Age</string>
-    <string name = "finish_button">Finish</string>
+    <!-- Register Form Fragment Strings -->
+    <string name="face_image_content_description">Tap this image to be capture your picture</string>
+    <string name="first_name_hint">First Name</string>
+    <string name="last_name_hint">Last Name</string>
+    <string name="age">Age</string>
+    <string name="finish_button">Finish</string>
 
-    <string-array name = "sex_array">
+    <string-array name="sex_array">
         <item>Female</item>
         <item>Male</item>
     </string-array>
 
-    <string-array name ="language_array">
+    <string-array name="language_array">
         <item>English</item>
         <item>French</item>
         <item>Japanese</item>
@@ -48,8 +58,15 @@
         <item>Germany</item>
     </string-array>
 
-    <string name = "first_name_autofill_hint">Type in your first name</string>
-    <string name = "last_name_autofill_hint">Type in your last name</string>
-    <string name = "age_autofill_hint">Enter your age</string>
-    <string name = "confirm_check">I agree the information provided is accurate, and does not depict any other persons</string>
+    <string name="first_name_autofill_hint">Type in your first name</string>
+    <string name="last_name_autofill_hint">Type in your last name</string>
+    <string name="age_autofill_hint">Enter your age</string>
+    <string name="confirm_check">I agree the information provided is accurate, and does not depict any other persons
+    </string>
+    <string name="no_face_detected">No faces detected! Position the camera clearly in front of you</string>
+    <string name="one_face_detected">Face Detected! Hold the Camera button</string>
+    <string name="multiple_faces_detected">Multiple faces detected! Please only show the face used</string>
+    <string name="title_activity_sign_up">Sign in</string>
+
+
 </resources>

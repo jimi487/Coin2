@@ -1,4 +1,4 @@
-package com.bohil.coin.registration
+package com.bohil.coin.login.registration
 
 import androidx.lifecycle.ViewModel
 

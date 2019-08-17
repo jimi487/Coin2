@@ -1,9 +1,9 @@
-package com.bohil.coin.facedetection
+package com.bohil.coin.login.facedetection
 
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import com.bohil.coin.common.GraphicOverlay
+import com.bohil.coin.login.common.GraphicOverlay
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceContour
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark
@@ -40,7 +40,8 @@ class FaceContourGraphic(overlay: GraphicOverlay, private val firebaseVisionFace
         // Draws a circle at the position of the detected face, with the face's track id below.
         val x = translateX(face.boundingBox.centerX().toFloat())
         val y = translateY(face.boundingBox.centerY().toFloat())
-        canvas.drawCircle(x, y, FACE_POSITION_RADIUS, facePositionPaint)
+        canvas.drawCircle(x, y,
+            FACE_POSITION_RADIUS, facePositionPaint)
         canvas.drawText("id: ${face.trackingId}", x + ID_X_OFFSET, y + ID_Y_OFFSET, idPaint)
 
         // Draws a bounding box around the face.
@@ -56,7 +57,8 @@ class FaceContourGraphic(overlay: GraphicOverlay, private val firebaseVisionFace
         for (point in contour.points) {
             val px = translateX(point.x)
             val py = translateY(point.y)
-            canvas.drawCircle(px, py, FACE_POSITION_RADIUS, facePositionPaint)
+            canvas.drawCircle(px, py,
+                FACE_POSITION_RADIUS, facePositionPaint)
         }
 
         if (face.smilingProbability >= 0) {

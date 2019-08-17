@@ -1,8 +1,8 @@
-package com.bohil.coin.facedetection
+package com.bohil.coin.login.facedetection
 
 import android.graphics.*
 import android.graphics.Paint.Style
-import com.bohil.coin.common.GraphicOverlay
+import com.bohil.coin.login.common.GraphicOverlay
 import com.google.android.gms.vision.CameraSource
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark
@@ -46,7 +46,8 @@ class FaceGraphic(
         // of the face's bounding box
         val x = translateX(face.boundingBox.centerX().toFloat())
         val y = translateY(face.boundingBox.centerY().toFloat())
-        canvas.drawCircle(x, y - 4 * ID_Y_OFFSET, FACE_POSITION_RADIUS, facePositionPaint)
+        canvas.drawCircle(x, y - 4 * ID_Y_OFFSET,
+            FACE_POSITION_RADIUS, facePositionPaint)
         canvas.drawText("id: " + face.trackingId, x + ID_X_OFFSET, y - 3 * ID_Y_OFFSET, idPaint)
         canvas.drawText(
             "happiness: ${String.format("%.2f", face.smilingProbability)}",

@@ -1,4 +1,4 @@
-package com.bohil.coin.registration
+package com.bohil.coin.login.registration
 
 import android.graphics.Color
 import android.os.Bundle
@@ -6,12 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.bohil.coin.R
-import com.bohil.coin.databinding.RegisterFragmentBinding
+import com.bohil.coin.databinding.FragmentRegisterBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class RegisterFragment : Fragment() {
 
@@ -24,7 +26,11 @@ class RegisterFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         val binding =
-            DataBindingUtil.inflate<RegisterFragmentBinding>(inflater, R.layout.register_fragment, container, false)
+            DataBindingUtil.inflate<FragmentRegisterBinding>(inflater, R.layout.fragment_register, container, false)
+
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+        Toast.makeText(activity, user.toString(), Toast.LENGTH_LONG).show()
 
         // Enable the complete registration button only if the user agrees the information provided is accurate
         binding.confirmationCheckbox.setOnClickListener{view ->

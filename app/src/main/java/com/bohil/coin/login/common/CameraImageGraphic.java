@@ -1,14 +1,13 @@
-package com.bohil.coin.common;
+package com.bohil.coin.login.common;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import com.bohil.coin.common.GraphicOverlay.Graphic;
 
 /**
  * Draw camera image to background.
  */
-public class CameraImageGraphic extends Graphic {
+public class CameraImageGraphic extends GraphicOverlay.Graphic {
 
     private final Bitmap bitmap;
 

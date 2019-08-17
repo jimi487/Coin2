@@ -1,12 +1,12 @@
-package com.bohil.coin.facedetection
+package com.bohil.coin.login.facedetection
 
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.bohil.coin.common.CameraImageGraphic
-import com.bohil.coin.common.FrameMetadata
-import com.bohil.coin.common.GraphicOverlay
+import com.bohil.coin.login.common.CameraImageGraphic
+import com.bohil.coin.login.common.FrameMetadata
+import com.bohil.coin.login.common.GraphicOverlay
 import com.google.android.gms.tasks.Task
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
@@ -17,8 +17,10 @@ import timber.log.Timber
 import java.io.IOException
 
 /**
- * Detects the Faces
+ * ViewModel for the Preview Activity
  */
+
+// TODO Change to Landmark detector possibly
 class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace>>() {
 
     private val detector: FirebaseVisionFaceDetector
@@ -41,7 +43,7 @@ class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace
         try {
             detector.close()
         } catch (e: IOException) {
-            Timber.e("Exception thrown while trying to close Face Contour Detector: $e")
+            Timber.e("Exception thrown while trying to close User Contour Detector: $e")
         }
     }
 
@@ -74,7 +76,7 @@ class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace
     }
 
     override fun onFailure(e: Exception) {
-        Log.e(TAG, "Face detection failed $e")
+        Log.e(TAG, "User detection failed $e")
     }
 
     companion object {

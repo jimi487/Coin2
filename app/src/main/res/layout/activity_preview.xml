@@ -3,7 +3,7 @@
     <data>
         <variable
             name="faceContourDetectorProcessor"
-            type="com.bohil.coin.facedetection.FaceContourDetectorProcessor"/>
+            type="com.bohil.coin.login.facedetection.FaceContourDetectorProcessor"/>
     </data>
 
     <RelativeLayout
@@ -15,28 +15,29 @@
             android:keepScreenOn="true">
 
         <TextView
-                android:id="@+id/numOfFaces"
-                android:text="@{faceContourDetectorProcessor.numFaces.toString()}"
+                android:id="@+id/faces_help_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="463dp" android:layout_marginStart="55dp"
                 android:layout_alignStart="@+id/firePreview" android:layout_alignTop="@+id/firePreview"
-                android:textSize="36sp"/>
-        <com.bohil.coin.common.CameraSourcePreview
+                android:textSize="18sp"/>
+        <!--android:text="@{faceContourDetectorProcessor.numFaces.toString()}"-->
+
+        <com.bohil.coin.login.common.CameraSourcePreview
                 android:id="@+id/firePreview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true">
 
-            <com.bohil.coin.common.GraphicOverlay
+            <com.bohil.coin.login.common.GraphicOverlay
                     android:id="@+id/fireFaceOverlay"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"/>
-        </com.bohil.coin.common.CameraSourcePreview>
+        </com.bohil.coin.login.common.CameraSourcePreview>
 
         <FrameLayout
                 android:id="@+id/control"
@@ -64,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/capture_button_description"
                     app:srcCompat="@android:drawable/ic_menu_camera"
-                    android:layout_gravity="center_horizontal"/>
+                    android:layout_gravity="center_horizontal" android:clickable="false"/>
         </FrameLayout>
 
     </RelativeLayout>

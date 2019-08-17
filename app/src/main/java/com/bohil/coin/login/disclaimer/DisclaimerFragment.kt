@@ -1,4 +1,4 @@
-package com.bohil.coin
+package com.bohil.coin.login.disclaimer
 
 import android.content.Context
 import android.os.Bundle
@@ -8,21 +8,23 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.bohil.coin.databinding.DisclaimerFragmentBinding
+import com.bohil.coin.R
+import com.bohil.coin.databinding.FragmentDisclaimerBinding
 
 
 class DisclaimerFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding =
-            DataBindingUtil.inflate<DisclaimerFragmentBinding>(inflater, R.layout.disclaimer_fragment, container, false)
+            DataBindingUtil.inflate<FragmentDisclaimerBinding>(inflater,
+                R.layout.fragment_disclaimer, container, false)
 
         // Loading the Disclaimer text information into the TextView
         loadingDisclaimer(binding, context!!)
 
         // On click to navigate to the Register Fragment
         binding.confirmButton.setOnClickListener {
-            this.findNavController().navigate(DisclaimerFragmentDirections.actionDisclosureFragmentToRegisterFragment())
+            this.findNavController().navigate(DisclaimerFragmentDirections.actionDisclaimerFragmentToSignUpFragment())
         }
 
         // Adding logic to the scrollview to only enable
@@ -37,7 +39,7 @@ class DisclaimerFragment: Fragment() {
      * ScrollView
      */
     // TODO Add this method to the ViewModel instead
-    private fun agree(binding: DisclaimerFragmentBinding){
+    private fun agree(binding: FragmentDisclaimerBinding){
         // Checking whether the user is at the bottom of the scroll view
         binding.disclaimerScrollView.viewTreeObserver.addOnScrollChangedListener {
             if(binding.disclaimerScrollView.getChildAt(0).bottom <= (binding.disclaimerScrollView.height +
@@ -52,7 +54,7 @@ class DisclaimerFragment: Fragment() {
     Loads the text information from the Disclaimer file into the TextView
      */
     // TODO Add this method into the ViewModel instead
-    private fun loadingDisclaimer(binding: DisclaimerFragmentBinding, context: Context){
+    private fun loadingDisclaimer(binding: FragmentDisclaimerBinding, context: Context){
         binding.disclaimerText.text = context.assets.open("disclaimer.txt").bufferedReader().use{
             it.readText()
         }

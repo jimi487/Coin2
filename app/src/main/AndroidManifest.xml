@@ -15,21 +15,18 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".PreviewActivity">
+        <activity android:name=".main.MainActivity">
         </activity>
-        <activity android:name=".FaceDetect">
+        <activity android:name=".login.SignUp2Activity">
         </activity>
-        <activity
-                android:name=".Camera"
-                android:configChanges="orientation|keyboardHidden|screenSize"
-                android:theme="@style/FullscreenTheme">
+        <activity android:name=".login.facedetection.PreviewActivity">
         </activity> <!-- Automatically download the ML model to the device after app is installed from Play Store -->
         <meta-data
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"
                 android:value="face"/>
 
         <activity
-                android:name=".MainActivity"
+                android:name=".login.LogInActivity"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

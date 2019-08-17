@@ -1,4 +1,4 @@
-package com.bohil.coin.common;
+package com.bohil.coin.login.common;
 
 import android.graphics.*;
 import android.hardware.Camera.CameraInfo;

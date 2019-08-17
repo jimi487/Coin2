@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.bohil.coin
+package com.bohil.coin.login.facedetection
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -24,14 +24,18 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import com.bohil.coin.common.CameraSource
+import androidx.lifecycle.Observer
+import com.bohil.coin.R
 import com.bohil.coin.databinding.ActivityPreviewBinding
-import com.bohil.coin.facedetection.FaceContourDetectorProcessor
+import com.bohil.coin.login.common.CameraSource
 import com.google.firebase.ml.common.FirebaseMLException
 import kotlinx.android.synthetic.main.activity_preview.*
 import timber.log.Timber
 import java.io.IOException
 
+/**
+ * Activity that handles creating the View for the Camera and User Detection
+ */
 class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
     CompoundButton.OnCheckedChangeListener {
 
@@ -41,6 +45,7 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
 
     // Variable that handles saving faces
     private lateinit var faceContourDetectorProcessor : FaceContourDetectorProcessor
+    private lateinit var binding : ActivityPreviewBinding
 
 
     private val requiredPermissions: Array<String?>
@@ -63,14 +68,14 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding : ActivityPreviewBinding = DataBindingUtil.setContentView(this, R.layout.activity_preview)
+        binding  = DataBindingUtil.setContentView(this, R.layout.activity_preview)
         binding.lifecycleOwner =  this
         Timber.d("onCreate")
 
-        // Creating the Face Contour View Model
+        // Creating the User Contour View Model
         faceContourDetectorProcessor = FaceContourDetectorProcessor()
         binding.faceContourDetectorProcessor = faceContourDetectorProcessor
-        binding.numOfFaces.bringToFront()
+        binding.facesHelpText.bringToFront()
 
 
         if (firePreview == null) {
@@ -90,7 +95,8 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
         }
 
         if (allPermissionsGranted()) {
-            createCameraSource(selectedModel)
+            createCameraSource()
+            numOfFaces()
         } else {
             getRuntimePermissions()
         }
@@ -110,7 +116,7 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
         startCameraSource()
     }
 
-    private fun createCameraSource(model: String) {
+    private fun createCameraSource() {
         // If there's no existing cameraSource, create one
         if (cameraSource == null) {
             cameraSource = CameraSource(this, fireFaceOverlay)
@@ -177,7 +183,8 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
 
         if (allNeededPermissions.isNotEmpty()) {
             ActivityCompat.requestPermissions(
-                this, allNeededPermissions.toTypedArray(), PERMISSION_REQUESTS
+                this, allNeededPermissions.toTypedArray(),
+                PERMISSION_REQUESTS
             )
         }
     }
@@ -185,14 +192,39 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         Timber.i("Permission granted!")
         if (allPermissionsGranted()) {
-            createCameraSource(selectedModel)
+            createCameraSource()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
+    /**
+     * Handles how many faces are present in the screen
+     * Only allows the user to take a picture if there is ony only 1 face detected on the screen
+     */
+    private fun numOfFaces(){
+        faceContourDetectorProcessor.numFaces.observe(this, Observer {facesDetected ->
+
+            when(facesDetected){
+
+                0 ->{
+                    binding.facesHelpText.text = resources.getString(R.string.no_face_detected)
+                    binding.captureButton.isClickable = false
+                }
+                1 -> {
+                    binding.facesHelpText.text = resources.getString(R.string.one_face_detected)
+                    binding.captureButton.isClickable = true
+                }
+                else -> {
+                    binding.facesHelpText.text = resources.getString(R.string.multiple_faces_detected)
+                    binding.captureButton.isClickable = false
+                }
+            }
+        })
+    }
+
 
     companion object {
-        private const val FACE_CONTOUR = "Face Contour"
+        private const val FACE_CONTOUR = "User Contour"
         private const val PERMISSION_REQUESTS = 1
 
         private fun isPermissionGranted(context: Context, permission: String): Boolean {

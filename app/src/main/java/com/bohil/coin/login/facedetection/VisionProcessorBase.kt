@@ -1,11 +1,11 @@
-package com.bohil.coin.facedetection
+package com.bohil.coin.login.facedetection
 
 import android.graphics.Bitmap
 import androidx.annotation.GuardedBy
-import com.bohil.coin.common.BitmapUtils
-import com.bohil.coin.common.FrameMetadata
-import com.bohil.coin.common.GraphicOverlay
-import com.bohil.coin.common.VisionImageProcessor
+import com.bohil.coin.login.common.BitmapUtils
+import com.bohil.coin.login.common.FrameMetadata
+import com.bohil.coin.login.common.GraphicOverlay
+import com.bohil.coin.login.common.VisionImageProcessor
 import com.google.android.gms.tasks.Task
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata

@@ -1,4 +1,4 @@
-package com.bohil.coin
+package com.bohil.coin.login.title
 
 import android.net.Uri
 import android.os.Bundle
@@ -7,19 +7,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
 
 class TitleFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = DataBindingUtil.inflate<FragmentTitleBinding>(inflater, R.layout.fragment_title, container, false)
+        val binding = DataBindingUtil.inflate<FragmentTitleBinding>(inflater,
+            R.layout.fragment_title, container, false)
 
-        //TODO Create viewmodel for this fragment, use that for navigation instead
         binding.signupButton.setOnClickListener {
-            it.findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToDisclosureFragment())
+            findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToDisclosureFragment())
         }
+
+        binding.loginButton.setOnClickListener { navigateToMainActivity() }
 
         // Setting the background videos
         setBackgroundVideo(binding)
@@ -35,5 +38,10 @@ class TitleFragment : Fragment() {
         binding.backgroundVideo.start()
     }
 
+
+    private fun navigateToMainActivity(){
+        val directions = TitleFragmentDirections.actionTitleFragmentToMainActivity()
+        findNavController().navigate(directions)
+    }
 
 }
