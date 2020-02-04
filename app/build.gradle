@@ -61,6 +61,11 @@ dependencies {
     // Firebase Dynamic Links Dependency
     implementation 'com.google.firebase:firebase-dynamic-links:19.0.0'
 
+    // AWS Amplify Dependency
+    implementation 'com.amplifyframework:core:0.9.0'
+    implementation 'com.amplifyframework:aws-api:0.9.0'
+
+
     // Navigation Dependency
     def nav_version = "2.2.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
