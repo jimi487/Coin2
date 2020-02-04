@@ -1,0 +1,15 @@
+{
+    "amplify": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-coin-amplify-150904-authRole",
+            "UnauthRoleArn": "arn:aws:iam::633263412160:role/amplify-coin-amplify-150904-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::633263412160:role/amplify-coin-amplify-150904-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "amplify-coin-amplify-150904-deployment",
+            "UnauthRoleName": "amplify-coin-amplify-150904-unauthRole",
+            "StackName": "amplify-coin-amplify-150904",
+            "StackId": "arn:aws:cloudformation:us-east-2:633263412160:stack/amplify-coin-amplify-150904/07ce8970-46c1-11ea-8006-0a3121d24df0",
+            "AmplifyAppId": "dn56eurds6l80"
+        }
+    }
+}

@@ -26,7 +26,14 @@ class SignUpFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_up, container, false)
+
         binding.registerButton.setOnClickListener { validateForm() }
+        // Long click the submit button to bypass registration
+        binding.registerButton.setOnLongClickListener{
+            findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
+            true
+        }
+
         auth = FirebaseAuth.getInstance()
         return binding.root
     }
@@ -64,6 +71,7 @@ class SignUpFragment : Fragment() {
                 null -> Toast.makeText(activity, "The user was not successfully created", Toast.LENGTH_LONG).show()
                 else -> {
                     findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
+
                 }
             }
         }
