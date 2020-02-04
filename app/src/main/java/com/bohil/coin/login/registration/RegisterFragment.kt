@@ -37,26 +37,47 @@ class RegisterFragment : Fragment() {
             //TODO Fix code so button changes availability not depending on when the checkbox is clicked
             // in other words, make it so when all fields are properly filled, the button becomes available
             // Display toasts for which field is not properly completed
-            with(view as CheckBox){
-                if(view.isChecked){
+            with(view as CheckBox) {
+                if (view.isChecked) {
                     // If the checkbox is checked, makes sure the other fields aren't empty
-                    if(binding.firstNameEditText.text.toString() != "" && binding.lastNameEditText.text.toString()
-                        != "" && binding.ageTextField.text.toString() != "") {
-                        binding.finishButton.setBackgroundColor(Color.GRAY)
-                        binding.finishButton.isClickable = true
-                    }
-                }
-                else{
                     binding.finishButton.setBackgroundColor(Color.WHITE)
+                    binding.finishButton.isClickable = true
+
+                } else {
+                    binding.finishButton.setBackgroundColor(Color.GRAY)
                     binding.finishButton.isClickable = false
                 }
             }
         }
 
+
         // Adding navigation to the camera icon
         binding.faceImageButton.setOnClickListener {
             it.findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToPreviewActivity())
         }
+
+        binding.finishButton.setOnClickListener {
+
+            val firstName = binding.firstNameEditText.text.toString()
+            val lastName = binding.lastNameEditText.text.toString()
+            val age = binding.ageTextField.text.toString()
+            val lang = binding.languageSpinner.selectedItem.toString()
+            val sex = binding.sexSpinner.selectedItem.toString()
+            val country = binding.countrySpinner.selectedItem.toString()
+
+            val listOfStrings = listOf(firstName, lastName, age)
+
+            if (listOfStrings.contains("")) {
+                if(listOfStrings.filter { it == "" }.isNotEmpty()) {
+                    Toast.makeText(context, "All fields must be filled", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                //Implement save user information here
+
+
+            }
+        }
+
 
         return binding.root
     }

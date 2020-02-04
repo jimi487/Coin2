@@ -34,8 +34,9 @@ class TitleFragment : Fragment() {
 
     // Sets the background video for the main screen
     private fun setBackgroundVideo(binding: FragmentTitleBinding) {
-        binding.backgroundVideo.setVideoURI(Uri.parse("android.resource://" + activity?.packageName + "/" + R.raw.b1))
-        binding.backgroundVideo.start()
+        //Joseph: commented out for now, missing videos on Github so won't run on my machine
+        //binding.backgroundVideo.setVideoURI(Uri.parse("android.resource://" + activity?.packageName + "/" + R.raw.b1))
+        //binding.backgroundVideo.start()
     }
 
 
