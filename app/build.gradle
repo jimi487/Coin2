@@ -65,6 +65,14 @@ dependencies {
     implementation 'com.amplifyframework:core:0.9.0'
     implementation 'com.amplifyframework:aws-api:0.9.0'
 
+    //For AWSMobileClient only:
+    implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.15.+'
+
+    //For the drop-in UI also:
+    implementation 'com.amazonaws:aws-android-sdk-auth-userpools:2.15.+'
+    implementation 'com.amazonaws:aws-android-sdk-auth-ui:2.15.+'
+    implementation('com.amazonaws:aws-android-sdk-cognitoauth:2.15.+@aar') { transitive=true }
+
 
     // Navigation Dependency
     def nav_version = "2.2.0"

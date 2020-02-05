@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bohil.coin.Coin
 import com.bohil.coin.R
 
+
 /**
  * The Activity the users are directed to once logged in
  */

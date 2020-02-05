@@ -2,6 +2,7 @@ package com.bohil.coin.login.registration
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +12,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
-import com.bohil.coin.R
+import com.amazonaws.mobile.client.AWSMobileClient
+import com.amazonaws.mobile.client.Callback
+import com.amazonaws.mobile.client.results.SignUpResult
 import com.bohil.coin.databinding.FragmentRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
+import java.util.*
 
 class RegisterFragment : Fragment() {
 
@@ -26,7 +30,7 @@ class RegisterFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         val binding =
-            DataBindingUtil.inflate<FragmentRegisterBinding>(inflater, R.layout.fragment_register, container, false)
+            DataBindingUtil.inflate<FragmentRegisterBinding>(inflater, com.bohil.coin.R.layout.fragment_register, container, false)
 
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
@@ -65,6 +69,7 @@ class RegisterFragment : Fragment() {
             val sex = binding.sexSpinner.selectedItem.toString()
             val country = binding.countrySpinner.selectedItem.toString()
 
+
             val listOfStrings = listOf(firstName, lastName, age)
 
             if (listOfStrings.contains("")) {
@@ -72,9 +77,7 @@ class RegisterFragment : Fragment() {
                     Toast.makeText(context, "All fields must be filled", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                //Implement save user information here
-
-
+                //Test(firstName, lastName)
             }
         }
 
@@ -88,6 +91,7 @@ class RegisterFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RegisterViewModel::class.java)
         // TODO: Use the ViewModel
     }
+
 
 
 }

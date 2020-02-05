@@ -11,5 +11,32 @@
             "StackId": "arn:aws:cloudformation:us-east-2:633263412160:stack/amplify-coin-amplify-150904/07ce8970-46c1-11ea-8006-0a3121d24df0",
             "AmplifyAppId": "dn56eurds6l80"
         }
+    },
+    "local": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-coin-local-161156-authRole",
+            "UnauthRoleArn": "arn:aws:iam::633263412160:role/amplify-coin-local-161156-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::633263412160:role/amplify-coin-local-161156-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "amplify-coin-local-161156-deployment",
+            "UnauthRoleName": "amplify-coin-local-161156-unauthRole",
+            "StackName": "amplify-coin-local-161156",
+            "StackId": "arn:aws:cloudformation:us-east-2:633263412160:stack/amplify-coin-local-161156/fb3ce210-4792-11ea-b441-0286ec33b064",
+            "AmplifyAppId": "dn56eurds6l80"
+        },
+        "categories": {
+            "auth": {
+                "coincb5a0d9f": {
+                    "hostedUIProviderCreds": "[]"
+                }
+            },
+            "function": {
+                "coincb5a0d9fCustomMessage": {
+                    "EMAILSUBJECT": "",
+                    "EMAILMESSAGE": "",
+                    "REDIRECTURL": "coin2://"
+                }
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.bohil.coin.login.signup
 
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +12,14 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import com.amazonaws.mobile.client.AWSMobileClient
+import com.amazonaws.mobile.client.Callback
+import com.amazonaws.mobile.client.results.SignUpResult
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentSignUpBinding
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
+import java.util.HashMap
 
 
 class SignUpFragment : Fragment() {
@@ -29,10 +34,10 @@ class SignUpFragment : Fragment() {
 
         binding.registerButton.setOnClickListener { validateForm() }
         // Long click the submit button to bypass registration
-        binding.registerButton.setOnLongClickListener{
+        /*binding.registerButton.setOnLongClickListener{
             findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
             true
-        }
+        }*/
 
         auth = FirebaseAuth.getInstance()
         return binding.root
@@ -66,14 +71,16 @@ class SignUpFragment : Fragment() {
             binding.password.error = null
         }
         if(valid){
-            createAccount(email, password)
+
+            Test(binding.username.text.toString(), binding.password.text.toString())
+            /*createAccount(email, password)
             when(FirebaseAuth.getInstance().currentUser){
                 null -> Toast.makeText(activity, "The user was not successfully created", Toast.LENGTH_LONG).show()
                 else -> {
                     findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
 
                 }
-            }
+            }*/
         }
     }
 
@@ -111,6 +118,42 @@ class SignUpFragment : Fragment() {
 
             }
         }
+    }
+
+    fun Test(user: String, pass: String) {
+        val attributes: MutableMap<String, String> =
+            HashMap()
+        attributes["email"] = user
+        AWSMobileClient.getInstance().signUp(
+            user,
+            pass,
+            attributes,
+            null,
+            object :
+                Callback<SignUpResult> {
+                override fun onResult(signUpResult: SignUpResult) {
+                    activity!!.runOnUiThread {
+                        Log.d(
+                            "TESTTEST",
+                            "Sign-up callback state: " + signUpResult.confirmationState
+                        )
+                        if (!signUpResult.confirmationState) {
+                            val details =
+                                signUpResult.userCodeDeliveryDetails
+                            Log.i(
+                                "CONFIRM",
+                                "Confirm sign-up with: " + details.destination
+                            )
+                        } else {
+                            Log.i("COMPLETE", "Sign-up done.")
+                        }
+                    }
+                }
+
+                override fun onError(e: Exception) {
+                    Log.e("ERR", "Sign-up error", e)
+                }
+            })
     }
 
     companion object{private const val TAG = "EmailPassword"}
