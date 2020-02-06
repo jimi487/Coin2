@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.findNavController
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignUpResult
@@ -19,7 +18,7 @@ import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentSignUpBinding
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
-import java.util.HashMap
+import java.util.*
 
 
 class SignUpFragment : Fragment() {
@@ -158,9 +157,8 @@ class SignUpFragment : Fragment() {
                 }
 
                 override fun onError(e: Exception) {
-                    binding.TxtProgress.text = "S"
+                    binding.TxtProgress.text = e.toString()
                     binding.loading.visibility = View.GONE
-                    binding.TxtErrorMsg.text = e.message.toString()
                 }
             })
     }

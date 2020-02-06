@@ -1,11 +1,5 @@
 {
     "AppSyncApiName": "coin",
     "DynamoDBBillingMode": "PAY_PER_REQUEST",
-    "DynamoDBEnableServerSideEncryption": "false",
-    "AuthCognitoUserPoolId": {
-        "Fn::GetAtt": [
-            "us-east-2_TCOE1XZKO",
-            "Outputs.UserPoolId"
-        ]
-    }
+    "DynamoDBEnableServerSideEncryption": "false"
 }
