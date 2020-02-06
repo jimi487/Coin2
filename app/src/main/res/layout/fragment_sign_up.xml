@@ -66,6 +66,19 @@
                 app:layout_constraintStart_toStartOf="@+id/password"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.3"/>
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/TxtProgress"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/loading" android:layout_marginTop="4dp"
+                android:textAlignment="center">
+        </TextView>
+
+
+
         <Button
                 android:text="Button"
                 android:layout_width="wrap_content"
@@ -74,5 +87,16 @@
                 app:layout_constraintTop_toBottomOf="@+id/password" app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginEnd="8dp" app:layout_constraintHorizontal_bias="0.498"/>
+
+        <TextView
+                android:id="@+id/TxtErrorMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/register_button" android:layout_marginTop="4dp"
+                android:textColor="#ff0000"
+                android:textAlignment="center"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

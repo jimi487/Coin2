@@ -121,6 +121,9 @@ class SignUpFragment : Fragment() {
     }
 
     fun Test(user: String, pass: String) {
+
+        binding.loading.visibility = View.VISIBLE
+        binding.TxtProgress.text = "Signing you up..."
         val attributes: MutableMap<String, String> =
             HashMap()
         attributes["email"] = user
@@ -133,6 +136,7 @@ class SignUpFragment : Fragment() {
                 Callback<SignUpResult> {
                 override fun onResult(signUpResult: SignUpResult) {
                     activity!!.runOnUiThread {
+
                         Log.d(
                             "TESTTEST",
                             "Sign-up callback state: " + signUpResult.confirmationState
@@ -144,14 +148,19 @@ class SignUpFragment : Fragment() {
                                 "CONFIRM",
                                 "Confirm sign-up with: " + details.destination
                             )
+                            binding.TxtProgress.text = "Confirm sign-up with " + details.destination
+
                         } else {
                             Log.i("COMPLETE", "Sign-up done.")
+                            binding.TxtProgress.text = "Sign-up completed successfully"
                         }
                     }
                 }
 
                 override fun onError(e: Exception) {
-                    Log.e("ERR", "Sign-up error", e)
+                    binding.TxtProgress.text = "S"
+                    binding.loading.visibility = View.GONE
+                    binding.TxtErrorMsg.text = e.message.toString()
                 }
             })
     }
