@@ -3,6 +3,7 @@ package com.bohil.coin.login.signup
 
 import android.os.Bundle
 import android.text.TextUtils
+import androidx.navigation.fragment.findNavController
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +20,6 @@ import com.bohil.coin.databinding.FragmentSignUpBinding
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import java.util.*
-import com.amazonaws.services.cognitoidentityprovider.model.*
 
 
 class SignUpFragment : Fragment() {
@@ -33,6 +33,7 @@ class SignUpFragment : Fragment() {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_up, container, false)
 
         binding.registerButton.setOnClickListener { validateForm() }
+        binding.BtnNext.setOnClickListener{ findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
         // Long click the submit button to bypass registration
         /*binding.registerButton.setOnLongClickListener{
             findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
@@ -73,6 +74,8 @@ class SignUpFragment : Fragment() {
         if(valid){
 
             beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())
+            //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
+
             /*createAccount(email, password)
             when(FirebaseAuth.getInstance().currentUser){
                 null -> Toast.makeText(activity, "The user was not successfully created", Toast.LENGTH_LONG).show()
@@ -133,6 +136,8 @@ class SignUpFragment : Fragment() {
      */
     private fun beginSignUpProcess(user: String, pass: String) {
 
+        var success = false
+
         binding.loading.visibility = View.VISIBLE
         binding.TxtProgress.text = getString(R.string.sign_up_in_progress)
 
@@ -148,7 +153,7 @@ class SignUpFragment : Fragment() {
                 object :
                     Callback<SignUpResult> {
                     override fun onResult(signUpResult: SignUpResult) {
-                        activity!!.runOnUiThread  {
+                        activity!!.runOnUiThread {
 
                             if (!signUpResult.confirmationState) {
                                 binding.TxtProgress.text = getString(R.string.check_inbox)
@@ -159,6 +164,8 @@ class SignUpFragment : Fragment() {
 
                         this@SignUpFragment.activity!!.runOnUiThread {
                             binding.loading.visibility = View.GONE
+                            binding.BtnNext.visibility = View.VISIBLE
+                            binding.registerButton.visibility = View.GONE
                         }
 
                     }
@@ -176,9 +183,12 @@ class SignUpFragment : Fragment() {
 
                             binding.TxtProgress.text = ""
                             binding.loading.visibility = View.GONE
+
                         }
                     }
                 })
+
+
     }
 
     companion object{private const val TAG = "EmailPassword"}
