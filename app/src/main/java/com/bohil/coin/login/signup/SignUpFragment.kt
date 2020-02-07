@@ -19,6 +19,7 @@ import com.bohil.coin.databinding.FragmentSignUpBinding
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import java.util.*
+import com.amazonaws.services.cognitoidentityprovider.model.*
 
 
 class SignUpFragment : Fragment() {
@@ -71,7 +72,7 @@ class SignUpFragment : Fragment() {
         }
         if(valid){
 
-            Test(binding.username.text.toString(), binding.password.text.toString())
+            beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())
             /*createAccount(email, password)
             when(FirebaseAuth.getInstance().currentUser){
                 null -> Toast.makeText(activity, "The user was not successfully created", Toast.LENGTH_LONG).show()
@@ -119,48 +120,65 @@ class SignUpFragment : Fragment() {
         }
     }
 
-    fun Test(user: String, pass: String) {
+
+    /**
+     * Function used to sign-up a user to the Cognito user pool by sending a verification link
+     * to the e-mail address provided. Will display error messages if the e-mail is already in use,
+     * or if the password is too short.
+     *
+     * @param user: The username (e-mail) provided by the user
+     * @param pass: The password provided by the user
+     *
+     * TODO: Implement redirect to login (?) or another fragment after verification e-mail sent
+     */
+    private fun beginSignUpProcess(user: String, pass: String) {
 
         binding.loading.visibility = View.VISIBLE
-        binding.TxtProgress.text = "Signing you up..."
+        binding.TxtProgress.text = getString(R.string.sign_up_in_progress)
+
         val attributes: MutableMap<String, String> =
             HashMap()
         attributes["email"] = user
-        AWSMobileClient.getInstance().signUp(
-            user,
-            pass,
-            attributes,
-            null,
-            object :
-                Callback<SignUpResult> {
-                override fun onResult(signUpResult: SignUpResult) {
-                    activity!!.runOnUiThread {
 
-                        Log.d(
-                            "TESTTEST",
-                            "Sign-up callback state: " + signUpResult.confirmationState
-                        )
-                        if (!signUpResult.confirmationState) {
-                            val details =
-                                signUpResult.userCodeDeliveryDetails
-                            Log.i(
-                                "CONFIRM",
-                                "Confirm sign-up with: " + details.destination
-                            )
-                            binding.TxtProgress.text = "Confirm sign-up with " + details.destination
+            AWSMobileClient.getInstance().signUp(
+                user,
+                pass,
+                attributes,
+                null,
+                object :
+                    Callback<SignUpResult> {
+                    override fun onResult(signUpResult: SignUpResult) {
+                        activity!!.runOnUiThread  {
 
-                        } else {
-                            Log.i("COMPLETE", "Sign-up done.")
-                            binding.TxtProgress.text = "Sign-up completed successfully"
+                            if (!signUpResult.confirmationState) {
+                                binding.TxtProgress.text = getString(R.string.check_inbox)
+                            } else {
+                                binding.TxtProgress.text = getString(R.string.signup_success)
+                            }
+                        }
+
+                        this@SignUpFragment.activity!!.runOnUiThread {
+                            binding.loading.visibility = View.GONE
+                        }
+
+                    }
+
+                    override fun onError(e: Exception) {
+                        Log.e("ERR IN SIGN UP", e.message)
+                        this@SignUpFragment.activity!!.runOnUiThread {
+
+                            //Not an ideal way of checking for the type of exception.. might want to find another way
+                            if(e.message.toString().toLowerCase().contains("exists")) {
+                                Toast.makeText(context, getString(R.string.email_in_use), Toast.LENGTH_LONG).show()
+                            } else if (e.message.toString().toLowerCase().contains("password")) {
+                                Toast.makeText(context, getString(R.string.pass_too_short), Toast.LENGTH_LONG).show()
+                            }
+
+                            binding.TxtProgress.text = ""
+                            binding.loading.visibility = View.GONE
                         }
                     }
-                }
-
-                override fun onError(e: Exception) {
-                    binding.TxtProgress.text = e.toString()
-                    binding.loading.visibility = View.GONE
-                }
-            })
+                })
     }
 
     companion object{private const val TAG = "EmailPassword"}

@@ -68,5 +68,12 @@
     <string name="multiple_faces_detected">Multiple faces detected! Please only show the face used</string>
     <string name="title_activity_sign_up">Sign in</string>
 
+    <string name="check_inbox">Please check your inbox to complete registration.</string>
+    <string name="signup_success">Sign-up completed successfully!</string>
+    <string name="email_in_use">This e-mail is already in use.</string>
+    <string name="pass_too_short">The password must be at least 8 characters long.</string>
+    <string name="signup_in_progress">"Sign-up in progress.."</string>
+
+
 
 </resources>
