@@ -173,23 +173,24 @@ class SignUpFragment : Fragment() {
                     override fun onError(e: Exception) {
                         Log.e("ERR IN SIGN UP", e.message)
                         this@SignUpFragment.activity!!.runOnUiThread {
+                            var errMessage = e?.message.toString().toLowerCase()
 
                             //Not an ideal way of checking for the type of exception.. might want to find another way
-                            if(e.message.toString().toLowerCase().contains("exists")) {
-                                Toast.makeText(context, getString(R.string.email_in_use), Toast.LENGTH_LONG).show()
-                            } else if (e.message.toString().toLowerCase().contains("password")) {
-                                Toast.makeText(context, getString(R.string.pass_too_short), Toast.LENGTH_LONG).show()
+                            with(errMessage) {
+                                when {
+                                    contains("exists") -> Toast.makeText(context, getString(R.string.email_in_use), Toast.LENGTH_LONG).show()
+                                    contains("password") -> Toast.makeText(context, getString(R.string.pass_too_short), Toast.LENGTH_LONG).show()
+                                    contains("http") -> Toast.makeText(context, "An active internet connection is required", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                                binding.TxtProgress.text = ""
+                                binding.loading.visibility = View.GONE
                             }
 
-                            binding.TxtProgress.text = ""
-                            binding.loading.visibility = View.GONE
-
                         }
-                    }
-                })
-
-
+                    })
     }
+
 
     companion object{private const val TAG = "EmailPassword"}
 
