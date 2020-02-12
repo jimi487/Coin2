@@ -14,6 +14,7 @@
 package com.bohil.coin.login.facedetection
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Camera
 import android.os.Bundle
@@ -28,6 +29,7 @@ import androidx.lifecycle.Observer
 import com.bohil.coin.R
 import com.bohil.coin.databinding.ActivityPreviewBinding
 import com.bohil.coin.login.common.CameraSource
+import com.bohil.coin.main.MainActivity
 import com.google.firebase.ml.common.FirebaseMLException
 import kotlinx.android.synthetic.main.activity_preview.*
 import timber.log.Timber
@@ -76,6 +78,15 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
         faceContourDetectorProcessor = FaceContourDetectorProcessor()
         binding.faceContourDetectorProcessor = faceContourDetectorProcessor
         binding.facesHelpText.bringToFront()
+
+        //TODO Implement a proper capture sequence
+
+        // Currently navigates to the Main Program Activity
+        binding.captureButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
 
 
         if (firePreview == null) {

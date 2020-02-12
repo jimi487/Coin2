@@ -16,12 +16,13 @@
             android:id="@+id/face_image_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/ic_action_camera"
-            android:contentDescription="@string/face_image_content_description"
-            android:src="@drawable/ic_action_camera"
             android:layout_centerHorizontal="true"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
+            android:background="@drawable/ic_action_camera"
+            android:contentDescription="@string/face_image_content_description"
+            android:src="@drawable/ic_action_camera"
+            android:visibility="gone"
             tools:src="@drawable/ic_action_camera" />
 
     <LinearLayout
@@ -67,52 +68,47 @@
         <Spinner
                 android:id="@+id/language_spinner"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:entries="@array/language_array"
+                android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_weight="1"
-                />
+                android:entries="@array/language_array" />
+
         <Spinner
                 android:id="@+id/country_spinner"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
-                android:entries="@array/country_array"/>
+                android:layout_weight="1"
+                android:entries="@array/country_array" />
     </LinearLayout>
 
     <LinearLayout
+            android:id="@+id/sex_age_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_below="@id/spinner_layout"
-            android:id="@+id/sex_age_layout">
+            android:orientation="horizontal">
 
 
-    <Spinner
+        <Spinner
                 android:id="@+id/sex_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:entries="@array/sex_array"
                 android:layout_weight="1"
-                />
+                android:entries="@array/sex_array" />
 
         <EditText
-                android:id="@+id/age_text_field"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:ems="10"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:hint="@string/age"
-                android:autofillHints="@string/age_autofill_hint"
+                android:id="@+id/dob_text"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                />
+                android:ems="10"
+                android:hint="@string/dob_text"
+                android:inputType="date" />
 
     </LinearLayout>
 
@@ -131,17 +127,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/confirmation_checkbox">
+
         <Button
                 android:id="@+id/finish_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerInParent="true"
-                android:layout_marginBottom="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
                 android:background="@android:color/white"
-                android:clickable="false"
+                android:clickable="true"
                 android:text="@string/finish_button" />
     </RelativeLayout>
 </RelativeLayout>

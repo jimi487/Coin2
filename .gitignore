@@ -18,6 +18,7 @@ dist/
 awsconfiguration.json
 amplifyconfiguration.json
 node_modules/
+
 #amplify
 amplify/\#current-cloud-backend
 amplify/.config/local-*

@@ -1,9 +1,8 @@
 package com.bohil.coin.login.signup
 
-
+import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
-import androidx.navigation.fragment.findNavController
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,22 +10,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignUpResult
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentSignUpBinding
-import com.google.firebase.auth.ActionCodeSettings
-import com.google.firebase.auth.FirebaseAuth
 import java.util.*
 
 
 class SignUpFragment : Fragment() {
 
-    private lateinit var viewModel: SignUpViewModel
     private lateinit var binding: FragmentSignUpBinding
-    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -35,18 +30,12 @@ class SignUpFragment : Fragment() {
         binding.registerButton.setOnClickListener { validateForm() }
         binding.BtnNext.setOnClickListener{ findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
         // Long click the submit button to bypass registration
-        /*binding.registerButton.setOnLongClickListener{
+        binding.registerButton.setOnLongClickListener{
             findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
             true
-        }*/
+        }
 
-        auth = FirebaseAuth.getInstance()
         return binding.root
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(SignUpViewModel::class.java)
     }
 
     private fun validateForm() {
@@ -76,53 +65,8 @@ class SignUpFragment : Fragment() {
             beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())
             //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
 
-            /*createAccount(email, password)
-            when(FirebaseAuth.getInstance().currentUser){
-                null -> Toast.makeText(activity, "The user was not successfully created", Toast.LENGTH_LONG).show()
-                else -> {
-                    findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
-
-                }
-            }*/
         }
     }
-
-    private fun createAccount(email: String, password: String): Boolean{
-
-        var success = false
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener (activity!!){task ->
-                if(task.isSuccessful){
-                    success = true
-                    val user = auth.currentUser
-                }else{
-                    success = false
-                    Toast.makeText(activity, "Something was wrong with the registration", Toast.LENGTH_LONG).show()
-                }
-            }
-        return success
-    }
-
-    //TODO Implement a proper email verification sequence
-    private fun sendEmailVerificationWithContinueUrl(){
-        auth = FirebaseAuth.getInstance()
-        val user = auth.currentUser
-
-        val url = "http://www.example.com/verify?uid=" + user?.uid
-        val actionCodeSettings = ActionCodeSettings.newBuilder()
-            .setUrl(url)
-            .setIOSBundleId("com.example.ios")
-            .setAndroidPackageName("com.bohil.coin", false, null)
-            .build()
-
-        user?.sendEmailVerification(actionCodeSettings)?.addOnCompleteListener { task ->
-            // What to do if the email link is successfully sent
-            if(task.isSuccessful){
-
-            }
-        }
-    }
-
 
     /**
      * Function used to sign-up a user to the Cognito user pool by sending a verification link
@@ -173,7 +117,7 @@ class SignUpFragment : Fragment() {
                     override fun onError(e: Exception) {
                         Log.e("ERR IN SIGN UP", e.message)
                         this@SignUpFragment.activity!!.runOnUiThread {
-                            var errMessage = e?.message.toString().toLowerCase()
+                            val errMessage = e.message.toString().toLowerCase()
 
                             //Not an ideal way of checking for the type of exception.. might want to find another way
                             with(errMessage) {
@@ -191,6 +135,16 @@ class SignUpFragment : Fragment() {
                     })
     }
 
+    /**
+     * Handles when the user is redirected back to the app
+     */
+    override fun onResume() {
+        super.onResume()
+        val activityIntent = Intent()
+        if (activityIntent.data != null && "myapp" == activityIntent.data?.scheme) {
+            AWSMobileClient.getInstance().handleAuthResponse(activityIntent)
+        }
+    }
 
     companion object{private const val TAG = "EmailPassword"}
 

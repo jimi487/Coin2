@@ -38,6 +38,13 @@
             {
               "client_id": "648506903954-a32s2hak1qumjlt3d1g20kcdstp3r40r.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "648506903954-sgpsqt54e0dqi4kr5ohhbru1u9pqrk61.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bohil.coin"
+              }
             }
           ]
         }

@@ -64,7 +64,7 @@ class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace
             graphicOverlay.add(imageGraphic)
         }
 
-        // The list of faces
+        // The number of faces
         _numFaces.value = results.size
 
         // Faces located

@@ -1,22 +1,14 @@
 {
-	"api": {
-		"coin": {
-			"service": "AppSync",
+	"auth": {
+		"coin491741f1": {
+			"service": "Cognito",
 			"providerPlugin": "awscloudformation",
-			"output": {
-				"authConfig": {
-					"additionalAuthenticationProviders": [],
-					"defaultAuthentication": {
-						"authenticationType": "API_KEY",
-						"apiKeyConfig": {
-							"description": "AR Facial Recoginition",
-							"apiKeyExpirationDays": "365"
-						}
-					}
-				}
-			}
-		},
-		"coinAPI": {
+			"dependsOn": [],
+			"customAuth": false
+		}
+	},
+	"api": {
+		"coinAPI02": {
 			"service": "AppSync",
 			"providerPlugin": "awscloudformation",
 			"output": {
@@ -25,55 +17,15 @@
 					"defaultAuthentication": {
 						"authenticationType": "AMAZON_COGNITO_USER_POOLS",
 						"userPoolConfig": {
-							"userPoolId": "authcoin04"
+							"userPoolId": "authcoin491741f1"
 						}
 					}
 				}
 			}
 		}
 	},
-	"function": {
-		"coin04CustomMessage": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true
-		}
-	},
-	"auth": {
-		"userPoolGroups": {
-			"service": "Cognito-UserPool-Groups",
-			"providerPlugin": "awscloudformation",
-			"dependsOn": [
-				{
-					"category": "auth",
-					"resourceName": "coin04",
-					"attributes": [
-						"UserPoolId",
-						"AppClientIDWeb",
-						"AppClientID",
-						"IdentityPoolId"
-					]
-				}
-			]
-		},
-		"coin04": {
-			"service": "Cognito",
-			"providerPlugin": "awscloudformation",
-			"dependsOn": [
-				{
-					"category": "function",
-					"resourceName": "coin04CustomMessage",
-					"triggerProvider": "Cognito",
-					"attributes": [
-						"Arn",
-						"Name"
-					]
-				}
-			]
-		}
-	},
 	"storage": {
-		"CoinBank": {
+		"CoinResource": {
 			"service": "S3",
 			"providerPlugin": "awscloudformation"
 		}

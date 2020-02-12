@@ -8,6 +8,7 @@ import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.UserStateDetails
 import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.core.Amplify
+
 import com.bohil.coin.R
 
 
@@ -20,6 +21,7 @@ class LogInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        // Initializing the AWS Amplify instance
         AWSMobileClient.getInstance()
             .initialize(applicationContext, object : Callback<UserStateDetails> {
                 override fun onResult(userStateDetails: UserStateDetails) {

@@ -44,7 +44,6 @@ class Coin : Fragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_coin, container, false)
     }
-
     // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
         listener?.onFragmentInteraction(uri)

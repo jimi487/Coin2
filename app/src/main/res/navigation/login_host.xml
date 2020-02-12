@@ -29,7 +29,6 @@
         <action android:id="@+id/action_registerFragment_to_previewActivity" app:destination="@id/previewActivity"
                 app:popUpTo="@+id/registerFragment" app:enterAnim="@anim/nav_default_enter_anim"
                 app:exitAnim="@anim/nav_default_exit_anim"/>
-        <action android:id="@+id/action_registerFragment_to_mainActivity" app:destination="@id/mainActivity"/>
     </fragment>
     <activity android:id="@+id/previewActivity"
               android:name="com.bohil.coin.login.facedetection.PreviewActivity"

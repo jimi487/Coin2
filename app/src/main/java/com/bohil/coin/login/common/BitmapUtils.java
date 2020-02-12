@@ -1,9 +1,16 @@
 package com.bohil.coin.login.common;
 
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera.CameraInfo;
 import android.util.Log;
+
 import androidx.annotation.Nullable;
+
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 
 import java.io.ByteArrayOutputStream;

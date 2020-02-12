@@ -18,7 +18,7 @@ class FaceContourGraphic(overlay: GraphicOverlay, private val firebaseVisionFace
     private val boxPaint: Paint
 
     init {
-        val selectedColor = Color.CYAN
+        val selectedColor = Color.MAGENTA
 
         facePositionPaint = Paint()
         facePositionPaint.color = selectedColor

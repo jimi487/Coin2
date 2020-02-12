@@ -19,9 +19,7 @@
             tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".main.MainActivity">
         </activity>
-        <activity android:name=".login.SignUp2Activity">
-        </activity>
-        <activity android:name=".login.facedetection.PreviewActivity">
+        <activity android:name="com.bohil.coin.login.facedetection.PreviewActivity">
         </activity> <!-- Automatically download the ML model to the device after app is installed from Play Store -->
         <meta-data
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"
@@ -32,6 +30,11 @@
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+                <!-- Callback intent to bring user back to app -->
+                <action android:name = "android.intent.action.VIEW"/>
+                <category android:name = "android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme = "myapp"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
