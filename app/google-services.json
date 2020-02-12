@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "648506903954-5v7905157mddo2ko12bt4oa1e4iq1vnd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bohil.coin",
+            "certificate_hash": "f1ce1778123d8272232773a7a7ae4cb31626ac6c"
+          }
+        },
+        {
           "client_id": "648506903954-a32s2hak1qumjlt3d1g20kcdstp3r40r.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -30,6 +38,13 @@
             {
               "client_id": "648506903954-a32s2hak1qumjlt3d1g20kcdstp3r40r.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "648506903954-sgpsqt54e0dqi4kr5ohhbru1u9pqrk61.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bohil.coin"
+              }
             }
           ]
         }

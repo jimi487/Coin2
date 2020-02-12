@@ -1,0 +1,33 @@
+{
+	"auth": {
+		"coin491741f1": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [],
+			"customAuth": false
+		}
+	},
+	"api": {
+		"coinAPI02": {
+			"service": "AppSync",
+			"providerPlugin": "awscloudformation",
+			"output": {
+				"authConfig": {
+					"additionalAuthenticationProviders": [],
+					"defaultAuthentication": {
+						"authenticationType": "AMAZON_COGNITO_USER_POOLS",
+						"userPoolConfig": {
+							"userPoolId": "authcoin491741f1"
+						}
+					}
+				}
+			}
+		}
+	},
+	"storage": {
+		"CoinResource": {
+			"service": "S3",
+			"providerPlugin": "awscloudformation"
+		}
+	}
+}

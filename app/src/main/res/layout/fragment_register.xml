@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+<RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:animateLayoutChanges="false"
+        tools:context=".login.registration.RegisterFragment"
+        >
+
+        <!-- //TODO Add small icons next to the text fields-->
+
+    <ImageButton
+            android:id="@+id/face_image_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/ic_action_camera"
+            android:contentDescription="@string/face_image_content_description"
+            android:src="@drawable/ic_action_camera"
+            android:visibility="gone"
+            tools:src="@drawable/ic_action_camera" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@id/face_image_button"
+            android:id="@+id/name_layout">
+        <EditText
+                    android:id="@+id/first_name_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                    android:inputType="textPersonName"
+                    android:hint="@string/first_name_hint"
+                    android:ems="10"
+                android:layout_weight="1"
+                    android:autofillHints="@string/first_name_autofill_hint"/>
+
+            <EditText
+                    android:id="@+id/last_name_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:hint="@string/last_name_hint"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_weight="1"
+                    android:autofillHints="@string/last_name_autofill_hint"
+                    android:ems="10"
+                    />
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@id/name_layout"
+            android:id="@+id/spinner_layout">
+
+        <!-- //TODO Create text field where user can type in their language/country and it gets autofilled with chips-->
+        <Spinner
+                android:id="@+id/language_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:entries="@array/language_array" />
+
+        <Spinner
+                android:id="@+id/country_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:entries="@array/country_array" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/sex_age_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/spinner_layout"
+            android:orientation="horizontal">
+
+
+        <Spinner
+                android:id="@+id/sex_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:entries="@array/sex_array" />
+
+        <EditText
+                android:id="@+id/dob_text"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="@string/dob_text"
+                android:inputType="date" />
+
+    </LinearLayout>
+
+        <CheckBox
+                android:id="@+id/confirmation_checkbox"
+                android:text="@string/confirm_check"
+                android:layout_width="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/sex_age_layout"
+                />
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/confirmation_checkbox">
+
+        <Button
+                android:id="@+id/finish_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerInParent="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@android:color/white"
+                android:clickable="true"
+                android:text="@string/finish_button" />
+    </RelativeLayout>
+</RelativeLayout>
+</layout>
+
+
+
+
+

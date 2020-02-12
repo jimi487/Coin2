@@ -1,0 +1,55 @@
+# this is an auto generated file. This will be overwritten
+query GetCoinUser($userID: Int!) {
+  getCoinUser(userID: $userID) {
+    age
+    country
+    f_name
+    l_name
+    language
+    pictureID
+    sex
+    userID
+  }
+}
+query ListCoinUsers(
+  $filter: TableCoinUserFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listCoinUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      age
+      country
+      f_name
+      l_name
+      language
+      pictureID
+      sex
+      userID
+    }
+    nextToken
+  }
+}
+query QueryCoinUsersByPictureIdIndex(
+  $after: String
+  $first: Int
+  $pictureID: ID!
+) {
+  queryCoinUsersByPictureIDIndex(
+    after: $after
+    first: $first
+    pictureID: $pictureID
+  ) {
+    items {
+      age
+      country
+      f_name
+      l_name
+      language
+      pictureID
+      sex
+      userID
+    }
+    nextToken
+  }
+}

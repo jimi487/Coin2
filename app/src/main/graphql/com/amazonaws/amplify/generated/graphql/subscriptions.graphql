@@ -1,0 +1,73 @@
+# this is an auto generated file. This will be overwritten
+subscription OnCreateCoinUser(
+  $f_name: String
+  $l_name: String
+  $language: String
+  $pictureID: ID
+  $userID: Int
+) {
+  onCreateCoinUser(
+    f_name: $f_name
+    l_name: $l_name
+    language: $language
+    pictureID: $pictureID
+    userID: $userID
+  ) {
+    age
+    country
+    f_name
+    l_name
+    language
+    pictureID
+    sex
+    userID
+  }
+}
+subscription OnDeleteCoinUser(
+  $f_name: String
+  $l_name: String
+  $language: String
+  $pictureID: ID
+  $userID: Int
+) {
+  onDeleteCoinUser(
+    f_name: $f_name
+    l_name: $l_name
+    language: $language
+    pictureID: $pictureID
+    userID: $userID
+  ) {
+    age
+    country
+    f_name
+    l_name
+    language
+    pictureID
+    sex
+    userID
+  }
+}
+subscription OnUpdateCoinUser(
+  $f_name: String
+  $l_name: String
+  $language: String
+  $pictureID: ID
+  $userID: Int
+) {
+  onUpdateCoinUser(
+    f_name: $f_name
+    l_name: $l_name
+    language: $language
+    pictureID: $pictureID
+    userID: $userID
+  ) {
+    age
+    country
+    f_name
+    l_name
+    language
+    pictureID
+    sex
+    userID
+  }
+}
