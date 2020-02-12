@@ -54,7 +54,7 @@ class DisclaimerFragment: Fragment() {
     Loads the text information from the Disclaimer file into the TextView
      */
     // TODO Add this method into the ViewModel instead
-    private fun loadingDisclaimer(binding: FragmentDisclaimerBinding, context: Context){
+    private fun loadingDisclaimer(binding: DisclaimerFragmentBinding, context: Context){
         binding.disclaimerText.text = context.assets.open("disclaimer.txt").bufferedReader().use{
             it.readText()
         }
