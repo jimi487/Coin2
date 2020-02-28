@@ -11,8 +11,11 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils.runOnUiThread
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
+import com.amazonaws.mobile.client.results.SignInResult
+import com.amazonaws.mobile.client.results.SignInState
 import com.amazonaws.mobile.client.results.SignUpResult
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentSignUpBinding
@@ -27,14 +30,13 @@ class SignUpFragment : Fragment() {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_up, container, false)
 
-        binding.registerButton.setOnClickListener { validateForm() }
-        binding.BtnNext.setOnClickListener{ findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
+        binding.signupButton.setOnClickListener { validateForm() }
+        //binding.nextBtn.setOnClickListener{ findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
         // Long click the submit button to bypass registration
-        binding.registerButton.setOnLongClickListener{
+        binding.signupButton.setOnLongClickListener{
             findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
             true
         }
-
         return binding.root
     }
 
@@ -61,15 +63,12 @@ class SignUpFragment : Fragment() {
             binding.password.error = null
         }
         if(valid){
-
             beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())
-            //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
-
         }
     }
 
     /**
-     * Function used to sign-up a user to the Cognito user pool by sending a verification link
+     * Function used to sign-up a user to the Cognito user pool by sending a verification code
      * to the e-mail address provided. Will display error messages if the e-mail is already in use,
      * or if the password is too short.
      *
@@ -79,9 +78,6 @@ class SignUpFragment : Fragment() {
      * TODO: Implement redirect to login (?) or another fragment after verification e-mail sent
      */
     private fun beginSignUpProcess(user: String, pass: String) {
-
-        var success = false
-
         binding.loading.visibility = View.VISIBLE
         binding.TxtProgress.text = getString(R.string.sign_up_in_progress)
 
@@ -101,30 +97,39 @@ class SignUpFragment : Fragment() {
 
                             if (!signUpResult.confirmationState) {
                                 binding.TxtProgress.text = getString(R.string.check_inbox)
+                                binding.loading.visibility = View.INVISIBLE
+                                binding.confirmCode.visibility = View.VISIBLE
+                                binding.signupButton.text = getString(R.string.confirm_button)
+
+                                // Changing the button on click to confirm the verification code
+                                binding.signupButton.setOnClickListener {verifySignUp(user)}
+
                             } else {
                                 binding.TxtProgress.text = getString(R.string.signup_success)
                             }
                         }
 
+                        /*
                         this@SignUpFragment.activity!!.runOnUiThread {
                             binding.loading.visibility = View.GONE
                             binding.BtnNext.visibility = View.VISIBLE
                             binding.registerButton.visibility = View.GONE
                         }
+                        */
 
                     }
 
                     override fun onError(e: Exception) {
                         Log.e("ERR IN SIGN UP", e.message)
-                        this@SignUpFragment.activity!!.runOnUiThread {
-                            val errMessage = e.message.toString().toLowerCase()
+                        this@SignUpFragment.activity?.runOnUiThread {
+                            val errMessage = e.message.toString()//.toLowerCase()
 
                             //Not an ideal way of checking for the type of exception.. might want to find another way
                             with(errMessage) {
                                 when {
-                                    contains("exists") -> Toast.makeText(context, getString(R.string.email_in_use), Toast.LENGTH_LONG).show()
-                                    contains("password") -> Toast.makeText(context, getString(R.string.pass_too_short), Toast.LENGTH_LONG).show()
-                                    contains("http") -> Toast.makeText(context, "An active internet connection is required", Toast.LENGTH_LONG).show()
+                                    contains("exists") -> makeToast(getString(R.string.email_in_use))
+                                    contains("password") -> makeToast(getString(R.string.pass_too_short))
+                                    contains("http") -> makeToast("An active internet connection is required")
                                 }
                             }
                                 binding.TxtProgress.text = ""
@@ -136,6 +141,82 @@ class SignUpFragment : Fragment() {
     }
 
     /**
+     * Confirms the user using the code sent to their email
+     */
+    private fun verifySignUp(userName: String){
+        val code = binding.confirmCode.text.toString()
+
+        AWSMobileClient.getInstance().confirmSignUp(
+            userName,
+            code,
+            object :
+                Callback<SignUpResult> {
+                override fun onResult(signUpResult: SignUpResult) {
+                    runOnUiThread(Runnable {
+                        Log.d(TAG, "Sign-up callback state: " + signUpResult.confirmationState)
+                        if (!signUpResult.confirmationState) {
+                            val details = signUpResult.userCodeDeliveryDetails
+                            makeToast("Confirm sign-up with: " + details.destination)
+
+                        } else {
+                            //Sign up completed
+                            makeToast("Sign up Complete")
+                            signIn()
+                        }
+                    })
+                }
+
+                override fun onError(e: java.lang.Exception) {
+                    Log.e(TAG, "Confirm sign-up error", e)
+                    binding.TxtProgress.text = e.toString()
+                }
+            })
+
+    }
+
+    /**
+     * Signs the user in using provided credentials
+     */
+    private fun signIn(){
+
+        val username = binding.username.text.toString()
+        val password = binding.password.text.toString()
+
+        AWSMobileClient.getInstance().signIn(
+            username,
+            password,
+            null,
+            object : Callback<SignInResult> {
+                override fun onResult(signInResult: SignInResult) {
+                    runOnUiThread {
+                        Log.d(TAG, "Sign-in callback state: " + signInResult.signInState)
+                        when (signInResult.signInState) {
+                            SignInState.DONE -> {
+                                makeToast("Sign-in Complete")
+                                findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
+                            SignInState.SMS_MFA -> makeToast("Please confirm sign-in with SMS.")
+                            SignInState.NEW_PASSWORD_REQUIRED -> makeToast("Please confirm sign-in with new password.")
+                            else -> makeToast("Unsupported sign-in confirmation: " + signInResult.signInState)
+                        }
+                    }
+                }
+
+                override fun onError(e: java.lang.Exception) {
+                    Log.e(TAG, "Sign-in error", e)
+                    binding.TxtProgress.text = e.toString()
+                }
+            })
+    }
+
+    /*
+    Utility function to help make toast
+     */
+    private fun makeToast(msg:String){
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    //TODO Handle when the user is redirected back to the app
+    /**
      * Handles when the user is redirected back to the app
      */
     override fun onResume() {
@@ -146,6 +227,6 @@ class SignUpFragment : Fragment() {
         }
     }
 
-    companion object{private const val TAG = "EmailPassword"}
+    companion object{private const val TAG = "SignUpFragment"}
 
 }

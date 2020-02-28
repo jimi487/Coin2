@@ -18,7 +18,7 @@ class FaceContourGraphic(overlay: GraphicOverlay, private val firebaseVisionFace
     private val boxPaint: Paint
 
     init {
-        val selectedColor = Color.MAGENTA
+        val selectedColor = Color.BLUE
 
         facePositionPaint = Paint()
         facePositionPaint.color = selectedColor
@@ -37,12 +37,12 @@ class FaceContourGraphic(overlay: GraphicOverlay, private val firebaseVisionFace
     override fun draw(canvas: Canvas) {
         val face = firebaseVisionFace ?: return
 
+
         // Draws a circle at the position of the detected face, with the face's track id below.
         val x = translateX(face.boundingBox.centerX().toFloat())
         val y = translateY(face.boundingBox.centerY().toFloat())
-        canvas.drawCircle(x, y,
-            FACE_POSITION_RADIUS, facePositionPaint)
-        canvas.drawText("id: ${face.trackingId}", x + ID_X_OFFSET, y + ID_Y_OFFSET, idPaint)
+        //canvas.drawCircle(x, y, FACE_POSITION_RADIUS, facePositionPaint)
+        //canvas.drawText("id: ${face.trackingId}", x + ID_X_OFFSET, y + ID_Y_OFFSET, idPaint)
 
         // Draws a bounding box around the face.
         val xOffset = scaleX(face.boundingBox.width() / 2.0f)
@@ -57,8 +57,7 @@ class FaceContourGraphic(overlay: GraphicOverlay, private val firebaseVisionFace
         for (point in contour.points) {
             val px = translateX(point.x)
             val py = translateY(point.y)
-            canvas.drawCircle(px, py,
-                FACE_POSITION_RADIUS, facePositionPaint)
+            canvas.drawCircle(px, py, FACE_POSITION_RADIUS, facePositionPaint)
         }
 
         if (face.smilingProbability >= 0) {
@@ -86,6 +85,7 @@ class FaceContourGraphic(overlay: GraphicOverlay, private val firebaseVisionFace
                 idPaint
             )
         }
+
         val leftEye = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EYE)
         leftEye?.position?.let {
             canvas.drawCircle(

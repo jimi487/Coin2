@@ -2,6 +2,7 @@
     <string name="app_name">Coin</string>
     <string name="firestore_table">CoinBank</string>
     <string name="firebase_project">coin-b80f5</string>
+    <string name="cognito_firestore">custom:FireStoreID</string>
     <string name="version">Version: Alpha</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="capture_button_description">Icon to capture the picture</string>
@@ -30,14 +31,19 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="confirm_email">Confirm Email</string>
+    <string name="confirmation_code">Verification Code</string>
+    <string name="signup_button">Sign Up</string>
+    <string name="confirm_button">Confirm</string>
 
     <string name="check_inbox">Please check your inbox to complete registration.</string>
     <string name="signup_success">Sign-up completed successfully!</string>
     <string name="email_in_use">This e-mail is already in use.</string>
     <string name="pass_too_short">The password must be at least 8 characters long.</string>
-    <string name="signup_in_progress">"Sign-up in progress.."</string>
+    <string name="signup_in_progress">"Sending email"</string>
 
-    <!-- Register Form Fragment Strings -->
+
+
+    <!-- Register Fragment Strings -->
     <string name="face_image_content_description">Tap this image to be capture your picture</string>
     <string name="first_name_hint">First Name</string>
     <string name="last_name_hint">Last Name</string>
@@ -75,5 +81,7 @@
     <string name="one_face_detected">Face Detected! Tap the camera button when ready</string>
     <string name="multiple_faces_detected">Multiple faces detected! Please only show your face</string>
     <string name="title_activity_sign_up">Sign in</string>
+    <string name="user_thumbnail_description">A picture the user has taken</string>
+    <string name="capture_complete_button">Complete</string>
 
 </resources>

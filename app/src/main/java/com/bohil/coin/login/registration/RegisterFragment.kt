@@ -41,6 +41,11 @@ class RegisterFragment : Fragment() {
         binding.finishButton.setOnClickListener {
             verify_form()
         }
+        // Long click to skip adding user to database
+        binding.finishButton.setOnLongClickListener {
+            findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToPreviewActivity())
+            true
+        }
         return binding.root
     }
 
@@ -74,12 +79,8 @@ class RegisterFragment : Fragment() {
         // When the form has been successfully completed, navigate to the Preview Activity
         // Also creates the user in the database
         if (completed && binding.confirmationCheckbox.isChecked) {
-            //Toast.makeText(context, "Table name: ${getString(R.string.firestore_table)}", Toast.LENGTH_LONG).show()
-            viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table))
+            viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table), getString(R.string.cognito_firestore))
             findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToPreviewActivity())
         }
-
     }
-
-
 }
