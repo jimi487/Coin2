@@ -1,4 +1,4 @@
-package com.bohil.coin.login.signup
+package com.bohil.coin.login.registration
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,35 +8,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.databinding.DataBindingUtil
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignUpResult
 import com.bohil.coin.R
-import com.bohil.coin.databinding.FragmentSignUpBinding
-import java.util.*
+import com.bohil.coin.databinding.CombinedRegisterBinding
+import com.bohil.coin.databinding.FragmentTitleBinding
+import java.util.HashMap
 
+class CombinedRegister : Fragment() {
 
-class SignUpFragment : Fragment() {
-
-    private lateinit var binding: FragmentSignUpBinding
+    private lateinit var binding: CombinedRegisterBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_up, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.combined_register, container, false)
+        binding.lifecycleOwner = this
 
         binding.registerButton.setOnClickListener { validateForm() }
-        //binding.BtnNext.setOnClickListener{ findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
-        // Long click the submit button to bypass registration
-
-        /*binding.registerButton.setOnLongClickListener{
-            findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
-            true
-        }*/
+        binding.confirmationCheckbox.setOnClickListener{ toggleSignup() }
 
         return binding.root
+    }
+
+    private fun toggleSignup() {
+        binding.registerButton.isEnabled = binding.confirmationCheckbox.isChecked
     }
 
     private fun validateForm() {
@@ -65,7 +63,6 @@ class SignUpFragment : Fragment() {
 
             beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())
             //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
-
         }
     }
 
@@ -90,50 +87,50 @@ class SignUpFragment : Fragment() {
             HashMap()
         attributes["email"] = user
 
-            AWSMobileClient.getInstance().signUp(
-                user,
-                pass,
-                attributes,
-                null,
-                object :
-                    Callback<SignUpResult> {
-                    override fun onResult(signUpResult: SignUpResult) {
-                        activity!!.runOnUiThread {
+        AWSMobileClient.getInstance().signUp(
+            user,
+            pass,
+            attributes,
+            null,
+            object :
+                Callback<SignUpResult> {
+                override fun onResult(signUpResult: SignUpResult) {
+                    activity!!.runOnUiThread {
 
-                            if (!signUpResult.confirmationState) {
-                                binding.TxtProgress.text = getString(R.string.check_inbox)
-                            } else {
-                                binding.TxtProgress.text = getString(R.string.signup_success)
-                            }
+                        if (!signUpResult.confirmationState) {
+                            binding.TxtProgress.text = getString(R.string.check_inbox)
+                        } else {
+                            binding.TxtProgress.text = getString(R.string.signup_success)
                         }
-
-                        this@SignUpFragment.activity!!.runOnUiThread {
-                            binding.loading.visibility = View.GONE
-                            binding.BtnNext.visibility = View.VISIBLE
-                            binding.registerButton.visibility = View.GONE
-                        }
-
                     }
 
-                    override fun onError(e: Exception) {
-                        Log.e("ERR IN SIGN UP", e.message)
-                        this@SignUpFragment.activity!!.runOnUiThread {
-                            val errMessage = e.message.toString().toLowerCase()
+                    this@CombinedRegister.activity!!.runOnUiThread {
+                        binding.loading.visibility = View.GONE
+                        //binding.BtnNext.visibility = View.VISIBLE
+                        binding.registerButton.visibility = View.GONE
+                    }
 
-                            //Not an ideal way of checking for the type of exception.. might want to find another way
-                            with(errMessage) {
-                                when {
-                                    contains("exists") -> Toast.makeText(context, getString(R.string.email_in_use), Toast.LENGTH_LONG).show()
-                                    contains("password") -> Toast.makeText(context, getString(R.string.pass_too_short), Toast.LENGTH_LONG).show()
-                                    contains("http") -> Toast.makeText(context, "An active internet connection is required", Toast.LENGTH_LONG).show()
-                                }
-                            }
-                                binding.TxtProgress.text = ""
-                                binding.loading.visibility = View.GONE
-                            }
+                }
 
+                override fun onError(e: Exception) {
+                    Log.e("ERR IN SIGN UP", e.message)
+                    this@CombinedRegister.activity!!.runOnUiThread {
+                        val errMessage = e.message.toString().toLowerCase()
+
+                        //Not an ideal way of checking for the type of exception.. might want to find another way
+                        with(errMessage) {
+                            when {
+                                contains("exists") -> Toast.makeText(context, getString(R.string.email_in_use), Toast.LENGTH_LONG).show()
+                                contains("password") -> Toast.makeText(context, getString(R.string.pass_too_short), Toast.LENGTH_LONG).show()
+                                contains("http") -> Toast.makeText(context, "An active internet connection is required", Toast.LENGTH_LONG).show()
+                            }
                         }
-                    })
+                        binding.TxtProgress.text = ""
+                        binding.loading.visibility = View.GONE
+                    }
+
+                }
+            })
     }
 
     /**
@@ -148,5 +145,6 @@ class SignUpFragment : Fragment() {
     }
 
     companion object{private const val TAG = "EmailPassword"}
+
 
 }

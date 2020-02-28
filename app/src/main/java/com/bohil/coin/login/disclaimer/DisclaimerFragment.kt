@@ -24,7 +24,7 @@ class DisclaimerFragment: Fragment() {
 
         // On click to navigate to the Register Fragment
         binding.confirmButton.setOnClickListener {
-            this.findNavController().navigate(DisclaimerFragmentDirections.actionDisclaimerFragmentToSignUpFragment())
+            this.findNavController().navigate(DisclaimerFragmentDirections.actionDisclaimerFragmentToCombinedFragment())
         }
 
         // Adding logic to the scrollview to only enable
