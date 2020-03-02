@@ -1,6 +1,5 @@
 package com.bohil.coin.login.title
 
-import com.bohil.coin.R
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,8 +12,8 @@ import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignInResult
 import com.amazonaws.mobile.client.results.SignInState
+import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
-import android.widget.Toast
 
 //import sun.jvm.hotspot.utilities.IntArray
 
@@ -26,6 +25,7 @@ class TitleFragment : Fragment() {
     private lateinit var binding: FragmentTitleBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_title, container, false)
 
         binding.signupButton.setOnClickListener {

@@ -1,0 +1,49 @@
+{
+	"auth": {
+		"coin491741f1": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [],
+			"customAuth": false
+		},
+		"userPoolGroups": {
+			"service": "Cognito-UserPool-Groups",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [
+				{
+					"category": "auth",
+					"resourceName": "coin491741f1",
+					"attributes": [
+						"UserPoolId",
+						"AppClientIDWeb",
+						"AppClientID",
+						"IdentityPoolId"
+					]
+				}
+			]
+		},
+		"coin0cfd68c6": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [],
+			"customAuth": false
+		},
+		"coin9539ff05": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [],
+			"customAuth": false
+		}
+	},
+	"api": {},
+	"storage": {
+		"CoinResource": {
+			"service": "S3",
+			"providerPlugin": "awscloudformation"
+		},
+		"coinproject": {
+			"service": "S3",
+			"providerPlugin": "awscloudformation"
+		}
+	}
+}

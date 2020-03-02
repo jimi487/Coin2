@@ -33,9 +33,15 @@
               android:name="com.bohil.coin.login.registration.RegisterFragment"
               android:label="RegisterFragment"
               tools:layout="@layout/fragment_register">
-        <action android:id="@+id/action_registerFragment_to_previewActivity" app:destination="@id/previewActivity"
-                app:popUpTo="@+id/registerFragment" app:enterAnim="@anim/nav_default_enter_anim"
-                app:exitAnim="@anim/nav_default_exit_anim"/>
+        <action
+                android:id="@+id/action_registerFragment_to_previewActivity"
+                app:destination="@id/previewActivity"
+                app:enterAnim="@anim/nav_default_enter_anim"
+                app:exitAnim="@anim/nav_default_exit_anim"
+                app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                app:popExitAnim="@anim/nav_default_pop_exit_anim"
+                app:popUpTo="@+id/registerFragment"
+                app:popUpToInclusive="false" />
     </fragment>
     <activity android:id="@+id/previewActivity"
               android:name="com.bohil.coin.login.facedetection.PreviewActivity"

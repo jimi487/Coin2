@@ -1,0 +1,43 @@
+{
+    "coinbacknd": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-coin-coinbacknd-233518-authRole",
+            "UnauthRoleArn": "arn:aws:iam::633263412160:role/amplify-coin-coinbacknd-233518-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::633263412160:role/amplify-coin-coinbacknd-233518-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "amplify-coin-coinbacknd-233518-deployment",
+            "UnauthRoleName": "amplify-coin-coinbacknd-233518-unauthRole",
+            "StackName": "amplify-coin-coinbacknd-233518",
+            "StackId": "arn:aws:cloudformation:us-east-2:633263412160:stack/amplify-coin-coinbacknd-233518/e93a9d10-4c87-11ea-a633-064ea827a74e",
+            "AmplifyAppId": "dbws76n08zktr"
+        },
+        "categories": {
+            "auth": {
+                "coin786db021786db021": {},
+                "coin4a7a3842": {},
+                "coin491741f1": {}
+            }
+        }
+    },
+    "coinback": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-coin-coinback-00940-authRole",
+            "UnauthRoleArn": "arn:aws:iam::633263412160:role/amplify-coin-coinback-00940-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::633263412160:role/amplify-coin-coinback-00940-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "amplify-coin-coinback-00940-deployment",
+            "UnauthRoleName": "amplify-coin-coinback-00940-unauthRole",
+            "StackName": "amplify-coin-coinback-00940",
+            "StackId": "arn:aws:cloudformation:us-east-2:633263412160:stack/amplify-coin-coinback-00940/86d8eeb0-59e8-11ea-97ae-026789fff09e",
+            "AmplifyAppId": "dbws76n08zktr"
+        },
+        "categories": {
+            "auth": {
+                "coin491741f1": {},
+                "userPoolGroups": {},
+                "coin0cfd68c6": {},
+                "coin9539ff05": {}
+            }
+        }
+    }
+}

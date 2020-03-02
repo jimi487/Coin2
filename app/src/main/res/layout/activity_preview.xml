@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
             name="faceContourDetectorProcessor"
@@ -8,20 +9,11 @@
 
     <RelativeLayout
             android:id="@+id/fireTopLayout"
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#000"
-            android:keepScreenOn="true">
-
-        <TextView
-                android:id="@+id/faces_help_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="463dp" android:layout_marginStart="55dp"
-                android:layout_alignStart="@+id/firePreview" android:layout_alignTop="@+id/firePreview"
-                android:textSize="18sp"/>
-        <!--android:text="@{faceContourDetectorProcessor.numFaces.toString()}"-->
+            android:keepScreenOn="true"
+            android:orientation="vertical">
 
         <com.bohil.coin.login.common.CameraSourcePreview
                 android:id="@+id/firePreview"
@@ -36,15 +28,57 @@
                     android:layout_height="match_parent"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
-                    android:layout_alignParentBottom="true"/>
+                    android:layout_alignParentBottom="true" />
+
         </com.bohil.coin.login.common.CameraSourcePreview>
+
+        <LinearLayout
+                android:id="@+id/imageViewsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_above="@+id/control"
+                android:layout_marginBottom="1dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+            <ImageView
+                    android:id="@+id/userImage00"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#FFF"
+                    android:contentDescription="@string/user_thumbnail_description"
+                    android:padding="1dp"
+                    app:srcCompat="@drawable/ic_action_camera"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+            <ImageView
+                    android:id="@+id/userImage01"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#FFF"
+                    android:contentDescription="@string/user_thumbnail_description"
+                    app:srcCompat="@drawable/ic_action_camera"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+            <ImageView
+                    android:id="@+id/userImage02"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#FFF"
+                    android:contentDescription="@string/user_thumbnail_description"
+                    app:srcCompat="@drawable/ic_action_camera"
+                    tools:srcCompat="@tools:sample/avatars" />
+        </LinearLayout>
 
         <FrameLayout
                 android:id="@+id/control"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:layout_alignParentBottom="true"
                 android:layout_alignParentStart="true"
+                android:layout_alignParentBottom="true"
                 android:layout_toEndOf="@id/firePreview"
                 android:background="#000">
 
@@ -55,18 +89,40 @@
                     android:layout_height="48dp"
                     android:layout_gravity="center_vertical"
                     android:background="@layout/toggle_style"
+                    android:checked="false"
                     android:textOff=""
-                    android:textOn=""
-                    android:checked="false"/>
+                    android:textOn="" />
 
             <ImageButton
                     android:id="@+id/capture_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:clickable="false"
                     android:contentDescription="@string/capture_button_description"
-                    app:srcCompat="@android:drawable/ic_menu_camera"
-                    android:layout_gravity="center_horizontal" android:clickable="false"/>
+                    app:srcCompat="@android:drawable/ic_menu_camera" />
+
         </FrameLayout>
+
+        <TextView
+                android:id="@+id/faces_help_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="55dp"
+                android:layout_marginTop="463dp"
+                android:textSize="24sp" />
+
+        <Button
+                android:id="@+id/cptCompleteBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="2dp"
+                android:layout_marginBottom="7dp"
+                android:text="@string/capture_complete_button"
+                android:visibility="invisible"
+                tools:visibility="visible" />
 
     </RelativeLayout>
 </layout>
