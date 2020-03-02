@@ -10,25 +10,45 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils
 import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
+import com.amazonaws.mobile.client.results.SignInResult
+import com.amazonaws.mobile.client.results.SignInState
 import com.amazonaws.mobile.client.results.SignUpResult
 import com.bohil.coin.R
 import com.bohil.coin.databinding.CombinedRegisterBinding
-import com.bohil.coin.databinding.FragmentTitleBinding
 import java.util.HashMap
 
 class CombinedRegister : Fragment() {
 
     private lateinit var binding: CombinedRegisterBinding
+    private lateinit var viewModel:RegisterViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+
+        viewModel = ViewModelProviders.of(this).get(RegisterViewModel::class.java)
 
         binding = DataBindingUtil.inflate(inflater, R.layout.combined_register, container, false)
         binding.lifecycleOwner = this
 
         binding.registerButton.setOnClickListener { validateForm() }
-        binding.confirmationCheckbox.setOnClickListener{ toggleSignup() }
+        binding.confirmationCheckbox.setOnClickListener { toggleSignup() }
+
+        // Adding navigation to the camera icon
+        /*binding.faceImageButton.setOnClickListener {
+            it.findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToPreviewActivity())
+        }*/
+
+
+
 
         return binding.root
     }
@@ -39,35 +59,56 @@ class CombinedRegister : Fragment() {
 
     private fun validateForm() {
         var valid = true
+
+        //AWS Fields
         val email = binding.username.text.toString()
         val password = binding.password.text.toString()
 
-        if(TextUtils.isEmpty(email)) {
+        //Firebase Fields
+        val firstName = binding.firstNameEditText.text.toString()
+        val lastName = binding.lastNameEditText.text.toString()
+        val dob = binding.dobText.text.toString()
+        val lang = binding.languageSpinner.selectedItem.toString()
+        val sex = binding.sexSpinner.selectedItem.toString()
+        val country = binding.countrySpinner.selectedItem.toString()
+        val listOfStrings = listOf(firstName, lastName, dob)
+
+        if (TextUtils.isEmpty(email)) {
             binding.username.error = "Required"
             valid = false
-        } else if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             binding.username.error = "Please input a valid email address"
             valid = false
-        }
-        else {
+        } else {
             binding.username.error = null
         }
 
-        if(TextUtils.isEmpty(password)){
+        if (TextUtils.isEmpty(password)) {
             binding.password.error = "Required"
             valid = false
-        } else{
+        } else {
             binding.password.error = null
         }
-        if(valid){
 
-            beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())
-            //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
+        when {
+            listOfStrings.contains("") -> if (listOfStrings.filter { it == "" }.isNotEmpty()) {
+                Toast.makeText(context, "All fields must be filled", Toast.LENGTH_SHORT).show()
+                valid = false
+            }
+        }
+
+        if (valid) {
+            //Add user to AWS
+            if(beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())) {
+
+                //Create user in Firebase
+                viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table), getString(R.string.cognito_firestore))
+            }
         }
     }
 
     /**
-     * Function used to sign-up a user to the Cognito user pool by sending a verification link
+     * Function used to sign-up a user to the Cognito user pool by sending a verification code
      * to the e-mail address provided. Will display error messages if the e-mail is already in use,
      * or if the password is too short.
      *
@@ -76,12 +117,11 @@ class CombinedRegister : Fragment() {
      *
      * TODO: Implement redirect to login (?) or another fragment after verification e-mail sent
      */
-    private fun beginSignUpProcess(user: String, pass: String) {
-
-        var success = false
-
+    private fun beginSignUpProcess (user: String, pass: String) : Boolean {
         binding.loading.visibility = View.VISIBLE
         binding.TxtProgress.text = getString(R.string.sign_up_in_progress)
+
+        var success = false;
 
         val attributes: MutableMap<String, String> =
             HashMap()
@@ -99,38 +139,133 @@ class CombinedRegister : Fragment() {
 
                         if (!signUpResult.confirmationState) {
                             binding.TxtProgress.text = getString(R.string.check_inbox)
+                            binding.loading.visibility = View.INVISIBLE
+                            binding.confirmCode.visibility = View.VISIBLE
+                            binding.registerButton.text = getString(R.string.confirm_button)
+
+                            // Changing the button on click to confirm the verification code
+                            binding.registerButton.setOnClickListener { verifySignUp(user) }
+
+                            success = true;
+
                         } else {
                             binding.TxtProgress.text = getString(R.string.signup_success)
                         }
                     }
 
-                    this@CombinedRegister.activity!!.runOnUiThread {
+                    /*
+                    this@SignUpFragment.activity!!.runOnUiThread {
                         binding.loading.visibility = View.GONE
-                        //binding.BtnNext.visibility = View.VISIBLE
+                        binding.BtnNext.visibility = View.VISIBLE
                         binding.registerButton.visibility = View.GONE
                     }
+                    */
 
                 }
 
                 override fun onError(e: Exception) {
                     Log.e("ERR IN SIGN UP", e.message)
-                    this@CombinedRegister.activity!!.runOnUiThread {
-                        val errMessage = e.message.toString().toLowerCase()
+                    this@CombinedRegister.activity?.runOnUiThread {
+                        val errMessage = e.message.toString()//.toLowerCase()
 
                         //Not an ideal way of checking for the type of exception.. might want to find another way
                         with(errMessage) {
                             when {
-                                contains("exists") -> Toast.makeText(context, getString(R.string.email_in_use), Toast.LENGTH_LONG).show()
-                                contains("password") -> Toast.makeText(context, getString(R.string.pass_too_short), Toast.LENGTH_LONG).show()
-                                contains("http") -> Toast.makeText(context, "An active internet connection is required", Toast.LENGTH_LONG).show()
+                                contains("exists") -> makeToast(getString(R.string.email_in_use))
+                                contains("password") -> makeToast(getString(R.string.pass_too_short))
+                                contains("http") -> makeToast("An active internet connection is required")
                             }
                         }
                         binding.TxtProgress.text = ""
                         binding.loading.visibility = View.GONE
+
+                        success = false;
                     }
 
                 }
             })
+
+        return success;
+    }
+
+    /**
+     * Confirms the user using the code sent to their email
+     */
+    private fun verifySignUp(userName: String) {
+        val code = binding.confirmCode.text.toString()
+
+        AWSMobileClient.getInstance().confirmSignUp(
+            userName,
+            code,
+            object :
+                Callback<SignUpResult> {
+                override fun onResult(signUpResult: SignUpResult) {
+                    ThreadUtils.runOnUiThread(Runnable {
+                        Log.d(TAG, "Sign-up callback state: " + signUpResult.confirmationState)
+                        if (!signUpResult.confirmationState) {
+                            val details = signUpResult.userCodeDeliveryDetails
+                            makeToast("Confirm sign-up with: " + details.destination)
+
+                        } else {
+                            //Sign up completed
+                            makeToast("Sign up Complete")
+                            signIn()
+                        }
+                    })
+                }
+
+                override fun onError(e: java.lang.Exception) {
+                    Log.e(TAG, "Confirm sign-up error", e)
+
+                    this@CombinedRegister.activity?.runOnUiThread {
+                        makeToast("Invalid code")
+                    }
+                }
+            })
+
+    }
+
+
+    /**
+     * Signs the user in using provided credentials
+     */
+    private fun signIn() {
+
+        val username = binding.username.text.toString()
+        val password = binding.password.text.toString()
+
+        AWSMobileClient.getInstance().signIn(
+            username,
+            password,
+            null,
+            object : Callback<SignInResult> {
+                override fun onResult(signInResult: SignInResult) {
+                    ThreadUtils.runOnUiThread {
+                        Log.d(TAG, "Sign-in callback state: " + signInResult.signInState)
+                        when (signInResult.signInState) {
+                            SignInState.DONE ->
+                                makeToast("Sign-in Complete")
+                            //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
+                            SignInState.SMS_MFA -> makeToast("Please confirm sign-in with SMS.")
+                            SignInState.NEW_PASSWORD_REQUIRED -> makeToast("Please confirm sign-in with new password.")
+                            else -> makeToast("Unsupported sign-in confirmation: " + signInResult.signInState)
+                        }
+                    }
+                }
+
+
+                override fun onError(e: java.lang.Exception) {
+                    Log.e(TAG, "Sign-in error", e)
+                    binding.TxtProgress.text = e.toString()
+                }
+            })
+    }
+
+    /**
+     * Utility function to help make toast
+     */
+    private fun makeToast(msg: String) {
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -144,7 +279,7 @@ class CombinedRegister : Fragment() {
         }
     }
 
-    companion object{private const val TAG = "EmailPassword"}
-
-
+    companion object {
+        private const val TAG = "SignUpFragment"
+    }
 }

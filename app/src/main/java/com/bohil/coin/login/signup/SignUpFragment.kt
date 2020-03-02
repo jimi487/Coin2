@@ -30,17 +30,17 @@ class SignUpFragment : Fragment() {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_up, container, false)
 
-        binding.signupButton.setOnClickListener { validateForm() }
+        //binding.signupButton.setOnClickListener { validateForm() }
         //binding.nextBtn.setOnClickListener{ findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
         // Long click the submit button to bypass registration
-        binding.signupButton.setOnLongClickListener{
-            findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
-            true
-        }
+        //binding.signupButton.setOnLongClickListener{
+            //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
+          //  true
+       // }
         return binding.root
     }
 
-    private fun validateForm() {
+    /*private fun validateForm() {
         var valid = true
         val email = binding.username.text.toString()
         val password = binding.password.text.toString()
@@ -193,7 +193,7 @@ class SignUpFragment : Fragment() {
                         when (signInResult.signInState) {
                             SignInState.DONE -> {
                                 makeToast("Sign-in Complete")
-                                findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
+                                //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
                             SignInState.SMS_MFA -> makeToast("Please confirm sign-in with SMS.")
                             SignInState.NEW_PASSWORD_REQUIRED -> makeToast("Please confirm sign-in with new password.")
                             else -> makeToast("Unsupported sign-in confirmation: " + signInResult.signInState)
@@ -228,5 +228,5 @@ class SignUpFragment : Fragment() {
     }
 
     companion object{private const val TAG = "SignUpFragment"}
-
+*/
 }

@@ -15,7 +15,7 @@ import com.bohil.coin.databinding.FragmentRegisterBinding
 
 class RegisterFragment : Fragment() {
 
-    private lateinit var binding:FragmentRegisterBinding
+   /* private lateinit var binding:FragmentRegisterBinding
     private lateinit var viewModel:RegisterViewModel
     private var mContext = context
     companion object {
@@ -82,5 +82,5 @@ class RegisterFragment : Fragment() {
             viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table), getString(R.string.cognito_firestore))
             findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToPreviewActivity())
         }
-    }
+    }*/
 }
