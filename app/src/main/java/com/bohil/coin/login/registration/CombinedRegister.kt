@@ -27,6 +27,12 @@ class CombinedRegister : Fragment() {
 
     private lateinit var binding: CombinedRegisterBinding
     private lateinit var viewModel:RegisterViewModel
+    private lateinit var firstName : String
+    private lateinit var lastName : String
+    private lateinit var dob : String
+    private lateinit var sex : String
+    private lateinit var lang : String
+    private lateinit var country : String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,12 +71,12 @@ class CombinedRegister : Fragment() {
         val password = binding.password.text.toString()
 
         //Firebase Fields
-        val firstName = binding.firstNameEditText.text.toString()
-        val lastName = binding.lastNameEditText.text.toString()
-        val dob = binding.dobText.text.toString()
-        val lang = binding.languageSpinner.selectedItem.toString()
-        val sex = binding.sexSpinner.selectedItem.toString()
-        val country = binding.countrySpinner.selectedItem.toString()
+        firstName = binding.firstNameEditText.text.toString()
+        lastName = binding.lastNameEditText.text.toString()
+        dob = binding.dobText.text.toString()
+        lang = binding.languageSpinner.selectedItem.toString()
+        sex = binding.sexSpinner.selectedItem.toString()
+        country = binding.countrySpinner.selectedItem.toString()
         val listOfStrings = listOf(firstName, lastName, dob)
 
         if (TextUtils.isEmpty(email)) {
@@ -99,11 +105,7 @@ class CombinedRegister : Fragment() {
 
         if (valid) {
             //Add user to AWS
-            if(beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())) {
-
-                //Create user in Firebase
-                viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table), getString(R.string.cognito_firestore))
-            }
+            beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())
         }
     }
 
@@ -117,11 +119,10 @@ class CombinedRegister : Fragment() {
      *
      * TODO: Implement redirect to login (?) or another fragment after verification e-mail sent
      */
-    private fun beginSignUpProcess (user: String, pass: String) : Boolean {
+    private fun beginSignUpProcess (user: String, pass: String) {
         binding.loading.visibility = View.VISIBLE
         binding.TxtProgress.text = getString(R.string.sign_up_in_progress)
 
-        var success = false;
 
         val attributes: MutableMap<String, String> =
             HashMap()
@@ -146,21 +147,15 @@ class CombinedRegister : Fragment() {
                             // Changing the button on click to confirm the verification code
                             binding.registerButton.setOnClickListener { verifySignUp(user) }
 
-                            success = true;
+
 
                         } else {
                             binding.TxtProgress.text = getString(R.string.signup_success)
                         }
                     }
 
-                    /*
-                    this@SignUpFragment.activity!!.runOnUiThread {
-                        binding.loading.visibility = View.GONE
-                        binding.BtnNext.visibility = View.VISIBLE
-                        binding.registerButton.visibility = View.GONE
-                    }
-                    */
-
+                    //Create user in Firebase
+                    viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table), getString(R.string.cognito_firestore))
                 }
 
                 override fun onError(e: Exception) {
@@ -179,13 +174,10 @@ class CombinedRegister : Fragment() {
                         binding.TxtProgress.text = ""
                         binding.loading.visibility = View.GONE
 
-                        success = false;
                     }
 
                 }
             })
-
-        return success;
     }
 
     /**
@@ -243,9 +235,11 @@ class CombinedRegister : Fragment() {
                     ThreadUtils.runOnUiThread {
                         Log.d(TAG, "Sign-in callback state: " + signInResult.signInState)
                         when (signInResult.signInState) {
-                            SignInState.DONE ->
+                            SignInState.DONE -> {
                                 makeToast("Sign-in Complete")
-                            //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
+                                findNavController().navigate(CombinedRegisterDirections.combinedFragmentToPreviewActivity())
+                            }
+
                             SignInState.SMS_MFA -> makeToast("Please confirm sign-in with SMS.")
                             SignInState.NEW_PASSWORD_REQUIRED -> makeToast("Please confirm sign-in with new password.")
                             else -> makeToast("Unsupported sign-in confirmation: " + signInResult.signInState)
