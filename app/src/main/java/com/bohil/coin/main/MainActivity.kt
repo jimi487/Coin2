@@ -1,15 +1,11 @@
 package com.bohil.coin.main
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.bohil.coin.Coin
-import com.bohil.coin.R
 import com.amazonaws.mobile.client.AWSMobileClient
-import com.bohil.coin.login.title.TitleFragment
+import com.bohil.coin.R
 
 
 /**

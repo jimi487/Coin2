@@ -1,3 +1,13 @@
 package com.bohil.coin
 
-class DBUtility
+/**
+ * Class containing common DB methods
+ */
+class DBUtility{
+
+    fun uploadToFaceCollection(){
+
+    }
+
+
+}

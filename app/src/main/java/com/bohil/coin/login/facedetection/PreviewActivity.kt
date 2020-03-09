@@ -58,10 +58,11 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
 
     //TODO replace this with Camera2 api
     private var cameraSource: CameraSource? = null
-
-    // Variable that handles saving faces
     private lateinit var faceContourDetectorProcessor : FaceContourDetectorProcessor
     private lateinit var binding : ActivityPreviewBinding
+    // TODO Implement methods and strategy in viewmodel
+
+    // Variable that handles saving faces
     private lateinit var capturedImages: MutableList<Pair<File, Uri>>
     private var capturedImagesIndex = 0
     private lateinit var currentPhotoPath:String
@@ -95,7 +96,7 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
         faceContourDetectorProcessor = FaceContourDetectorProcessor()
         binding.faceContourDetectorProcessor = faceContourDetectorProcessor
 
-        // Currently navigates to the Main Program Activity
+        // Launches the intent to capture a picture
         binding.captureButton.setOnClickListener {
             captureImage()
         }

@@ -1,258 +1,183 @@
 package com.bohil.coin.login.registration
 
+import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
-import android.text.TextUtils
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
+import androidx.core.content.FileProvider
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils
 import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.Callback
-import com.amazonaws.mobile.client.results.SignInResult
-import com.amazonaws.mobile.client.results.SignInState
-import com.amazonaws.mobile.client.results.SignUpResult
 import com.bohil.coin.R
-import com.bohil.coin.databinding.CombinedRegisterBinding
-import java.util.HashMap
+import com.bohil.coin.databinding.FragmentCombinedBinding
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CombinedRegister : Fragment() {
 
-    private lateinit var binding: CombinedRegisterBinding
+    private lateinit var binding: FragmentCombinedBinding
     private lateinit var viewModel:RegisterViewModel
-    private lateinit var firstName : String
-    private lateinit var lastName : String
-    private lateinit var dob : String
-    private lateinit var sex : String
-    private lateinit var lang : String
-    private lateinit var country : String
+    private lateinit var capturedImage: Pair<File, Uri>
+    private lateinit var currentPhotoPath:String
+    private lateinit var photoURI: Uri
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         viewModel = ViewModelProviders.of(this).get(RegisterViewModel::class.java)
-
-        binding = DataBindingUtil.inflate(inflater, R.layout.combined_register, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_combined, container, false)
         binding.lifecycleOwner = this
+        binding.emailText.setText(AWSMobileClient.getInstance().username.toString())
+        binding.finishButton2.setOnClickListener { validateForm() }
 
-        binding.registerButton.setOnClickListener { validateForm() }
-        binding.confirmationCheckbox.setOnClickListener { toggleSignup() }
-
-        // Adding navigation to the camera icon
-        /*binding.faceImageButton.setOnClickListener {
-            it.findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToPreviewActivity())
-        }*/
-
-
-
+        // Capturing the users image
+        binding.faceImage.setOnClickListener {
+            captureImage()
+        }
 
         return binding.root
-    }
-
-    private fun toggleSignup() {
-        binding.registerButton.isEnabled = binding.confirmationCheckbox.isChecked
     }
 
     private fun validateForm() {
         var valid = true
 
-        //AWS Fields
-        val email = binding.username.text.toString()
-        val password = binding.password.text.toString()
-
         //Firebase Fields
-        firstName = binding.firstNameEditText.text.toString()
-        lastName = binding.lastNameEditText.text.toString()
-        dob = binding.dobText.text.toString()
-        lang = binding.languageSpinner.selectedItem.toString()
-        sex = binding.sexSpinner.selectedItem.toString()
-        country = binding.countrySpinner.selectedItem.toString()
+        val firstName = binding.firstNameEditText.text.toString()
+        val lastName = binding.lastNameEditText.text.toString()
+        val dob = binding.dobText.text.toString()
+        val lang = binding.languageSpinner.selectedItem.toString()
+        val sex = binding.sexSpinner.selectedItem.toString()
+        val country = binding.countrySpinner.selectedItem.toString()
         val listOfStrings = listOf(firstName, lastName, dob)
 
-        if (TextUtils.isEmpty(email)) {
-            binding.username.error = "Required"
-            valid = false
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.username.error = "Please input a valid email address"
-            valid = false
-        } else {
-            binding.username.error = null
-        }
-
-        if (TextUtils.isEmpty(password)) {
-            binding.password.error = "Required"
-            valid = false
-        } else {
-            binding.password.error = null
-        }
 
         when {
             listOfStrings.contains("") -> if (listOfStrings.filter { it == "" }.isNotEmpty()) {
-                Toast.makeText(context, "All fields must be filled", Toast.LENGTH_SHORT).show()
+                makeToast("All fields must be filled")
                 valid = false
+            }
+            binding.faceImage.drawable == null -> {
+                makeToast("Please take a picture")
+                valid = false
+            }
+            !oneFace -> {
+                makeToast("Unable to find your face. Please upload picture again")
             }
         }
 
         if (valid) {
+            val userFile = capturedImage
             //Add user to AWS
-            beginSignUpProcess(binding.username.text.toString(), binding.password.text.toString())
+            viewModel.addUser(firstName,lastName, lang, country,sex, dob,
+                getString(R.string.firestore_table), getString(R.string.cognito_firestore), userFile)
+            findNavController().navigate(CombinedRegisterDirections.actionCombinedFragmentToMainActivity())
         }
     }
 
     /**
-     * Function used to sign-up a user to the Cognito user pool by sending a verification code
-     * to the e-mail address provided. Will display error messages if the e-mail is already in use,
-     * or if the password is too short.
-     *
-     * @param user: The username (e-mail) provided by the user
-     * @param pass: The password provided by the user
-     *
-     * TODO: Implement redirect to login (?) or another fragment after verification e-mail sent
+     * Creates an image file for the image
      */
-    private fun beginSignUpProcess (user: String, pass: String) {
-        binding.loading.visibility = View.VISIBLE
-        binding.TxtProgress.text = getString(R.string.sign_up_in_progress)
-
-
-        val attributes: MutableMap<String, String> =
-            HashMap()
-        attributes["email"] = user
-
-        AWSMobileClient.getInstance().signUp(
-            user,
-            pass,
-            attributes,
-            null,
-            object :
-                Callback<SignUpResult> {
-                override fun onResult(signUpResult: SignUpResult) {
-                    activity!!.runOnUiThread {
-
-                        if (!signUpResult.confirmationState) {
-                            binding.TxtProgress.text = getString(R.string.check_inbox)
-                            binding.loading.visibility = View.INVISIBLE
-                            binding.confirmCode.visibility = View.VISIBLE
-                            binding.registerButton.text = getString(R.string.confirm_button)
-
-                            // Changing the button on click to confirm the verification code
-                            binding.registerButton.setOnClickListener { verifySignUp(user) }
-
-
-
-                        } else {
-                            binding.TxtProgress.text = getString(R.string.signup_success)
-                        }
-                    }
-
-                    //Create user in Firebase
-                    viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table), getString(R.string.cognito_firestore))
-                }
-
-                override fun onError(e: Exception) {
-                    Log.e("ERR IN SIGN UP", e.message)
-                    this@CombinedRegister.activity?.runOnUiThread {
-                        val errMessage = e.message.toString()//.toLowerCase()
-
-                        //Not an ideal way of checking for the type of exception.. might want to find another way
-                        with(errMessage) {
-                            when {
-                                contains("exists") -> makeToast(getString(R.string.email_in_use))
-                                contains("password") -> makeToast(getString(R.string.pass_too_short))
-                                contains("http") -> makeToast("An active internet connection is required")
-                            }
-                        }
-                        binding.TxtProgress.text = ""
-                        binding.loading.visibility = View.GONE
-
-                    }
-
-                }
-            })
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File? = activity!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
     }
 
     /**
-     * Confirms the user using the code sent to their email
+     * Captures the image
      */
-    private fun verifySignUp(userName: String) {
-        val code = binding.confirmCode.text.toString()
+    private fun captureImage(){
 
-        AWSMobileClient.getInstance().confirmSignUp(
-            userName,
-            code,
-            object :
-                Callback<SignUpResult> {
-                override fun onResult(signUpResult: SignUpResult) {
-                    ThreadUtils.runOnUiThread(Runnable {
-                        Log.d(TAG, "Sign-up callback state: " + signUpResult.confirmationState)
-                        if (!signUpResult.confirmationState) {
-                            val details = signUpResult.userCodeDeliveryDetails
-                            makeToast("Confirm sign-up with: " + details.destination)
+/*        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        takePictureIntent.resolveActivity(packageManager)?.let{
+            val values = ContentValues()
+            values.put(MediaStore.Images.Media.TITLE, "New Picture")
+            values.put(MediaStore.Images.Media.DESCRIPTION, "User Picture")
+            val imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
+            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+        }*/
 
-                        } else {
-                            //Sign up completed
-                            makeToast("Sign up Complete")
-                            signIn()
-                        }
-                    })
+        val packageManager = context!!.packageManager
+
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    Log.d(TAG, "Error creating the file")
+                    null
                 }
-
-                override fun onError(e: java.lang.Exception) {
-                    Log.e(TAG, "Confirm sign-up error", e)
-
-                    this@CombinedRegister.activity?.runOnUiThread {
-                        makeToast("Invalid code")
-                    }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    photoURI= FileProvider.getUriForFile(
+                        context!!,
+                        "com.bohil.coin.fileprovider",
+                        it
+                    )
+                    // Adding the file and uri to the captured images list
+                    capturedImage = Pair(photoFile, photoURI)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
                 }
-            })
+            }
+        }
+    }
 
+    /**
+     * Handles when the user is brought back to the app from taking a picture
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK){
+            val facesFound = viewModel.verifyPicture(capturedImage)
+            if (facesFound != 1){
+                makeToast("Please only have one face in your picture")
+            }
+            else{
+                oneFace = true
+                Log.d(TAG, "Creating bitmap")
+                val imageBitmap = BitmapFactory.decodeFile(capturedImage.first.path)
+                Log.d(TAG, "Created bitmap, creating thumbnail")
+                changeThumbnail(imageBitmap)
+            }
+
+        }
     }
 
 
     /**
-     * Signs the user in using provided credentials
+     * Changes the thumbnails in the preview screen
      */
-    private fun signIn() {
-
-        val username = binding.username.text.toString()
-        val password = binding.password.text.toString()
-
-        AWSMobileClient.getInstance().signIn(
-            username,
-            password,
-            null,
-            object : Callback<SignInResult> {
-                override fun onResult(signInResult: SignInResult) {
-                    ThreadUtils.runOnUiThread {
-                        Log.d(TAG, "Sign-in callback state: " + signInResult.signInState)
-                        when (signInResult.signInState) {
-                            SignInState.DONE -> {
-                                makeToast("Sign-in Complete")
-                                findNavController().navigate(CombinedRegisterDirections.combinedFragmentToPreviewActivity())
-                            }
-
-                            SignInState.SMS_MFA -> makeToast("Please confirm sign-in with SMS.")
-                            SignInState.NEW_PASSWORD_REQUIRED -> makeToast("Please confirm sign-in with new password.")
-                            else -> makeToast("Unsupported sign-in confirmation: " + signInResult.signInState)
-                        }
-                    }
-                }
-
-
-                override fun onError(e: java.lang.Exception) {
-                    Log.e(TAG, "Sign-in error", e)
-                    binding.TxtProgress.text = e.toString()
-                }
-            })
+    private fun changeThumbnail(thumb: Bitmap){
+        binding.faceImage.setImageBitmap(thumb)
     }
 
     /**
@@ -274,6 +199,10 @@ class CombinedRegister : Fragment() {
     }
 
     companion object {
-        private const val TAG = "SignUpFragment"
+        private const val TAG = "CombinedFragment"
+        private const val REQUEST_TAKE_PHOTO = 1001
+        private var oneFace = false
+
+
     }
 }

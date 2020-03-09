@@ -37,6 +37,7 @@ class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace
             .build()
 
         detector = FirebaseVision.getInstance().getVisionFaceDetector(options)
+
     }
 
     override fun stop() {

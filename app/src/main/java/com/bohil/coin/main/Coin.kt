@@ -1,4 +1,4 @@
-package com.bohil.coin
+package com.bohil.coin.main
 
 import android.content.Context
 import android.net.Uri
@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.bohil.coin.R
 
 
 // TODO: Rename parameter arguments, choose names that match

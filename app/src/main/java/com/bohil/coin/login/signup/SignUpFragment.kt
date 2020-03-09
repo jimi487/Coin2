@@ -30,17 +30,16 @@ class SignUpFragment : Fragment() {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_up, container, false)
 
-        //binding.signupButton.setOnClickListener { validateForm() }
-        //binding.nextBtn.setOnClickListener{ findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
+        binding.signupButton.setOnClickListener { validateForm() }
         // Long click the submit button to bypass registration
-        //binding.signupButton.setOnLongClickListener{
-            //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment())
-          //  true
-       // }
+        binding.signupButton.setOnLongClickListener{
+            findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToCombinedFragment())
+            true
+        }
         return binding.root
     }
 
-    /*private fun validateForm() {
+    private fun validateForm() {
         var valid = true
         val email = binding.username.text.toString()
         val password = binding.password.text.toString()
@@ -108,15 +107,6 @@ class SignUpFragment : Fragment() {
                                 binding.TxtProgress.text = getString(R.string.signup_success)
                             }
                         }
-
-                        /*
-                        this@SignUpFragment.activity!!.runOnUiThread {
-                            binding.loading.visibility = View.GONE
-                            binding.BtnNext.visibility = View.VISIBLE
-                            binding.registerButton.visibility = View.GONE
-                        }
-                        */
-
                     }
 
                     override fun onError(e: Exception) {
@@ -168,7 +158,11 @@ class SignUpFragment : Fragment() {
 
                 override fun onError(e: java.lang.Exception) {
                     Log.e(TAG, "Confirm sign-up error", e)
-                    binding.TxtProgress.text = e.toString()
+                    with(e.message.toString()){
+                        when {
+                            contains("CodeMistmatch") -> makeToast("Please input the correct code")
+                        }
+                    }
                 }
             })
 
@@ -193,12 +187,13 @@ class SignUpFragment : Fragment() {
                         when (signInResult.signInState) {
                             SignInState.DONE -> {
                                 makeToast("Sign-in Complete")
-                                //findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToRegisterFragment()) }
+                                findNavController().navigate(SignUpFragmentDirections.actionSignUpFragmentToCombinedFragment()) }
                             SignInState.SMS_MFA -> makeToast("Please confirm sign-in with SMS.")
                             SignInState.NEW_PASSWORD_REQUIRED -> makeToast("Please confirm sign-in with new password.")
                             else -> makeToast("Unsupported sign-in confirmation: " + signInResult.signInState)
                         }
                     }
+
                 }
 
                 override fun onError(e: java.lang.Exception) {
@@ -227,6 +222,6 @@ class SignUpFragment : Fragment() {
         }
     }
 
-    companion object{private const val TAG = "SignUpFragment"}
-*/
-}
+    companion object{ private const val TAG = "SignUpFragment"
+
+}}
