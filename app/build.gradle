@@ -33,10 +33,23 @@ android {
     dataBinding {
         enabled = true
     }
+
+    android {
+        packagingOptions {
+            exclude 'META-INF/DEPENDENCIES'
+            exclude 'META-INF/LICENSE'
+            exclude 'META-INF/LICENSE.txt'
+            exclude 'META-INF/license.txt'
+            exclude 'META-INF/NOTICE'
+            exclude 'META-INF/NOTICE.txt'
+            exclude 'META-INF/notice.txt'
+            exclude 'META-INF/ASL2.0'
+            exclude("META-INF/*.kotlin_module")
+        }
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'
@@ -76,7 +89,7 @@ dependencies {
     //For the drop-in UI also:
     implementation 'com.amazonaws:aws-android-sdk-auth-userpools:2.15.+'
     implementation 'com.amazonaws:aws-android-sdk-auth-ui:2.15.+'
-    implementation('com.amazonaws:aws-android-sdk-cognitoauth:2.15.+@aar') { transitive=true }
+    implementation('com.amazonaws:aws-android-sdk-cognitoauth:2.15.+@aar') { transitive = true }
 
     // Navigation Dependency
     def nav_version = "2.2.1"
@@ -94,6 +107,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-moshi:2.5.0'
 
     // arch components
+
     // ViewModel and LiveData
     def lifecycle_version = "2.2.0"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
@@ -109,5 +123,6 @@ dependencies {
 
     // WorkManager Dependency
     def work_version = "1.0.1"
-    implementation "android.arch.work:work-runtime-ktx:$work_version"
+    implementation 'androidx.work:work-runtime-ktx:2.0.1'
+    implementation 'com.amazonaws:aws-android-sdk-kinesisvideo:2.16.8'
 }
