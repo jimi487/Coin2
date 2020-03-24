@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.amazonaws.mobile.client.AWSMobileClient;
+import com.bohil.coin.DBUtility;
 import com.bohil.coin.fragment_streaming.StreamingFragment;
 import com.bohil.coin.fragment_streaming.StreamConfigurationFragment;
 import com.amazonaws.mobile.client.Callback;

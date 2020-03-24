@@ -18,13 +18,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import com.amazonaws.mobile.client.AWSMobileClient
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCombinedBinding
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import com.bohil.coin.DBUtility
 
 class CombinedRegister : Fragment() {
 
@@ -42,7 +42,7 @@ class CombinedRegister : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RegisterViewModel::class.java)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_combined, container, false)
         binding.lifecycleOwner = this
-        binding.emailText.setText(AWSMobileClient.getInstance().username.toString())
+        binding.emailText.setText(DBUtility.getAWSInstance().username.toString())
         binding.finishButton2.setOnClickListener { validateForm() }
 
         // Capturing the users image
@@ -194,7 +194,7 @@ class CombinedRegister : Fragment() {
         super.onResume()
         val activityIntent = Intent()
         if (activityIntent.data != null && "myapp" == activityIntent.data?.scheme) {
-            AWSMobileClient.getInstance().handleAuthResponse(activityIntent)
+            DBUtility.getAWSInstance().handleAuthResponse(activityIntent)
         }
     }
 

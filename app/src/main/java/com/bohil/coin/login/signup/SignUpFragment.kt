@@ -12,7 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils.runOnUiThread
-import com.amazonaws.mobile.client.AWSMobileClient
+import com.bohil.coin.DBUtility
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignInResult
 import com.amazonaws.mobile.client.results.SignInState
@@ -84,7 +84,7 @@ class SignUpFragment : Fragment() {
             HashMap()
         attributes["email"] = user
 
-            AWSMobileClient.getInstance().signUp(
+            DBUtility.getAWSInstance().signUp(
                 user,
                 pass,
                 attributes,
@@ -136,7 +136,7 @@ class SignUpFragment : Fragment() {
     private fun verifySignUp(userName: String){
         val code = binding.confirmCode.text.toString()
 
-        AWSMobileClient.getInstance().confirmSignUp(
+        DBUtility.getAWSInstance().confirmSignUp(
             userName,
             code,
             object :
@@ -176,7 +176,7 @@ class SignUpFragment : Fragment() {
         val username = binding.username.text.toString()
         val password = binding.password.text.toString()
 
-        AWSMobileClient.getInstance().signIn(
+        DBUtility.getAWSInstance().signIn(
             username,
             password,
             null,
@@ -218,7 +218,7 @@ class SignUpFragment : Fragment() {
         super.onResume()
         val activityIntent = Intent()
         if (activityIntent.data != null && "myapp" == activityIntent.data?.scheme) {
-            AWSMobileClient.getInstance().handleAuthResponse(activityIntent)
+            DBUtility.getAWSInstance().handleAuthResponse(activityIntent)
         }
     }
 

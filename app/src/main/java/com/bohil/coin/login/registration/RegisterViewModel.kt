@@ -6,7 +6,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.amazonaws.mobile.client.AWSMobileClient
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.ResultListener
 import com.amplifyframework.storage.result.StorageUploadFileResult
@@ -18,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import com.bohil.coin.DBUtility
 
 private const val TAG = "RegisterViewModel"
 private lateinit var user: HashMap<String, String>
@@ -85,7 +85,7 @@ class RegisterViewModel: ViewModel() {
      */
     private suspend fun updateCognito(attribute:String, id:String) = withContext(Dispatchers.IO){
         try{
-            AWSMobileClient.getInstance().updateUserAttributes(hashMapOf(attribute to id))
+            DBUtility.getAWSInstance().updateUserAttributes(hashMapOf(attribute to id))
             // Adding the users image to the S3 collection
         }catch(e:Exception){
             Log.e(TAG, "Unable to add key", e)

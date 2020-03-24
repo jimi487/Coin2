@@ -4,7 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.amazonaws.mobile.client.AWSMobileClient
+import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 
 
@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity(), Coin.OnFragmentInteractionListener{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.i("LOGGED IN SUCCESS", "WELCOME " + AWSMobileClient.getInstance().username)
+        Log.i("LOGGED IN SUCCESS", "WELCOME " + DBUtility.getAWSInstance().username)
     }
 
 

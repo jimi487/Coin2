@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.amazonaws.mobile.client.AWSMobileClient
+import com.bohil.coin.DBUtility
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignInResult
 import com.amazonaws.mobile.client.results.SignInState
@@ -57,7 +57,7 @@ class TitleFragment : Fragment() {
     }
 
     private fun validateLogin() {
-        AWSMobileClient.getInstance()
+        DBUtility.getAWSInstance()
             .signIn(email, password, null, object : Callback<SignInResult> {
                 override fun onResult(signInResult: SignInResult) {
                     activity!!.runOnUiThread {
