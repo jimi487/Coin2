@@ -24,6 +24,13 @@
         </activity>
         <activity android:name="com.bohil.coin.login.facedetection.PreviewActivity">
         </activity> <!-- Automatically download the ML model to the device after app is installed from Play Store -->
+
+        <activity
+                android:name="com.bohil.coin.main.SimpleNavActivity"
+                android:label="SimpleNavActivity"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
         <meta-data
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"
                 android:value="face"/>
