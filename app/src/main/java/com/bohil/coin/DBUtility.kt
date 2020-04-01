@@ -1,40 +1,41 @@
 package com.bohil.coin
 
 import android.content.Context
-import android.content.Intent
+import android.net.Uri
 import android.util.Log
-import androidx.core.content.ContextCompat.startActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import com.amazonaws.mobile.client.*
-import com.amazonaws.mobile.client.results.SignInResult
-import com.amazonaws.mobile.client.results.SignInState
 import com.amplifyframework.core.Amplify
+import com.amplifyframework.core.ResultListener
+import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
-import com.bohil.coin.databinding.FragmentTitleBinding
-import com.bohil.coin.login.title.TitleFragment
-import com.bohil.coin.main.SimpleNavActivity
+import com.google.firebase.firestore.FirebaseFirestore
+import java.io.File
+import kotlinx.coroutines.*
 
 /**
  * Class containing common DB methods
  */
 object DBUtility {
 
+    private const val TAG = "DBUtility"
+    val AWSInstance: AWSMobileClient = AWSMobileClient.getInstance()
+    val FirebaseInstance = FirebaseFirestore.getInstance()
+
     fun initAWS(applicationContext : Context) {
         // Initializing the AWS Amplify instance
-        getAWSInstance()
+        AWSInstance
         .initialize(applicationContext, object : Callback<UserStateDetails> {
             override fun onResult(userStateDetails: UserStateDetails) {
                 try {
                     Amplify.addPlugin(AWSS3StoragePlugin())
                     Amplify.configure(applicationContext)
                     when(userStateDetails.userState){
-                        UserState.SIGNED_IN -> getAWSInstance().signOut()
-                        UserState.SIGNED_OUT -> getAWSInstance().tokens
+                        UserState.SIGNED_IN -> AWSInstance.signOut()
+                        UserState.SIGNED_OUT -> AWSInstance.tokens
                     }
 
                     // IMPORTANT! Refreshes the access tokens stored in the cache
-                    //DBUtility.getAWSInstance().tokens
+                    //DBUtility.AWSInstance.tokens
                 } catch (e: java.lang.Exception) {
                     Log.e("ApiQuickstart", e.message)
                 }
@@ -48,7 +49,7 @@ object DBUtility {
     }
 
     fun signOutAWS() {
-        getAWSInstance().signOut(
+        AWSInstance.signOut(
             SignOutOptions.builder().signOutGlobally(true).build(),
             object : Callback<Void?> {
                 override fun onResult(result: Void?) {
@@ -61,10 +62,62 @@ object DBUtility {
             })
     }
 
-    fun getAWSInstance() : AWSMobileClient {
-        return AWSMobileClient.getInstance()
+    suspend fun addFirebaseUser(user : HashMap<String, String>, collectionName:String, cognitoAttribute: String, userPicture: Pair<File, Uri>) {
+        FirebaseInstance.collection(collectionName)
+            .add(user)
+            .addOnSuccessListener {
+                //Update user's FireStore ID in Cognito
+                try {
+                    Log.d(TAG, "Updating the user Firestore Key")
+                    GlobalScope.launch {
+                        updateCognito(cognitoAttribute, it.id)
+                        uploadFile(userPicture, it.id)
+                    }
+                } catch (e: Exception) {
+                    Log.d(TAG, e.toString())
+                }
+            }
+
+            .addOnFailureListener {
+                Log.w(TAG, "Error adding document", it)
+            }
     }
 
+
+    /**
+     * Updates the user's Firestore ID in Cognito
+     */
+    private suspend fun updateCognito(attribute:String, id:String) = withContext(Dispatchers.IO){
+        try{
+            AWSInstance.updateUserAttributes(hashMapOf(attribute to id))
+            // Adding the users image to the S3 collection
+        }catch(e:Exception){
+            Log.e(TAG, "Unable to add key", e)
+        }
+        Log.d(TAG, "User key finished adding")
+
+    }
+
+    /**
+     * Uploads the file to the Amazon s3 collection
+     */
+    private fun uploadFile(userFile: Pair<File, Uri>, firebaseID:String){
+        Amplify.Storage.uploadFile(
+            firebaseID,
+            userFile.first.absolutePath,
+            object: ResultListener<StorageUploadFileResult> {
+                override fun onResult(result: StorageUploadFileResult?) {
+                    Log.d(TAG, "File added successfully")
+                }
+
+                override fun onError(error: Throwable?) {
+                    Log.d(TAG, "File not added successfully")
+                }
+            }
+        )
+    }
 }
+
+
 
 

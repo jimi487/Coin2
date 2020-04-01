@@ -42,7 +42,7 @@ class CombinedRegister : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RegisterViewModel::class.java)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_combined, container, false)
         binding.lifecycleOwner = this
-        binding.emailText.setText(DBUtility.getAWSInstance().username.toString())
+        binding.emailText.setText(DBUtility.AWSInstance.username.toString())
         binding.finishButton2.setOnClickListener { validateForm() }
 
         // Capturing the users image
@@ -63,6 +63,9 @@ class CombinedRegister : Fragment() {
         val lang = binding.languageSpinner.selectedItem.toString()
         val sex = binding.sexSpinner.selectedItem.toString()
         val country = binding.countrySpinner.selectedItem.toString()
+        val instagramHandle = binding.igHandle.text.toString()
+        val twitterHandle = binding.twitterHandle.text.toString()
+        val snapchatHandle = binding.snapchatHandle.text.toString()
         val listOfStrings = listOf(firstName, lastName, dob)
 
 
@@ -83,7 +86,7 @@ class CombinedRegister : Fragment() {
         if (valid) {
             val userFile = capturedImage
             //Add user to AWS
-            viewModel.addUser(firstName,lastName, lang, country,sex, dob,
+            viewModel.addUser(firstName,lastName, lang, country,sex, dob, instagramHandle, twitterHandle, snapchatHandle,
                 getString(R.string.firestore_table), getString(R.string.cognito_firestore), userFile)
             findNavController().navigate(CombinedRegisterDirections.actionCombinedFragmentToMainActivity())
         }
@@ -194,7 +197,7 @@ class CombinedRegister : Fragment() {
         super.onResume()
         val activityIntent = Intent()
         if (activityIntent.data != null && "myapp" == activityIntent.data?.scheme) {
-            DBUtility.getAWSInstance().handleAuthResponse(activityIntent)
+            DBUtility.AWSInstance.handleAuthResponse(activityIntent)
         }
     }
 

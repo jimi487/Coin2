@@ -57,7 +57,7 @@ class TitleFragment : Fragment() {
     }
 
     private fun validateLogin() {
-        DBUtility.getAWSInstance()
+        DBUtility.AWSInstance
             .signIn(email, password, null, object : Callback<SignInResult> {
                 override fun onResult(signInResult: SignInResult) {
                     activity!!.runOnUiThread {

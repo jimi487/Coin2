@@ -48,6 +48,10 @@
     <string name="first_name_hint">First Name</string>
     <string name="last_name_hint">Last Name</string>
     <string name="finish_button">Finish</string>
+    <string name="ig_handle_hint">Instagram Username (optional)</string>
+    <string name="twitter_handle_hint">Twitter Username (optional)</string>
+    <string name="snapchat_handle_hint">Snapchat Username (optional)</string>
+
 
     <string-array name="sex_array">
         <item>Female</item>
@@ -71,9 +75,12 @@
     <string name="first_name_autofill_hint">Type in your first name</string>
     <string name="last_name_autofill_hint">Type in your last name</string>
     <string name="age_autofill_hint">Enter your age</string>
-    <string name="confirm_check">I agree the information provided is accurate, and does not depict any other persons
-    </string>
-    <string name ="dob_text">YYYYMMDD</string>
+    <string name="confirm_check">I agree the information provided is accurate, and does not depict any other persons</string>
+    <string name ="dob_text">YYYY/MM/DD</string>
+
+    <string name="ig_handle_autofill_hint">Type in your Instagram username (ex. @myinstagramusername)</string>
+    <string name="twitter_handle_autofill_hint">Type in your Twitter Username (ex. @mytwitterusername)</string>
+    <string name="snapchat_handle_autofill_hint">Type in your Snapchat Username (ex. @mysnapchatusername)</string>
 
 
     <!-- Preview Activity Strings -->

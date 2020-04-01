@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity(), Coin.OnFragmentInteractionListener{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.i("LOGGED IN SUCCESS", "WELCOME " + DBUtility.getAWSInstance().username)
+        Log.i("LOGGED IN SUCCESS", "WELCOME " + DBUtility.AWSInstance.username)
     }
 
 

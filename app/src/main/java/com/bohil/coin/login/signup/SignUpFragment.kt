@@ -84,7 +84,7 @@ class SignUpFragment : Fragment() {
             HashMap()
         attributes["email"] = user
 
-            DBUtility.getAWSInstance().signUp(
+            DBUtility.AWSInstance.signUp(
                 user,
                 pass,
                 attributes,
@@ -136,7 +136,7 @@ class SignUpFragment : Fragment() {
     private fun verifySignUp(userName: String){
         val code = binding.confirmCode.text.toString()
 
-        DBUtility.getAWSInstance().confirmSignUp(
+        DBUtility.AWSInstance.confirmSignUp(
             userName,
             code,
             object :
@@ -176,7 +176,7 @@ class SignUpFragment : Fragment() {
         val username = binding.username.text.toString()
         val password = binding.password.text.toString()
 
-        DBUtility.getAWSInstance().signIn(
+        DBUtility.AWSInstance.signIn(
             username,
             password,
             null,
@@ -218,7 +218,7 @@ class SignUpFragment : Fragment() {
         super.onResume()
         val activityIntent = Intent()
         if (activityIntent.data != null && "myapp" == activityIntent.data?.scheme) {
-            DBUtility.getAWSInstance().handleAuthResponse(activityIntent)
+            DBUtility.AWSInstance.handleAuthResponse(activityIntent)
         }
     }
 
