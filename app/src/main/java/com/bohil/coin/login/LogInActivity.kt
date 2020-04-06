@@ -1,9 +1,11 @@
 package com.bohil.coin.login
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.amazonaws.mobile.client.*
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferService
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
 import com.bohil.coin.R
@@ -24,14 +26,18 @@ class LogInActivity : AppCompatActivity() {
                 override fun onResult(userStateDetails: UserStateDetails) {
                     try {
                         Amplify.addPlugin(AWSS3StoragePlugin())
+                        applicationContext.startService(
+                            Intent(
+                                applicationContext,
+                                TransferService::class.java
+                            )
+                        )
                         Amplify.configure(applicationContext)
                         when(userStateDetails.userState){
                             UserState.SIGNED_IN -> AWSMobileClient.getInstance().signOut()
                             UserState.SIGNED_OUT -> AWSMobileClient.getInstance().tokens
                         }
 
-                        // IMPORTANT! Refreshes the access tokens stored in the cache
-                        //AWSMobileClient.getInstance().tokens
                     } catch (e: java.lang.Exception) {
                         Log.e("ApiQuickstart", e.message)
                     }

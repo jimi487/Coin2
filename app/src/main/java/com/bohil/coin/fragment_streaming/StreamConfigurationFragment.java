@@ -68,6 +68,7 @@ public class StreamConfigurationFragment extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_stream_configuration, container, false);
 
+        // Creates the Kinesis Video Instance
         try {
             mKinesisVideoClient = KinesisVideoAndroidClientFactory.createKinesisVideoClient(
                     getActivity(),
@@ -126,9 +127,9 @@ public class StreamConfigurationFragment extends Fragment {
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
-        mStartStreamingButton = (Button) view.findViewById(R.id.start_streaming);
+        mStartStreamingButton = view.findViewById(R.id.start_streaming);
         mStartStreamingButton.setOnClickListener(startStreamingActivityWhenClicked());
-        mStreamName = (EditText) view.findViewById(R.id.stream_name);
+        mStreamName = view.findViewById(R.id.stream_name);
     }
 
     private View.OnClickListener startStreamingActivityWhenClicked() {
@@ -154,6 +155,10 @@ public class StreamConfigurationFragment extends Fragment {
         navActivity.startStreamingFragment(extras);
     }
 
+    /**
+     * Sets up the configuration for the Data sent to the Video Stream
+     * @return
+     */
     private AndroidCameraMediaSourceConfiguration getCurrentConfiguration() {
         return new AndroidCameraMediaSourceConfiguration(
                 AndroidCameraMediaSourceConfiguration.builder()

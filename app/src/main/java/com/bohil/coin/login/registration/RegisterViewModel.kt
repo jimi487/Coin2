@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+
 private const val TAG = "RegisterViewModel"
 private lateinit var user: HashMap<String, String>
 
@@ -86,7 +87,6 @@ class RegisterViewModel: ViewModel() {
     private suspend fun updateCognito(attribute:String, id:String) = withContext(Dispatchers.IO){
         try{
             AWSMobileClient.getInstance().updateUserAttributes(hashMapOf(attribute to id))
-            // Adding the users image to the S3 collection
         }catch(e:Exception){
             Log.e(TAG, "Unable to add key", e)
         }
@@ -98,6 +98,7 @@ class RegisterViewModel: ViewModel() {
      * Uploads the file to the Amazon s3 collection
      */
     private suspend fun uploadFile(userFile: Pair<File, Uri>, firebaseID:String){
+
         Amplify.Storage.uploadFile(
             firebaseID,
             userFile.first.absolutePath,
@@ -116,6 +117,7 @@ class RegisterViewModel: ViewModel() {
     /**
      * Uses Firebase to verify if a face was detected in a picture
      */
+    //TODO Change to use Rekognition to identify faces
     fun verifyPicture(userPicture: Pair<File, Uri>): Int{
         var facesFound = 0
         val options = FirebaseVisionFaceDetectorOptions.Builder()
@@ -132,6 +134,7 @@ class RegisterViewModel: ViewModel() {
                 facesFound = faces.size
             }
             .addOnFailureListener { e ->
+                facesFound = 10000
                 Log.d(TAG, e.message)
             }
         return facesFound

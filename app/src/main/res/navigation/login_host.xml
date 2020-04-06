@@ -12,7 +12,9 @@
         <action android:id="@+id/action_titleFragment_to_disclosureFragment" app:destination="@+id/disclaimerFragment"
                 app:enterAnim="@anim/nav_default_enter_anim" app:exitAnim="@anim/nav_default_exit_anim"
                 app:popUpTo="@+id/titleFragment"/>
-        <action android:id="@+id/action_titleFragment_to_mainActivity" app:destination="@id/mainActivity"/>
+        <action
+                android:id="@+id/action_titleFragment_to_coinActivity"
+                app:destination="@id/coinActivity" />
     </fragment>
 
     <fragment android:id="@+id/disclaimerFragment"
@@ -32,8 +34,8 @@
                 android:id="@+id/action_combinedFragment_to_previewActivity"
                 app:destination="@id/previewActivity" />
         <action
-                android:id="@+id/action_combinedFragment_to_mainActivity"
-                app:destination="@id/mainActivity" />
+                android:id="@+id/action_combinedFragment_to_coinActivity"
+                app:destination="@id/coinActivity" />
     </fragment>
 
     <activity android:id="@+id/previewActivity"
@@ -41,19 +43,20 @@
               tools:layout="@layout/activity_preview"
               android:label="PreviewActivity"/>
 
-    <activity android:id="@+id/mainActivity"
-              android:name="com.bohil.coin.main.MainActivity"
-              tools:layout="@layout/activity_main"
-              android:label="MainActivity"/>
     <fragment
             android:id="@+id/signUpFragment"
             android:name="com.bohil.coin.login.signup.SignUpFragment"
             tools:layout="@layout/fragment_sign_up"
+
             android:label="SignUpFragment" >
         <action
                 android:id="@+id/action_signUpFragment_to_combinedFragment"
                 app:destination="@id/combinedFragment" />
     </fragment>
-
+    <activity
+            android:id="@+id/coinActivity"
+            android:name="com.bohil.coin.main.CoinActivity"
+            tools:layout="@layout/activity_coin"
+            android:label="CoinActivity" />
 
 </navigation>

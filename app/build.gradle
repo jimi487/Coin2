@@ -86,7 +86,9 @@ dependencies {
     //For AWSMobileClient only:
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.4'
 
-    //For the drop-in UI also:
+    //AWS Dependencies
+    implementation 'com.amazonaws:aws-android-sdk-rekognition:2.15.2'
+    implementation 'com.amazonaws:aws-android-sdk-s3:2.15.+'
     implementation 'com.amazonaws:aws-android-sdk-auth-userpools:2.15.+'
     implementation 'com.amazonaws:aws-android-sdk-auth-ui:2.15.+'
     implementation('com.amazonaws:aws-android-sdk-cognitoauth:2.15.+@aar') { transitive = true }

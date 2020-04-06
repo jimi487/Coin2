@@ -42,7 +42,11 @@ class CombinedRegister : Fragment() {
         viewModel = ViewModelProviders.of(this).get(RegisterViewModel::class.java)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_combined, container, false)
         binding.lifecycleOwner = this
-        binding.emailText.setText(AWSMobileClient.getInstance().username.toString())
+        try{
+            binding.emailText.setText(AWSMobileClient.getInstance().username.toString())
+        }catch(e:Exception){
+        }
+
         binding.finishButton2.setOnClickListener { validateForm() }
 
         // Capturing the users image
@@ -85,7 +89,7 @@ class CombinedRegister : Fragment() {
             //Add user to AWS
             viewModel.addUser(firstName,lastName, lang, country,sex, dob,
                 getString(R.string.firestore_table), getString(R.string.cognito_firestore), userFile)
-            findNavController().navigate(CombinedRegisterDirections.actionCombinedFragmentToMainActivity())
+            findNavController().navigate(CombinedRegisterDirections.actionCombinedFragmentToCoinActivity())
         }
     }
 
@@ -158,16 +162,17 @@ class CombinedRegister : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK){
             val facesFound = viewModel.verifyPicture(capturedImage)
-            if (facesFound != 1){
+            makeToast("Faces Found: $facesFound")
+            /*if (facesFound != 1){
                 makeToast("Please only have one face in your picture")
             }
-            else{
+            else{*/
                 oneFace = true
                 Log.d(TAG, "Creating bitmap")
                 val imageBitmap = BitmapFactory.decodeFile(capturedImage.first.path)
                 Log.d(TAG, "Created bitmap, creating thumbnail")
                 changeThumbnail(imageBitmap)
-            }
+            //}
 
         }
     }

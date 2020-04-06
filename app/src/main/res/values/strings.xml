@@ -42,7 +42,6 @@
     <string name="signup_in_progress">"Sending email"</string>
 
 
-
     <!-- Register Fragment Strings -->
     <string name="face_image_content_description">Tap this image to be capture your picture</string>
     <string name="first_name_hint">First Name</string>
@@ -73,7 +72,7 @@
     <string name="age_autofill_hint">Enter your age</string>
     <string name="confirm_check">I agree the information provided is accurate, and does not depict any other persons
     </string>
-    <string name ="dob_text">YYYYMMDD</string>
+    <string name="dob_text">YYYYMMDD</string>
 
 
     <!-- Preview Activity Strings -->
