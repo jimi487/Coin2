@@ -45,6 +45,16 @@ class CombinedRegister : Fragment() {
         binding.emailText.setText(DBUtility.AWSInstance.username.toString())
         binding.finishButton2.setOnClickListener { validateForm() }
 
+        binding.confirmationCheckbox.setOnCheckedChangeListener { _, isChecked ->
+           if(isChecked) {
+               binding.finishButton2.isEnabled = true
+               binding.finishButton2.isClickable = true
+           } else {
+               binding.finishButton2.isEnabled = false
+               binding.finishButton2.isClickable = false
+           }
+        }
+
         // Capturing the users image
         binding.faceImage.setOnClickListener {
             captureImage()

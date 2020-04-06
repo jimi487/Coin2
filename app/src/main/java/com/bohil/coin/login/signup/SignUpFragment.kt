@@ -117,7 +117,7 @@ class SignUpFragment : Fragment() {
                             with(errMessage) {
                                 when {
                                     contains("UsernameExistsException") -> makeToast(getString(R.string.email_in_use))
-                                    contains("InvalidPasswordException") -> makeToast(getString(R.string.pass_too_short))
+                                    contains("InvalidPasswordException") or contains("InvalidParameterException") -> makeToast(getString(R.string.pass_too_short))
                                     contains("HTTP") -> makeToast("An active internet connection is required")
                                 }
                             }
@@ -156,13 +156,18 @@ class SignUpFragment : Fragment() {
                 }
 
                 override fun onError(e: java.lang.Exception) {
-                    Log.e(TAG, "Confirm sign-up error", e)
-                    with(e.message.toString()){
-                        when {
-                            contains("CodeMistmatch") -> makeToast("Please input the correct code")
+                    runOnUiThread(Runnable {
+                        Log.e(TAG, "Confirm sign-up error", e)
+                        with(e.message.toString()) {
+                            when {
+                                contains("CodeMismatchException") or contains("InvalidParameterException") -> makeToast(
+                                    "Please input the correct code"
+                                )
+                            }
                         }
-                    }
+                    })
                 }
+
             })
 
     }
