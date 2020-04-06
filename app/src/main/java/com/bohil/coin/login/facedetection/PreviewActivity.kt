@@ -41,7 +41,6 @@ import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.bohil.coin.R
 import com.bohil.coin.databinding.ActivityPreviewBinding
 import com.bohil.coin.login.common.CameraSource
-import com.bohil.coin.main.MainActivity
 import com.google.firebase.ml.common.FirebaseMLException
 import kotlinx.android.synthetic.main.activity_preview.*
 import java.io.File
@@ -51,16 +50,16 @@ import java.util.*
 
 
 /**
- * Activity that handles creating the View for the Camera and User Detection
+ * Old Activity that handled capturing users images
+ * // TODO Clean Folder
  */
 class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
     CompoundButton.OnCheckedChangeListener {
 
-    //TODO replace this with Camera2 api
+
     private var cameraSource: CameraSource? = null
     private lateinit var faceContourDetectorProcessor : FaceContourDetectorProcessor
     private lateinit var binding : ActivityPreviewBinding
-    // TODO Implement methods and strategy in viewmodel
 
     // Variable that handles saving faces
     private lateinit var capturedImages: MutableList<Pair<File, Uri>>
@@ -103,7 +102,7 @@ class PreviewActivity : AppCompatActivity(), OnRequestPermissionsResultCallback,
 
         // Uploading the Picture to the Amazon s3 collection and navigating to the main activity
         binding.cptCompleteBtn.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            //val intent = Intent(this, MainActivity::class.java)
             uploadFile()
             startActivity(intent)
         }

@@ -1,6 +1,7 @@
 package com.bohil.coin
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import com.amazonaws.mobile.client.*
@@ -9,6 +10,8 @@ import com.amplifyframework.core.ResultListener
 import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
 import com.google.firebase.firestore.FirebaseFirestore
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferService
+
 import java.io.File
 import kotlinx.coroutines.*
 
@@ -23,29 +26,33 @@ object DBUtility {
 
     fun initAWS(applicationContext : Context) {
         // Initializing the AWS Amplify instance
-        AWSInstance
-        .initialize(applicationContext, object : Callback<UserStateDetails> {
-            override fun onResult(userStateDetails: UserStateDetails) {
-                try {
-                    Amplify.addPlugin(AWSS3StoragePlugin())
-                    Amplify.configure(applicationContext)
-                    when(userStateDetails.userState){
-                        UserState.SIGNED_IN -> AWSInstance.signOut()
-                        UserState.SIGNED_OUT -> AWSInstance.tokens
-                    }
+        AWSInstance.initialize(applicationContext, object : Callback<UserStateDetails> {
+                override fun onResult(userStateDetails: UserStateDetails) {
+                    try {
+                        Amplify.addPlugin(AWSS3StoragePlugin())
+                        applicationContext.startService(
+                            Intent(
+                                applicationContext,
+                                TransferService::class.java
+                            )
+                        )
+                        Amplify.configure(applicationContext)
+                        when(userStateDetails.userState){
+                            UserState.SIGNED_IN -> AWSMobileClient.getInstance().signOut()
+                            UserState.SIGNED_OUT -> AWSMobileClient.getInstance().tokens
+                        }
 
-                    // IMPORTANT! Refreshes the access tokens stored in the cache
-                    //DBUtility.AWSInstance.tokens
-                } catch (e: java.lang.Exception) {
-                    Log.e("ApiQuickstart", e.message)
+                    } catch (e: java.lang.Exception) {
+                        Log.e("ApiQuickstart", e.message)
+                    }
+                }
+
+                override fun onError(e: Exception?) {
+                    Log.e("INIT", "Initialization error.", e)
                 }
             }
+            )
 
-            override fun onError(e: Exception?) {
-                Log.e("INIT", "Initialization error.", e)
-            }
-        }
-        )
     }
 
     fun signOutAWS() {

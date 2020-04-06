@@ -81,10 +81,10 @@ class RegisterViewModel: ViewModel() {
                 facesFound = faces.size
             }
             .addOnFailureListener { e ->
+                facesFound = 10000
                 Log.d(TAG, e.message)
             }
         return facesFound
     }
-
 
 }
