@@ -1,6 +1,7 @@
 package com.bohil.coin.login.title
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -81,7 +82,19 @@ class TitleFragment : Fragment() {
                         with (errMessage) {
                             when {
                                 contains("UserNotFoundException") -> binding.TxtErrors.text = "The e-mail provided does not exist."
-                                contains("InvalidParameterException") -> binding.TxtErrors.text = "Please provide both your e-mail and password."
+                                contains("InvalidParameterException") -> {
+                                    if(TextUtils.isEmpty(email)) {
+                                        binding.emailField.error = "Required"
+                                    } else {
+                                        binding.emailField.error = null
+                                    }
+
+                                    if(TextUtils.isEmpty(password)) {
+                                        binding.passwordField.error = "Required"
+                                    } else {
+                                        binding.passwordField.error = null
+                                    }
+                                }
                                 contains("UserNotConfirmedException") -> binding.TxtErrors.text = "Your e-mail must be confirmed before signing in."
                                 contains("NotAuthorizedException") -> binding.TxtErrors.text = "Incorrect e-mail or password."
                                 contains("HTTP") -> binding.TxtErrors.text = "An active internet connection is required."

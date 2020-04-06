@@ -41,6 +41,7 @@ class SignUpFragment : Fragment() {
 
     private fun validateForm() {
         var valid = true
+        binding.TxtErrors.text = ""
         val email = binding.username.text.toString()
         val password = binding.password.text.toString()
 
@@ -116,9 +117,9 @@ class SignUpFragment : Fragment() {
 
                             with(errMessage) {
                                 when {
-                                    contains("UsernameExistsException") -> makeToast(getString(R.string.email_in_use))
-                                    contains("InvalidPasswordException") or contains("InvalidParameterException") -> makeToast(getString(R.string.pass_too_short))
-                                    contains("HTTP") -> makeToast("An active internet connection is required")
+                                    contains("UsernameExistsException") -> binding.TxtErrors.text = getString(R.string.email_in_use)
+                                    contains("InvalidPasswordException") or contains("InvalidParameterException") -> binding.TxtErrors.text = getString(R.string.pass_too_short)
+                                    contains("HTTP") -> binding.TxtErrors.text = "An active internet connection is required"
                                 }
                             }
                                 binding.TxtProgress.text = ""
