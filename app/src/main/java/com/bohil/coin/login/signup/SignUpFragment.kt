@@ -112,14 +112,13 @@ class SignUpFragment : Fragment() {
                     override fun onError(e: Exception) {
                         Log.e("ERR IN SIGN UP", e.message)
                         this@SignUpFragment.activity?.runOnUiThread {
-                            val errMessage = e.message.toString()//.toLowerCase()
+                            val errMessage = e.message.toString()
 
-                            //Not an ideal way of checking for the type of exception.. might want to find another way
                             with(errMessage) {
                                 when {
-                                    contains("exists") -> makeToast(getString(R.string.email_in_use))
-                                    contains("password") -> makeToast(getString(R.string.pass_too_short))
-                                    contains("http") -> makeToast("An active internet connection is required")
+                                    contains("UsernameExistsException") -> makeToast(getString(R.string.email_in_use))
+                                    contains("InvalidPasswordException") or contains("InvalidParameterException") -> makeToast(getString(R.string.pass_too_short))
+                                    contains("HTTP") -> makeToast("An active internet connection is required")
                                 }
                             }
                                 binding.TxtProgress.text = ""
@@ -157,13 +156,18 @@ class SignUpFragment : Fragment() {
                 }
 
                 override fun onError(e: java.lang.Exception) {
-                    Log.e(TAG, "Confirm sign-up error", e)
-                    with(e.message.toString()){
-                        when {
-                            contains("CodeMistmatch") -> makeToast("Please input the correct code")
+                    runOnUiThread(Runnable {
+                        Log.e(TAG, "Confirm sign-up error", e)
+                        with(e.message.toString()) {
+                            when {
+                                contains("CodeMismatchException") or contains("InvalidParameterException") -> makeToast(
+                                    "Please input the correct code"
+                                )
+                            }
                         }
-                    }
+                    })
                 }
+
             })
 
     }

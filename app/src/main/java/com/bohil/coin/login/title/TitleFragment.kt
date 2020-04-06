@@ -1,6 +1,5 @@
 package com.bohil.coin.login.title
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,7 +14,6 @@ import com.amazonaws.mobile.client.results.SignInResult
 import com.amazonaws.mobile.client.results.SignInState
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
-import com.bohil.coin.main.SimpleNavActivity
 
 //import sun.jvm.hotspot.utilities.IntArray
 
@@ -97,12 +95,10 @@ class TitleFragment : Fragment() {
 
 
     private fun navigateToMainActivity(){
+        findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
 
-        //val directions = TitleFragmentDirections.actionTitleFragmentToMainActivity()
-        //findNavController().navigate(directions)
-
-        val intent = Intent(context, SimpleNavActivity::class.java)
-        startActivity(intent);
+        /*val intent = Intent(context, SimpleNavActivity::class.java)
+        startActivity(intent);*/
     }
 
 }
