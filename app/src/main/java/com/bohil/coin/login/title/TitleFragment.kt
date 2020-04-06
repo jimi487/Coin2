@@ -1,6 +1,6 @@
 package com.bohil.coin.login.title
 
-import com.bohil.coin.R
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,12 +9,13 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.amazonaws.mobile.client.AWSMobileClient
+import com.bohil.coin.DBUtility
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignInResult
 import com.amazonaws.mobile.client.results.SignInState
+import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
-import android.widget.Toast
+import com.bohil.coin.main.SimpleNavActivity
 
 //import sun.jvm.hotspot.utilities.IntArray
 
@@ -26,6 +27,7 @@ class TitleFragment : Fragment() {
     private lateinit var binding: FragmentTitleBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_title, container, false)
 
         binding.signupButton.setOnClickListener {
@@ -55,7 +57,7 @@ class TitleFragment : Fragment() {
     }
 
     private fun validateLogin() {
-        AWSMobileClient.getInstance()
+        DBUtility.AWSInstance
             .signIn(email, password, null, object : Callback<SignInResult> {
                 override fun onResult(signInResult: SignInResult) {
                     activity!!.runOnUiThread {
@@ -95,8 +97,12 @@ class TitleFragment : Fragment() {
 
 
     private fun navigateToMainActivity(){
-        val directions = TitleFragmentDirections.actionTitleFragmentToMainActivity()
-        findNavController().navigate(directions)
+
+        //val directions = TitleFragmentDirections.actionTitleFragmentToMainActivity()
+        //findNavController().navigate(directions)
+
+        val intent = Intent(context, SimpleNavActivity::class.java)
+        startActivity(intent);
     }
 
 }

@@ -15,7 +15,7 @@ import com.bohil.coin.databinding.FragmentRegisterBinding
 
 class RegisterFragment : Fragment() {
 
-    private lateinit var binding:FragmentRegisterBinding
+   /* private lateinit var binding:FragmentRegisterBinding
     private lateinit var viewModel:RegisterViewModel
     private var mContext = context
     companion object {
@@ -40,6 +40,11 @@ class RegisterFragment : Fragment() {
         // Verifying the form has been completed successfully
         binding.finishButton.setOnClickListener {
             verify_form()
+        }
+        // Long click to skip adding user to database
+        binding.finishButton.setOnLongClickListener {
+            findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToPreviewActivity())
+            true
         }
         return binding.root
     }
@@ -74,12 +79,8 @@ class RegisterFragment : Fragment() {
         // When the form has been successfully completed, navigate to the Preview Activity
         // Also creates the user in the database
         if (completed && binding.confirmationCheckbox.isChecked) {
-            //Toast.makeText(context, "Table name: ${getString(R.string.firestore_table)}", Toast.LENGTH_LONG).show()
-            viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table))
+            viewModel.addUser(firstName,lastName, lang, country,sex, dob, getString(R.string.firestore_table), getString(R.string.cognito_firestore))
             findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToPreviewActivity())
         }
-
-    }
-
-
+    }*/
 }

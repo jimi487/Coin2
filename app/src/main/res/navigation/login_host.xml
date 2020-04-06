@@ -19,35 +19,41 @@
               android:name="com.bohil.coin.login.disclaimer.DisclaimerFragment"
               android:label="DisclosureFragment"
               tools:layout="@layout/fragment_disclaimer">
-        <action android:id="@+id/action_disclaimerFragment_to_signUpFragment" app:destination="@id/signUpFragment"/>
+        <action
+                android:id="@+id/action_disclaimerFragment_to_signUpFragment"
+                app:destination="@id/signUpFragment" />
     </fragment>
 
-    <fragment android:id="@+id/registerFragment"
-              android:name="com.bohil.coin.login.registration.RegisterFragment"
-              android:label="RegisterFragment"
-              tools:layout="@layout/fragment_register">
-        <action android:id="@+id/action_registerFragment_to_previewActivity" app:destination="@id/previewActivity"
-                app:popUpTo="@+id/registerFragment" app:enterAnim="@anim/nav_default_enter_anim"
-                app:exitAnim="@anim/nav_default_exit_anim"/>
+    <fragment android:id="@+id/combinedFragment"
+            android:name="com.bohil.coin.login.registration.CombinedRegister"
+            android:label="CombinedFragment"
+            tools:layout="@layout/fragment_combined">
+        <action
+                android:id="@+id/action_combinedFragment_to_previewActivity"
+                app:destination="@id/previewActivity" />
+        <action
+                android:id="@+id/action_combinedFragment_to_mainActivity"
+                app:destination="@id/mainActivity" />
     </fragment>
+
     <activity android:id="@+id/previewActivity"
               android:name="com.bohil.coin.login.facedetection.PreviewActivity"
               tools:layout="@layout/activity_preview"
               android:label="PreviewActivity"/>
 
-    <fragment android:id="@+id/signUpFragment"
-              android:name="com.bohil.coin.login.signup.SignUpFragment"
-              tools:layout="@layout/fragment_sign_up"
-              android:label="SignUpFragment">
-        <action android:id="@+id/action_signUpFragment_to_registerFragment" app:destination="@id/registerFragment"
-                app:popUpTo="@+id/disclaimerFragment" app:enterAnim="@anim/nav_default_enter_anim"
-                app:exitAnim="@anim/nav_default_exit_anim"/>
-    </fragment>
-
     <activity android:id="@+id/mainActivity"
               android:name="com.bohil.coin.main.MainActivity"
               tools:layout="@layout/activity_main"
               android:label="MainActivity"/>
+    <fragment
+            android:id="@+id/signUpFragment"
+            android:name="com.bohil.coin.login.signup.SignUpFragment"
+            tools:layout="@layout/fragment_sign_up"
+            android:label="SignUpFragment" >
+        <action
+                android:id="@+id/action_signUpFragment_to_combinedFragment"
+                app:destination="@id/combinedFragment" />
+    </fragment>
 
 
 </navigation>

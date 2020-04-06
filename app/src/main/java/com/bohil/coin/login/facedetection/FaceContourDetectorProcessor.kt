@@ -13,14 +13,14 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
-import timber.log.Timber
 import java.io.IOException
 
 /**
  * ViewModel for the Preview Activity
+ * Uses landmark detection
  */
 
-// TODO Change to Landmark detector possibly
+private const val TAG = "FaceContourDetectorProcessor: "
 class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace>>() {
 
     private val detector: FirebaseVisionFaceDetector
@@ -32,24 +32,30 @@ class FaceContourDetectorProcessor : VisionProcessorBase<List<FirebaseVisionFace
 
     init {
         val options = FirebaseVisionFaceDetectorOptions.Builder()
-            .setPerformanceMode(FirebaseVisionFaceDetectorOptions.FAST)
-            .setContourMode(FirebaseVisionFaceDetectorOptions.ALL_CONTOURS)
+            .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
+            .setLandmarkMode(FirebaseVisionFaceDetectorOptions.NO_LANDMARKS)
             .build()
 
         detector = FirebaseVision.getInstance().getVisionFaceDetector(options)
+
     }
 
     override fun stop() {
         try {
             detector.close()
         } catch (e: IOException) {
-            Timber.e("Exception thrown while trying to close User Contour Detector: $e")
+            Log.e(TAG, "Exception thrown while trying to close User Contour Detector: $e")
         }
     }
 
     override fun detectInImage(image: FirebaseVisionImage): Task<List<FirebaseVisionFace>> {
         return detector.detectInImage(image)
     }
+
+    fun captureImage(){
+
+    }
+
 
     override fun onSuccess(
         originalCameraImage: Bitmap?,

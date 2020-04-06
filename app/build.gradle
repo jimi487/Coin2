@@ -26,13 +26,30 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     dataBinding {
         enabled = true
+    }
+
+    android {
+        packagingOptions {
+            exclude 'META-INF/DEPENDENCIES'
+            exclude 'META-INF/LICENSE'
+            exclude 'META-INF/LICENSE.txt'
+            exclude 'META-INF/license.txt'
+            exclude 'META-INF/NOTICE'
+            exclude 'META-INF/NOTICE.txt'
+            exclude 'META-INF/notice.txt'
+            exclude 'META-INF/ASL2.0'
+            exclude("META-INF/*.kotlin_module")
+        }
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'
@@ -61,8 +78,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-dynamic-links:19.0.0'
 
     // AWS Amplify Dependency
-    implementation 'com.amplifyframework:core:0.9.0'
-    implementation 'com.amplifyframework:aws-api:0.9.0'
+    implementation 'com.amplifyframework:core:0.9.1'
+
+    //AWS Amplify Storage Dependency
+    implementation 'com.amplifyframework:aws-storage-s3:0.9.1'
 
     //For AWSMobileClient only:
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.4'
@@ -70,8 +89,7 @@ dependencies {
     //For the drop-in UI also:
     implementation 'com.amazonaws:aws-android-sdk-auth-userpools:2.15.+'
     implementation 'com.amazonaws:aws-android-sdk-auth-ui:2.15.+'
-    implementation('com.amazonaws:aws-android-sdk-cognitoauth:2.15.+@aar') { transitive=true }
-
+    implementation('com.amazonaws:aws-android-sdk-cognitoauth:2.15.+@aar') { transitive = true }
 
     // Navigation Dependency
     def nav_version = "2.2.1"
@@ -89,23 +107,22 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-moshi:2.5.0'
 
     // arch components
+
     // ViewModel and LiveData
     def lifecycle_version = "2.2.0"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
-
-    // logging
-    implementation 'com.jakewharton.timber:timber:4.7.1'
 
     // glide for images
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     kapt 'com.github.bumptech.glide:compiler:4.7.1'
 
     // Room Dependency
-    def room_version = "2.2.3"
+    def room_version = "2.2.4"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
 
     // WorkManager Dependency
     def work_version = "1.0.1"
-    implementation "android.arch.work:work-runtime-ktx:$work_version"
+    implementation 'androidx.work:work-runtime-ktx:2.0.1'
+    implementation 'com.amazonaws:aws-android-sdk-kinesisvideo:2.16.8'
 }

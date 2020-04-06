@@ -6,7 +6,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         app:startDestination="@id/coin">
     <fragment android:id="@+id/coin"
-              android:name="com.bohil.coin.Coin"
+              android:name="com.bohil.coin.main.Coin"
               android:label="fragment_coin"
               tools:layout="@layout/fragment_coin"/>
 </navigation>

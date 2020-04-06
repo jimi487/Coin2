@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-feature android:name="android.hardware.camera"
+            android:required="true"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
 
     <application
             android:allowBackup="true"
@@ -21,6 +24,13 @@
         </activity>
         <activity android:name="com.bohil.coin.login.facedetection.PreviewActivity">
         </activity> <!-- Automatically download the ML model to the device after app is installed from Play Store -->
+
+        <activity
+                android:name="com.bohil.coin.main.SimpleNavActivity"
+                android:label="SimpleNavActivity"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
         <meta-data
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"
                 android:value="face"/>
@@ -39,6 +49,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="com.bohil.coin.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+
+        </provider>
     </application>
 
 </manifest>
