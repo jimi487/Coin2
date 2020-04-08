@@ -21,8 +21,10 @@ import kotlinx.coroutines.*
 object DBUtility {
 
     private const val TAG = "DBUtility"
+    private lateinit var UserID : String
     val AWSInstance: AWSMobileClient = AWSMobileClient.getInstance()
     val FirebaseInstance = FirebaseFirestore.getInstance()
+
 
     fun initAWS(applicationContext : Context) {
         // Initializing the AWS Amplify instance
@@ -87,6 +89,32 @@ object DBUtility {
 
             .addOnFailureListener {
                 Log.w(TAG, "Error adding document", it)
+            }
+    }
+
+    fun getUserInfo(context:Context?) {
+
+        try {
+                UserID = AWSInstance.userAttributes[context!!.getString(R.string.cognito_firestore)].toString()
+        } catch (e: Exception) {
+            UserID = ""
+            Log.e("SETTINGS", e.message.toString())
+        }
+
+
+        val table = context!!.getString(R.string.firestore_table)
+        val t = DBUtility.FirebaseInstance.collection(table).document(UserID)
+
+        t.get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    Log.d("SETTINGS", "DocumentSnapshot data: ${document.data}")
+                } else {
+                    Log.d("SETTINGS", "No such document")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("SETTINGS", "get failed with ", exception)
             }
     }
 

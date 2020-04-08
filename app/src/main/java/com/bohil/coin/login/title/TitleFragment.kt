@@ -108,6 +108,7 @@ class TitleFragment : Fragment() {
 
 
     private fun navigateToMainActivity(){
+        DBUtility.getUserInfo(context)
         findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
 
         /*val intent = Intent(context, SimpleNavActivity::class.java)
