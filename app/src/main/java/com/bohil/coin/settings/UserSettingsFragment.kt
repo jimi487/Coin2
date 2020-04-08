@@ -15,11 +15,22 @@ import com.bohil.coin.databinding.FragmentUserSettingsBinding
 class UserSettingsFragment : Fragment() {
 
     private lateinit var binding: FragmentUserSettingsBinding
+    private val _userData = DBUtility.getUserInfo(context)
+
+    private val _fName = _userData?.first
+    private val _lName = _userData?.last
+    private val _birthday = _userData?.birthdate
+    private val _country = _userData?.country
+    private val _igHandle = _userData?.igHandle
+    private val _snapHandle = _userData?.snapchatHandle
+    private val _twitterHandle = _userData?.twitterHandle
+    private val _sex = _userData?.sex
+    private val _language = _userData?.language
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_user_settings, container, false)
-        //getUserInfo()
         return binding.root
     }
 

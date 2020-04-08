@@ -5,15 +5,16 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import com.amazonaws.mobile.client.*
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferService
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.ResultListener
 import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
 import com.google.firebase.firestore.FirebaseFirestore
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferService
-
-import java.io.File
+import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.*
+import java.io.File
+import java.util.concurrent.Executors
 
 /**
  * Class containing common DB methods
@@ -21,7 +22,8 @@ import kotlinx.coroutines.*
 object DBUtility {
 
     private const val TAG = "DBUtility"
-    private lateinit var UserID : String
+    private var UserID : String = ""
+    private var UserData : Users? = null
     val AWSInstance: AWSMobileClient = AWSMobileClient.getInstance()
     val FirebaseInstance = FirebaseFirestore.getInstance()
 
@@ -92,31 +94,42 @@ object DBUtility {
             }
     }
 
-    fun getUserInfo(context:Context?) {
 
-        try {
+    fun getUserInfo(context:Context?) : Users? {
+        runBlocking {
+
+            val getUserAttributeJob = GlobalScope.launch {
                 UserID = AWSInstance.userAttributes[context!!.getString(R.string.cognito_firestore)].toString()
-        } catch (e: Exception) {
-            UserID = ""
-            Log.e("SETTINGS", e.message.toString())
-        }
+            }
 
+            //Wait for job to complete
+            getUserAttributeJob.join()
 
-        val table = context!!.getString(R.string.firestore_table)
-        val t = DBUtility.FirebaseInstance.collection(table).document(UserID)
+           //Retrieve firestore document for logged in user
+            val doc = FirebaseInstance.collection(context!!.getString(R.string.firestore_table)).document(UserID)
 
-        t.get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    Log.d("SETTINGS", "DocumentSnapshot data: ${document.data}")
-                } else {
-                    Log.d("SETTINGS", "No such document")
+            doc.get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+
+                        //Convert document to object of type Users and assign it to UserData
+                       UserData = document.toObject<Users>()
+                    } else {
+                        Log.d("SETTINGS", "No such document")
+                    }
                 }
-            }
-            .addOnFailureListener { exception ->
-                Log.d("SETTINGS", "get failed with ", exception)
-            }
+                .addOnFailureListener { exception ->
+                    Log.d("SETTINGS", "get failed with ", exception)
+                }
+        }
+        return UserData
+
     }
+
+    fun getUserData() : Users? {
+        return UserData
+    }
+
 
 
     /**
@@ -151,7 +164,22 @@ object DBUtility {
             }
         )
     }
+
+    data class Users(
+        val birthdate: String? = null,
+        val country: String? = null,
+        val first: String? = null,
+        val last: String? = null,
+        val igHandle: String? = null,
+        val twitterHandle: String? = null,
+        val snapchatHandle: String? = null,
+        val sex: String? = null,
+        val language: String? = null
+    )
+
 }
+
+
 
 
 
