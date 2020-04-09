@@ -10,8 +10,10 @@ import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.ResultListener
 import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
+import com.google.firestore.v1.Document
 import kotlinx.coroutines.*
 import java.io.File
 import java.util.concurrent.Executors
@@ -22,8 +24,8 @@ import java.util.concurrent.Executors
 object DBUtility {
 
     private const val TAG = "DBUtility"
-    private var UserID : String = ""
-    private var UserData : Users? = null
+    var UserID : String = ""
+    var UserData : Users? = null
     val AWSInstance: AWSMobileClient = AWSMobileClient.getInstance()
     val FirebaseInstance = FirebaseFirestore.getInstance()
 
@@ -94,42 +96,19 @@ object DBUtility {
             }
     }
 
-
-    fun getUserInfo(context:Context?) : Users? {
-        runBlocking {
-
-            val getUserAttributeJob = GlobalScope.launch {
-                UserID = AWSInstance.userAttributes[context!!.getString(R.string.cognito_firestore)].toString()
+    /**
+     * Update the UserData var after making changes to it in other classes
+     */
+    fun updateUserInfo(doc: DocumentReference) {
+        doc.get()
+            .addOnSuccessListener { document ->
+                UserData = document.toObject<Users>()
+                Log.i(TAG, "Updated doc ref success")
             }
-
-            //Wait for job to complete
-            getUserAttributeJob.join()
-
-           //Retrieve firestore document for logged in user
-            val doc = FirebaseInstance.collection(context!!.getString(R.string.firestore_table)).document(UserID)
-
-            doc.get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-
-                        //Convert document to object of type Users and assign it to UserData
-                       UserData = document.toObject<Users>()
-                    } else {
-                        Log.d("SETTINGS", "No such document")
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.d("SETTINGS", "get failed with ", exception)
-                }
-        }
-        return UserData
-
+            .addOnFailureListener{
+                Log.e(TAG, "Error updating doc ref ${it.message}")
+            }
     }
-
-    fun getUserData() : Users? {
-        return UserData
-    }
-
 
 
     /**

@@ -15,6 +15,10 @@ import com.amazonaws.mobile.client.results.SignInResult
 import com.amazonaws.mobile.client.results.SignInState
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
+import com.google.firebase.firestore.ktx.toObject
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 //import sun.jvm.hotspot.utilities.IntArray
 
@@ -25,7 +29,11 @@ class TitleFragment : Fragment() {
     private var password = ""
     private lateinit var binding: FragmentTitleBinding
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_title, container, false)
 
@@ -69,7 +77,10 @@ class TitleFragment : Fragment() {
                             SignInState.DONE -> navigateToMainActivity()
                             SignInState.SMS_MFA -> Log.e("SMS_MFA", "")
                             SignInState.NEW_PASSWORD_REQUIRED -> Log.e("NEW_PASS_REQ", "")
-                            else -> Log.e("ERR", "Unsupported sign-in confirmation: " + signInResult.signInState)
+                            else -> Log.e(
+                                "ERR",
+                                "Unsupported sign-in confirmation: " + signInResult.signInState
+                            )
                         }
                     }
                 }
@@ -79,25 +90,30 @@ class TitleFragment : Fragment() {
 
                     this@TitleFragment.activity!!.runOnUiThread {
                         var errMessage = e?.message.toString()
-                        with (errMessage) {
+                        with(errMessage) {
                             when {
-                                contains("UserNotFoundException") -> binding.TxtErrors.text = "The e-mail provided does not exist."
+                                contains("UserNotFoundException") -> binding.TxtErrors.text =
+                                    "The e-mail provided does not exist."
                                 contains("InvalidParameterException") -> {
-                                    if(TextUtils.isEmpty(email)) {
+                                    if (TextUtils.isEmpty(email)) {
                                         binding.emailField.error = "Required"
                                     } else {
                                         binding.emailField.error = null
+                                        binding.TxtErrors.text = "Incorrect email format."
                                     }
 
-                                    if(TextUtils.isEmpty(password)) {
+                                    if (TextUtils.isEmpty(password)) {
                                         binding.passwordField.error = "Required"
                                     } else {
                                         binding.passwordField.error = null
                                     }
                                 }
-                                contains("UserNotConfirmedException") -> binding.TxtErrors.text = "Your e-mail must be confirmed before signing in."
-                                contains("NotAuthorizedException") -> binding.TxtErrors.text = "Incorrect e-mail or password."
-                                contains("HTTP") -> binding.TxtErrors.text = "An active internet connection is required."
+                                contains("UserNotConfirmedException") -> binding.TxtErrors.text =
+                                    "Your e-mail must be confirmed before signing in."
+                                contains("NotAuthorizedException") -> binding.TxtErrors.text =
+                                    "Incorrect e-mail or password."
+                                contains("HTTP") -> binding.TxtErrors.text =
+                                    "An active internet connection is required."
                                 else -> binding.TxtErrors.text = e?.message.toString()
                             }
                         }
@@ -107,12 +123,38 @@ class TitleFragment : Fragment() {
     }
 
 
-    private fun navigateToMainActivity(){
-        DBUtility.getUserInfo(context)
-        findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
+    private fun navigateToMainActivity() {
 
-        /*val intent = Intent(context, SimpleNavActivity::class.java)
-        startActivity(intent);*/
+        runBlocking {
+            val getUserAttributeJob = GlobalScope.launch {
+                DBUtility.UserID = DBUtility.AWSInstance.userAttributes[context!!.getString(R.string.cognito_firestore)].toString()
+            }
+
+            //Wait for job to complete
+            getUserAttributeJob.join()
+
+            //Retrieve firestore document for logged in user
+            val doc = DBUtility.FirebaseInstance.collection(context!!.getString(R.string.firestore_table)).document(
+                DBUtility.UserID
+            )
+
+            doc.get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+
+                        //Convert document to object of type Users and assign it to UserData
+                        DBUtility.UserData = document.toObject<DBUtility.Users>()
+                        findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
+                        //findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToSettings())
+
+                    } else {
+                        Log.d("SETTINGS", "No such document")
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d("SETTINGS", "get failed with ", exception)
+                }
+        }
     }
-
 }
+
