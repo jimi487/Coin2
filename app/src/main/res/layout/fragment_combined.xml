@@ -22,6 +22,16 @@
                 app:srcCompat="@drawable/ic_action_camera"
                 tools:srcCompat="@tools:sample/avatars" />
 
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@id/face_image"
+                android:id="@+id/TxtErrors"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp" app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="8dp" android:textColor="@color/colorError"/>
+
 
         <!--<Button
                 android:text="Sign-Up"
@@ -216,12 +226,13 @@
 
         <EditText
                 android:id="@+id/email_text"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
                 android:clickable="false"
+                android:textAlignment="center"
                 android:ems="10"
                 android:inputType="textPersonName"
                 android:text="Name"

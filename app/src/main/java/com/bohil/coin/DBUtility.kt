@@ -26,16 +26,24 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.rekognition.AmazonRekognition
 import com.amazonaws.services.rekognition.AmazonRekognitionClient
 import com.amazonaws.services.rekognition.model.*
+import com.amazonaws.mobile.client.*
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferService
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.ResultListener
 import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firestore.v1.Document
+import kotlinx.coroutines.*
+import java.io.File
+import java.util.concurrent.Executors
 
 /**
  * Class containing utility methods for Firebase and AWS
@@ -44,6 +52,9 @@ import java.io.File
 object DBUtility {
     private val TAG = DBUtility::class.java.simpleName
     // Network INSTANCES
+    private const val TAG = "DBUtility"
+    var UserID : String = ""
+    var UserData : Users? = null
     val AWSInstance: AWSMobileClient = AWSMobileClient.getInstance()
     val FirebaseInstance = FirebaseFirestore.getInstance()
     var rekognitionClient: AmazonRekognition = AmazonRekognitionClient(AWSInstance)
@@ -357,6 +368,21 @@ object DBUtility {
     }
 
     /**
+     * Update the UserData var after making changes to it in other classes
+     */
+    fun updateUserInfo(doc: DocumentReference) {
+        doc.get()
+            .addOnSuccessListener { document ->
+                UserData = document.toObject<Users>()
+                Log.i(TAG, "Updated doc ref success")
+            }
+            .addOnFailureListener{
+                Log.e(TAG, "Error updating doc ref ${it.message}")
+            }
+    }
+
+
+    /**
      * Updates the user's Firestore ID in Cognito
      */
     private suspend fun updateCognito(attribute: String, id: String) = withContext(Dispatchers.IO) {
@@ -438,8 +464,21 @@ object DBUtility {
     private fun getCollectionID(appContext: Context): String{
         return appContext.getString(R.string.face_collection_name)
     }
+    data class Users(
+        val birthdate: String? = null,
+        val country: String? = null,
+        val first: String? = null,
+        val last: String? = null,
+        val igHandle: String? = null,
+        val twitterHandle: String? = null,
+        val snapchatHandle: String? = null,
+        val sex: String? = null,
+        val language: String? = null
+    )
 
 }
+
+
 
 
 

@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -71,6 +72,7 @@ class CombinedRegister : Fragment() {
 
     private fun validateForm() {
         var valid = true
+        binding.TxtErrors.text = ""
 
         //Firebase Fields
         val firstName = binding.firstNameEditText.text.toString()
@@ -82,16 +84,19 @@ class CombinedRegister : Fragment() {
         val instagramHandle = binding.igHandle.text.toString()
         val twitterHandle = binding.twitterHandle.text.toString()
         val snapchatHandle = binding.snapchatHandle.text.toString()
-        val listOfStrings = listOf(firstName, lastName, dob)
+        val fieldsRequired = listOf(binding.firstNameEditText, binding.lastNameEditText, binding.dobText)
 
-
-        when {
-            listOfStrings.contains("") -> if (listOfStrings.filter { it == "" }.isNotEmpty()) {
-                makeToast("All fields must be filled")
+        for (field in fieldsRequired) {
+            if(TextUtils.isEmpty(field.text.toString())) {
+                field.error = "Required"
                 valid = false
+            } else {
+                field.error = null
             }
-            binding.faceImage.drawable == null -> {
-                makeToast("Please take a picture")
+        }
+        when {
+            !::capturedImage.isInitialized -> {
+                binding.TxtErrors.text = "Please take a picture before proceeding"
                 valid = false
             }
             !oneFace -> {
