@@ -18,6 +18,9 @@ import com.amazonaws.services.rekognition.model.Image
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCoinBinding
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 private lateinit var viewModel: CoinViewModel
@@ -145,6 +148,19 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         } catch (e: KinesisVideoException) {
             Log.e(TAG, "unable to pause streaming", e)
             makeToast("failed to pause streaming", 1)
+        }
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Adds users face to face collection
+
+        runBlocking {
+            val addFacesJob = GlobalScope.launch {
+                val results = DBUtility.addFaceToCollection(context!!)
+            }
+            addFacesJob.join()
         }
     }
 

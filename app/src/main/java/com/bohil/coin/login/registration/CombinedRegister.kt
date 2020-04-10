@@ -47,7 +47,7 @@ class CombinedRegister : Fragment() {
         try{
             binding.emailText.setText(DBUtility.AWSInstance.username.toString())
         }catch(e:Exception){
-
+            Log.d(TAG, e.toString())
         }
 
         binding.finishButton2.setOnClickListener { validateForm() }
@@ -136,26 +136,13 @@ class CombinedRegister : Fragment() {
      */
     private fun captureImage(){
 
-/*        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        takePictureIntent.resolveActivity(packageManager)?.let{
-            val values = ContentValues()
-            values.put(MediaStore.Images.Media.TITLE, "New Picture")
-            values.put(MediaStore.Images.Media.DESCRIPTION, "User Picture")
-            val imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
-            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
-        }*/
-
         val packageManager = context!!.packageManager
-
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
                 val photoFile: File? = try {
                     createImageFile()
                 } catch (ex: IOException) {
-                    // Error occurred while creating the File
                     Log.d(TAG, "Error creating the file")
                     null
                 }
@@ -166,7 +153,7 @@ class CombinedRegister : Fragment() {
                         "com.bohil.coin.fileprovider",
                         it
                     )
-                    // Adding the file and uri to the captured images list
+
                     capturedImage = Pair(photoFile, photoURI)
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
@@ -181,46 +168,18 @@ class CombinedRegister : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK){
-            //TODO Move to view model
-            /*var sourceImageBytes: ByteBuffer? = null
-            var facesFound = 0
-            var faceDetails: List<FaceDetail>? = null
-            //val facesFound = viewModel.verifyPicture(capturedImage)
-            //makeToast("Faces Found: $facesFound")
+            val imageBitmap = BitmapFactory.decodeFile(capturedImage.first.path)
+            val screenImage = Bitmap.createScaledBitmap(imageBitmap, 100, 100, false)
 
-            //Creates source Image
-            try {
-                FileInputStream(capturedImage.first.path).use { inputStream ->
-                    sourceImageBytes =
-                        ByteBuffer.wrap(IOUtils.toByteArray(inputStream))
-                }
-            } catch (e: Exception) {
-                println("Failed to load source screenImage ${capturedImage.first.path}")
-                exitProcess(1)
-            }
-            // Converts to AWS Image
-            val source = Image().withBytes(sourceImageBytes)
-            // Detecting faces
-            // App slowed from this network request
-            val results = viewModel.detectFaces(source)
+            val faces = viewModel.verifyPicture(context!!, screenImage)
 
-            if (results != null) {
-                faceDetails = results.faceDetails
-                Toast.makeText(context!!, "Faces: ${faceDetails.size}",Toast.LENGTH_SHORT).show();
-
-            }
-            facesFound = faceDetails!!.size
-
-            if (facesFound != 1){
-                makeToast("Please only have one face in your picture")
-            }
-            else{*/
+            if (faces == 1){
                 oneFace = true
-                Log.d(TAG, "Creating bitmap")
-                val imageBitmap = BitmapFactory.decodeFile(capturedImage.first.path)
-                Log.d(TAG, "Created bitmap, creating thumbnail")
                 changeThumbnail(imageBitmap)
-            //}
+            }else{
+                oneFace = false
+                makeToast("No faces were detected in your picture!")
+            }
 
         }
     }

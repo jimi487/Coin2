@@ -5,26 +5,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         app:startDestination="@id/coinFragment">
-    <fragment
-            android:id="@+id/streamConfigurationFragment"
-            android:name="com.bohil.coin.fragment_streaming.StreamConfigurationFragment"
-            android:label="StreamConfigurationFragment"
-            tools:layout="@layout/fragment_stream_configuration">
-        <action
-                android:id="@+id/action_streamConfigurationFragment_to_streamingFragment"
-                app:destination="@id/streamingFragment" />
-    </fragment>
-    <fragment
-            android:id="@+id/streamingFragment"
-            android:name="com.bohil.coin.fragment_streaming.StreamingFragment"
-            android:label="StreamingFragment"
-            tools:layout="@layout/fragment_streaming"/>
-    <activity
-            android:id="@+id/simpleNavActivity"
-            android:name="com.bohil.coin.main.SimpleNavActivity"
-            android:label="app_bar_simple_nav"
-            tools:layout="@layout/app_bar_simple_nav" />
-             />
+
     <fragment
             android:id="@+id/coinFragment"
             android:name="com.bohil.coin.main.CoinFragment"

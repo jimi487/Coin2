@@ -1,19 +1,18 @@
 package com.bohil.coin.login.registration
 
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.amazonaws.services.rekognition.model.DetectFacesResult
 import com.amazonaws.services.rekognition.model.Image
 import com.bohil.coin.DBUtility
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
+import java.nio.ByteBuffer
 
 private const val TAG = "RegisterViewModel"
+private lateinit var sourceImageBytes:ByteBuffer
 private lateinit var user: HashMap<String, String>
 
 class RegisterViewModel: ViewModel() {
@@ -24,7 +23,7 @@ class RegisterViewModel: ViewModel() {
     fun addUser(fName:String, lName:String, language:String, country:String,
                 sex:String, dob:String, instagramHandle:String, twitterHandle:String, snapchatHandle:String,
                 collectionName:String, cognitoAttribute:String, userPicture: Pair<File, Uri>){
-        viewModelScope.launch{
+        GlobalScope.launch{
             createUser(fName, lName, language, country, sex, dob, instagramHandle, twitterHandle, snapchatHandle,
                 collectionName, cognitoAttribute, userPicture)
         }
@@ -57,47 +56,20 @@ class RegisterViewModel: ViewModel() {
     }
 
     /**
-     * Verifies whether there is an image in the picture before the user submits
-     */
-    fun detectFaces(image: Image): DetectFacesResult?{
-        var results: DetectFacesResult? = null
-        runBlocking {
-            val getFacesDetectedJob = viewModelScope.launch {
-                results =  DBUtility.detectFaces(image)
-            }
-            // Wait for job to complete
-            getFacesDetectedJob.join()
-        }
-        return results
-    }
-    //TODO Switch to DBUtility verifyPicture
-    /**
      * Uses Firebase to verify if a face was detected in a picture
      */
-    fun verifyPicture(userPicture: Pair<File, Uri>): Int{
+    fun verifyPicture(appContext: Context, screenImage: Bitmap): Int{
         var facesFound = 0
+        val image = Image().withBytes(DBUtility.convertToByteBuffer(appContext, screenImage))
 
-        viewModelScope.launch {
-            //DBUtility.detectFaces(userPicture.first.absolutePath)
-        }
-        /*
-        val options = FirebaseVisionFaceDetectorOptions.Builder()
-            .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
-            .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
-            .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
-            .build()
-
-        val imageBitmap = BitmapFactory.decodeFile(userPicture.first.path)
-        val image = FirebaseVisionImage.fromBitmap(imageBitmap)
-        val detector = FirebaseVision.getInstance().getVisionFaceDetector(options)
-        val result = detector.detectInImage(image)
-            .addOnSuccessListener { faces ->
-                facesFound = faces.size
+        runBlocking {
+            val detectFacesJob = GlobalScope.launch {
+                val results = DBUtility.detectFaces(image)
+                facesFound = results?.faceDetails!!.size
             }
-            .addOnFailureListener { e ->
-                facesFound = 10000
-                Log.d(TAG, e.message)
-            }*/
+            detectFacesJob.join()
+        }
+
         return facesFound
     }
 

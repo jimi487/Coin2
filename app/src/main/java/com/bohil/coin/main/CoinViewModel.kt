@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.amazonaws.services.rekognition.model.DetectFacesResult
 import com.amazonaws.services.rekognition.model.FaceMatch
 import com.amazonaws.services.rekognition.model.Image
@@ -88,7 +87,7 @@ class CoinViewModel : ViewModel() {
     fun detectFaces(image: Image): DetectFacesResult?{
         var results:DetectFacesResult? = null
         runBlocking {
-            val getFacesDetectedJob = viewModelScope.launch {
+            val getFacesDetectedJob = GlobalScope.launch {
                 results =  DBUtility.detectFaces(image)
             }
             // Wait for job to complete
@@ -98,25 +97,25 @@ class CoinViewModel : ViewModel() {
     }
 
     fun clearCollection(appContext: Context){
-        viewModelScope.launch {
+        GlobalScope.launch {
             DBUtility.deleteFaceFromCollection(appContext)
         }
     }
 
     fun listCollection(appContext:Context){
-        viewModelScope.launch {
+        GlobalScope.launch {
             DBUtility.listCollection(appContext)
         }
     }
 
     fun deleteCollection(appContext: Context){
-        viewModelScope.launch {
+        GlobalScope.launch {
             DBUtility.deleteCollection(appContext)
         }
     }
 
     fun addFaceToCollection(appContext: Context){
-        viewModelScope.launch{
+        GlobalScope.launch{
             DBUtility.addFaceToCollection(appContext)
         }
 
@@ -127,7 +126,7 @@ class CoinViewModel : ViewModel() {
     }
 
     fun retrieveName(): String{
-        return DBUtility.retrieveName()
+        return DBUtility.getName()
     }
 
     fun retrieveInstagram(appContext: Context): String{

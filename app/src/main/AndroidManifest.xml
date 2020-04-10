@@ -23,11 +23,7 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".main.CoinActivity"></activity>
-        <activity android:name=".login.facedetection.PreviewActivity" /> <!-- Automatically download the ML model to the device after app is installed from Play Store -->
-        <activity
-                android:name=".main.SimpleNavActivity"
-                android:label="SimpleNavActivity"
-                android:theme="@style/AppTheme.NoActionBar" />
+         <!-- Automatically download the ML model to the device after app is installed from Play Store -->
 
         <meta-data
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"

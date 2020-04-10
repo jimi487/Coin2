@@ -2,6 +2,7 @@ package com.bohil.coin
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import android.util.Size
@@ -26,24 +27,22 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.rekognition.AmazonRekognition
 import com.amazonaws.services.rekognition.AmazonRekognitionClient
 import com.amazonaws.services.rekognition.model.*
-import com.amazonaws.mobile.client.*
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferService
+import com.amazonaws.util.IOUtils
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.ResultListener
 import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firestore.v1.Document
-import kotlinx.coroutines.*
-import java.io.File
-import java.util.concurrent.Executors
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.ByteBuffer
+import kotlin.system.exitProcess
 
 /**
  * Class containing utility methods for Firebase and AWS
@@ -52,9 +51,7 @@ import java.util.concurrent.Executors
 object DBUtility {
     private val TAG = DBUtility::class.java.simpleName
     // Network INSTANCES
-    private const val TAG = "DBUtility"
-    var UserID : String = ""
-    var UserData : Users? = null
+
     val AWSInstance: AWSMobileClient = AWSMobileClient.getInstance()
     val FirebaseInstance = FirebaseFirestore.getInstance()
     var rekognitionClient: AmazonRekognition = AmazonRekognitionClient(AWSInstance)
@@ -265,7 +262,7 @@ object DBUtility {
                 .withQualityFilter(QualityFilter.AUTO)
                 .withMaxFaces(1)
                 .withCollectionId(getCollectionID(appContext))
-                .withExternalImageId(retrieveName())
+                .withExternalImageId(getName())
                 .withDetectionAttributes("DEFAULT")
 
             val indexFacesResult = rekognitionClient.indexFaces(indexFacesRequest)
@@ -367,20 +364,6 @@ object DBUtility {
             }
     }
 
-    /**
-     * Update the UserData var after making changes to it in other classes
-     */
-    fun updateUserInfo(doc: DocumentReference) {
-        doc.get()
-            .addOnSuccessListener { document ->
-                UserData = document.toObject<Users>()
-                Log.i(TAG, "Updated doc ref success")
-            }
-            .addOnFailureListener{
-                Log.e(TAG, "Error updating doc ref ${it.message}")
-            }
-    }
-
 
     /**
      * Updates the user's Firestore ID in Cognito
@@ -417,8 +400,56 @@ object DBUtility {
     //TODO Retrieve users social media handles and store them locally
 
     // TODO Change to Firebase name
-    fun retrieveName(): String {
+    fun getName(): String {
         return AWSInstance.username.substring(0, AWSInstance.username.indexOf("@"))
+    }
+
+    /**
+     * Converts the bitmap to a ByteBuffer Rekognition can use
+     */
+    fun convertToByteBuffer(context: Context, screenImage: Bitmap): ByteBuffer{
+        var sourceImageBytes: ByteBuffer? = null
+
+        // Converting to Byte Array
+        val bostream = ByteArrayOutputStream()
+        screenImage.compress(Bitmap.CompressFormat.JPEG, 100, bostream)
+        val bitmapdata = bostream.toByteArray()
+
+        // Converting to File
+        val f = File(context.cacheDir, "input")
+        try {
+            f.createNewFile()
+        } catch (e: Exception) {
+            e.fillInStackTrace()
+        }
+        try {
+            val fostream = FileOutputStream(f)
+            fostream.write(bitmapdata)
+            fostream.flush()
+            fostream.close()
+        } catch (e: Exception) {
+            e.fillInStackTrace()
+        }
+
+        //Creates source Image
+        try {
+            FileInputStream(f).use { inputStream ->
+                sourceImageBytes =
+                    ByteBuffer.wrap(IOUtils.toByteArray(inputStream))
+            }
+        } catch (e: Exception) {
+            println("Failed to load source screenImage $f")
+            exitProcess(1)
+        }
+
+        return sourceImageBytes!!
+    }
+
+    /**
+     * Creates a Rekognition Image using Byte Array
+     */
+    fun createImageFromByte(sourceImageBytes: ByteBuffer): Image{
+        return Image().withBytes(sourceImageBytes)
     }
 
     /**
@@ -464,17 +495,6 @@ object DBUtility {
     private fun getCollectionID(appContext: Context): String{
         return appContext.getString(R.string.face_collection_name)
     }
-    data class Users(
-        val birthdate: String? = null,
-        val country: String? = null,
-        val first: String? = null,
-        val last: String? = null,
-        val igHandle: String? = null,
-        val twitterHandle: String? = null,
-        val snapchatHandle: String? = null,
-        val sex: String? = null,
-        val language: String? = null
-    )
 
 }
 

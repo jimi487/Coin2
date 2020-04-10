@@ -15,7 +15,6 @@ import com.amazonaws.mobile.client.results.SignInState
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
-import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -122,7 +121,7 @@ class TitleFragment : Fragment() {
 
         runBlocking {
             val getUserAttributeJob = GlobalScope.launch {
-                DBUtility.UserID = DBUtility.AWSInstance.userAttributes[context!!.getString(R.string.cognito_firestore)].toString()
+                //DBUtility.UserID = DBUtility.AWSInstance.userAttributes[context!!.getString(R.string.cognito_firestore)].toString()
             }
 
             //Wait for job to complete
@@ -130,7 +129,7 @@ class TitleFragment : Fragment() {
 
             //Retrieve firestore document for logged in user
             val doc = DBUtility.FirebaseInstance.collection(context!!.getString(R.string.firestore_table)).document(
-                DBUtility.UserID
+                //DBUtility.UserID
             )
 
             doc.get()
@@ -138,7 +137,7 @@ class TitleFragment : Fragment() {
                     if (document != null) {
 
                         //Convert document to object of type Users and assign it to UserData
-                        DBUtility.UserData = document.toObject<DBUtility.Users>()
+                        //DBUtility.UserData = document.toObject<DBUtility.Users>()
                         findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
                         //findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToSettings())
 

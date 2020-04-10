@@ -1,24 +1,10 @@
 package com.bohil.coin.settings
 
-import android.os.Bundle
-import android.util.Log
-import com.bohil.coin.R
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils.runOnUiThread
-import com.bohil.coin.DBUtility
-import com.bohil.coin.databinding.FragmentUserSettingsBinding
-import com.google.firebase.firestore.ktx.toObject
-import kotlinx.android.synthetic.main.fragment_user_settings.*
-import org.json.JSONObject
 
 
 class UserSettingsFragment : Fragment() {
-
+/*
     private lateinit var binding: FragmentUserSettingsBinding
     private val _userData : DBUtility.Users? = DBUtility.UserData
     private val _fName = _userData?.first
@@ -85,5 +71,5 @@ class UserSettingsFragment : Fragment() {
         updateJob.addOnFailureListener{
             Toast.makeText(context, "Error with save", Toast.LENGTH_SHORT).show()
         }
-    }
+    }*/
 }
