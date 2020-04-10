@@ -214,7 +214,5 @@ class CombinedRegister : Fragment() {
         private const val TAG = "CombinedFragment"
         private const val REQUEST_TAKE_PHOTO = 1001
         private var oneFace = false
-
-
     }
 }
