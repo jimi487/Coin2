@@ -41,8 +41,6 @@
     <string name="pass_too_short">The password must be at least 6 characters long.</string>
     <string name="signup_in_progress">"Sending email"</string>
 
-
-
     <!-- Register Fragment Strings -->
     <string name="face_image_content_description">Tap this image to be capture your picture</string>
     <string name="first_name_hint">First Name</string>
@@ -108,4 +106,8 @@
     <string name="title_fragment_stream">Stream Configuration</string>
     <string name="title_fragment_stream_detailed_configuration">Stream Detailed Configuration</string>
 
+    <!-- TODO Create a separate XML File to contain AWS and Firebase strings -->
+    <!-- Coin View Model Strings -->
+    <string name="kinesis_video_name">CoinVideoStream</string>
+    <string name="face_collection_name">CoinBank</string>
 </resources>

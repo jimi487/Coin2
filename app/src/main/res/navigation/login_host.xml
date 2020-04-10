@@ -31,9 +31,6 @@
             android:label="CombinedFragment"
             tools:layout="@layout/fragment_combined">
         <action
-                android:id="@+id/action_combinedFragment_to_previewActivity"
-                app:destination="@id/previewActivity" />
-        <action
                 android:id="@+id/action_combinedFragment_to_coinActivity"
                 app:destination="@id/coinActivity" />
     </fragment>

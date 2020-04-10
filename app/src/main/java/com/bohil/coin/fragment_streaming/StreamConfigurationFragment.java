@@ -142,8 +142,8 @@ public class StreamConfigurationFragment extends Fragment {
     }
 
     private void startStreamingActivity() {
-        final Bundle extras = new Bundle();
 
+        final Bundle extras = new Bundle();
         extras.putParcelable(
                 StreamingFragment.KEY_MEDIA_SOURCE_CONFIGURATION,
                 getCurrentConfiguration());

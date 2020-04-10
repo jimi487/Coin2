@@ -24,6 +24,7 @@ import com.amazonaws.mobileconnectors.kinesisvideo.mediasource.android.AndroidCa
 import com.amazonaws.services.rekognition.AmazonRekognition;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.amazonaws.services.rekognition.model.AgeRange;
+import com.amazonaws.services.rekognition.model.BoundingBox;
 import com.amazonaws.services.rekognition.model.DetectFacesRequest;
 import com.amazonaws.services.rekognition.model.DetectFacesResult;
 import com.amazonaws.services.rekognition.model.FaceDetail;
@@ -59,6 +60,7 @@ public class StreamingFragment extends Fragment implements TextureView.SurfaceTe
 
     private SimpleNavActivity navActivity;
 
+
     public static StreamingFragment newInstance(SimpleNavActivity navActivity) {
         StreamingFragment s = new StreamingFragment();
         s.navActivity = navActivity;
@@ -80,7 +82,6 @@ public class StreamingFragment extends Fragment implements TextureView.SurfaceTe
         final View view = inflater.inflate(R.layout.fragment_streaming, container, false);
         textureView = view.findViewById(R.id.texture);
         textureView.setSurfaceTextureListener(this);
-
 
         return view;
     }
@@ -199,17 +200,15 @@ public class StreamingFragment extends Fragment implements TextureView.SurfaceTe
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-        //Toast.makeText(getContext(), "Updated?", Toast.LENGTH_SHORT).show();
-        // Creating a screenshot of the screen
-        Bitmap frame = Bitmap.createBitmap(textureView.getWidth(),textureView.getHeight(),
-                Bitmap.Config.ARGB_8888);
 
-        Bitmap image = Bitmap.createScaledBitmap(frame, 100, 100, false);
-        textureView.getBitmap(image);
+        // Creating screenshot of the screen
+        Bitmap screenFrame = Bitmap.createBitmap(textureView.getWidth(),textureView.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap screenImage = Bitmap.createScaledBitmap(screenFrame, 100, 100, false);
+        textureView.getBitmap(screenImage);
 
         // Converting to Byte Array
         ByteArrayOutputStream bostream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 100, bostream);
+        screenImage.compress(Bitmap.CompressFormat.JPEG, 100, bostream);
         byte[] bitmapdata = bostream.toByteArray();
 
         // Converting to File
@@ -227,32 +226,31 @@ public class StreamingFragment extends Fragment implements TextureView.SurfaceTe
         }catch(Exception e){
             e.fillInStackTrace();
         }
-
-        //Creates source image
+        //Creates source screenImage
         try (InputStream inputStream = new FileInputStream(f)) {
             sourceImageBytes = ByteBuffer.wrap(IOUtils.toByteArray(inputStream));
         }
-        catch(Exception e)
-        {
-            System.out.println("Failed to load source image " + f);
+        catch(Exception e) {
+            System.out.println("Failed to load source screenImage " + f);
             System.exit(1);
         }
-
-        Image source=new Image()
-                .withBytes(sourceImageBytes);
-
-
+        // Converts to AWS Image
+        Image source=new Image().withBytes(sourceImageBytes);
         // Creating the face detect request
         DetectFacesRequest request = new DetectFacesRequest().withImage(source).withAttributes("ALL");
+
         // Detecting the face
         try {
+            //Network request starts here
             DetectFacesResult result = rekognitionClient.detectFaces(request);
             List<FaceDetail> faceDetails = result.getFaceDetails();
-
             Toast.makeText(getContext(), "Faces: " + faceDetails.size(),Toast.LENGTH_SHORT).show();
 
             for (FaceDetail face: faceDetails) {
-                //TODO Discover error
+                // Drawing Box around users face
+                BoundingBox box = face.getBoundingBox();
+                //Toast.makeText(getContext(), "Left: " + box.getLeft(),Toast.LENGTH_SHORT).show();
+
                 if (request.getAttributes().contains("ALL")) {
                     AgeRange ageRange = face.getAgeRange();
                     System.out.println("The detected face is estimated to be between "
@@ -266,33 +264,36 @@ public class StreamingFragment extends Fragment implements TextureView.SurfaceTe
         } catch (Exception e) {
             e.printStackTrace();
         }
-        /*
-        // Draws the bounding box around the detected faces.
-        public void paintComponent(Graphics g) {
-            float left = 0;
-            float top = 0;
-            int height = image.getHeight(this);
-            int width = image.getWidth(this);
-
-            Graphics2D g2d = (Graphics2D) g; // Create a Java2D version of g.
-
-            // Draw the image.
-            g2d.drawImage(image, 0, 0, width / scale, height / scale, this);
-            g2d.setColor(new Color(0, 212, 0));
-
-            // Iterate through faces and display bounding boxes.
-            List<FaceDetail> faceDetails = result.getFaceDetails();
-            for (FaceDetail face : faceDetails) {
-
-                BoundingBox box = face.getBoundingBox();
-                left = width * box.getLeft();
-                top = height * box.getTop();
-                g2d.drawRect(Math.round(left / scale), Math.round(top / scale),
-                        Math.round((width * box.getWidth()) / scale), Math.round((height * box.getHeight())) / scale);
-
-            }
-        }*/
-
     }
+
+    /*
+    // Draws the bounding box around the detected faces.
+    public void paintComponent(Bitmap bg) {
+        // Setting the Paint for the box
+        Paint paint = new Paint();
+        paint.setColor(Color.parseColor("#da4747"));
+
+        // Temporary Box dimensions
+        float left = 0;
+        float top = 0;
+        int height = bg.getHeight();
+        int width = bg.getWidth();
+
+        Canvas canvas = new Canvas(bg);
+
+        // Iterate through faces and display bounding boxes.
+        List<FaceDetail> faceDetails = result.getFaceDetails();
+        for (FaceDetail face : faceDetails) {
+
+            BoundingBox box = face.getBoundingBox();
+            left = width * box.getLeft();
+            top = height * box.getTop();
+
+            canvas.drawRect(left, top, width * box.getWidth(), height * box.getHeight(), paint);
+
+            /*g2d.drawRect(Math.round(left / scale), Math.round(top / scale),
+                    Math.round((width * box.getWidth()) / scale), Math.round((height * box.getHeight())) / scale);
+        }
+    }*/
 }
 

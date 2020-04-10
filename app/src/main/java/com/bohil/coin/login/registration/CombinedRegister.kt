@@ -18,13 +18,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCombinedBinding
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import com.bohil.coin.DBUtility
 
 class CombinedRegister : Fragment() {
 
@@ -176,9 +176,37 @@ class CombinedRegister : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK){
-            val facesFound = viewModel.verifyPicture(capturedImage)
-            makeToast("Faces Found: $facesFound")
-            /*if (facesFound != 1){
+            //TODO Move to view model
+            /*var sourceImageBytes: ByteBuffer? = null
+            var facesFound = 0
+            var faceDetails: List<FaceDetail>? = null
+            //val facesFound = viewModel.verifyPicture(capturedImage)
+            //makeToast("Faces Found: $facesFound")
+
+            //Creates source Image
+            try {
+                FileInputStream(capturedImage.first.path).use { inputStream ->
+                    sourceImageBytes =
+                        ByteBuffer.wrap(IOUtils.toByteArray(inputStream))
+                }
+            } catch (e: Exception) {
+                println("Failed to load source screenImage ${capturedImage.first.path}")
+                exitProcess(1)
+            }
+            // Converts to AWS Image
+            val source = Image().withBytes(sourceImageBytes)
+            // Detecting faces
+            // App slowed from this network request
+            val results = viewModel.detectFaces(source)
+
+            if (results != null) {
+                faceDetails = results.faceDetails
+                Toast.makeText(context!!, "Faces: ${faceDetails.size}",Toast.LENGTH_SHORT).show();
+
+            }
+            facesFound = faceDetails!!.size
+
+            if (facesFound != 1){
                 makeToast("Please only have one face in your picture")
             }
             else{*/

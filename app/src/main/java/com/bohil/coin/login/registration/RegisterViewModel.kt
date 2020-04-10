@@ -1,23 +1,17 @@
 package com.bohil.coin.login.registration
 
 
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.amplifyframework.core.Amplify
-import com.amplifyframework.core.ResultListener
-import com.amplifyframework.storage.result.StorageUploadFileResult
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.common.FirebaseVisionImage
-import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
+import com.amazonaws.services.rekognition.model.DetectFacesResult
+import com.amazonaws.services.rekognition.model.Image
+import com.bohil.coin.DBUtility
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
-import com.bohil.coin.DBUtility
 
 private const val TAG = "RegisterViewModel"
 private lateinit var user: HashMap<String, String>
@@ -63,10 +57,30 @@ class RegisterViewModel: ViewModel() {
     }
 
     /**
+     * Verifies whether there is an image in the picture before the user submits
+     */
+    fun detectFaces(image: Image): DetectFacesResult?{
+        var results: DetectFacesResult? = null
+        runBlocking {
+            val getFacesDetectedJob = viewModelScope.launch {
+                results =  DBUtility.detectFaces(image)
+            }
+            // Wait for job to complete
+            getFacesDetectedJob.join()
+        }
+        return results
+    }
+    //TODO Switch to DBUtility verifyPicture
+    /**
      * Uses Firebase to verify if a face was detected in a picture
      */
     fun verifyPicture(userPicture: Pair<File, Uri>): Int{
         var facesFound = 0
+
+        viewModelScope.launch {
+            //DBUtility.detectFaces(userPicture.first.absolutePath)
+        }
+        /*
         val options = FirebaseVisionFaceDetectorOptions.Builder()
             .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
             .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
@@ -83,7 +97,7 @@ class RegisterViewModel: ViewModel() {
             .addOnFailureListener { e ->
                 facesFound = 10000
                 Log.d(TAG, e.message)
-            }
+            }*/
         return facesFound
     }
 

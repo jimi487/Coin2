@@ -8,18 +8,16 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.bohil.coin.DBUtility
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignInResult
 import com.amazonaws.mobile.client.results.SignInState
+import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
 
-//import sun.jvm.hotspot.utilities.IntArray
-
+private val TAG = TitleFragment::class.java.simpleName
 
 class TitleFragment : Fragment() {
-
     private var email = ""
     private var password = ""
     private lateinit var binding: FragmentTitleBinding
@@ -68,7 +66,7 @@ class TitleFragment : Fragment() {
                             SignInState.DONE -> navigateToMainActivity()
                             SignInState.SMS_MFA -> Log.e("SMS_MFA", "")
                             SignInState.NEW_PASSWORD_REQUIRED -> Log.e("NEW_PASS_REQ", "")
-                            else -> Log.e("ERR", "Unsupported sign-in confirmation: " + signInResult.signInState)
+                            else -> Log.e(TAG, "Unsupported sign-in confirmation: " + signInResult.signInState)
                         }
                     }
                 }
@@ -97,8 +95,6 @@ class TitleFragment : Fragment() {
     private fun navigateToMainActivity(){
         findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
 
-        /*val intent = Intent(context, SimpleNavActivity::class.java)
-        startActivity(intent);*/
     }
 
 }

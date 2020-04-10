@@ -4,57 +4,95 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import com.amazonaws.mobile.client.*
+import android.util.Size
+import android.widget.Toast
+import com.amazonaws.kinesisvideo.client.KinesisVideoClient
+import com.amazonaws.kinesisvideo.common.exception.KinesisVideoException
+import com.amazonaws.kinesisvideo.producer.StreamInfo
+import com.amazonaws.mobile.client.AWSMobileClient
+import com.amazonaws.mobile.client.Callback
+import com.amazonaws.mobile.client.SignOutOptions
+import com.amazonaws.mobile.client.UserState.SIGNED_IN
+import com.amazonaws.mobile.client.UserStateDetails
+import com.amazonaws.mobileconnectors.kinesisvideo.client.KinesisVideoAndroidClientFactory
+import com.amazonaws.mobileconnectors.kinesisvideo.mediasource.android.AndroidCameraMediaSource
+import com.amazonaws.mobileconnectors.kinesisvideo.mediasource.android.AndroidCameraMediaSourceConfiguration
+import com.amazonaws.mobileconnectors.kinesisvideo.util.CameraUtils.getCameras
+import com.amazonaws.mobileconnectors.kinesisvideo.util.CameraUtils.getSupportedResolutions
+import com.amazonaws.mobileconnectors.kinesisvideo.util.VideoEncoderUtils.getSupportedMimeTypes
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferService
+import com.amazonaws.regions.Region
+import com.amazonaws.regions.Regions
+import com.amazonaws.services.rekognition.AmazonRekognition
+import com.amazonaws.services.rekognition.AmazonRekognitionClient
+import com.amazonaws.services.rekognition.model.*
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.ResultListener
 import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
 import com.google.firebase.firestore.FirebaseFirestore
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferService
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
-import kotlinx.coroutines.*
 
 /**
- * Class containing common DB methods
+ * Class containing utility methods for Firebase and AWS
  */
-object DBUtility {
 
-    private const val TAG = "DBUtility"
+object DBUtility {
+    private val TAG = DBUtility::class.java.simpleName
+    // Network INSTANCES
     val AWSInstance: AWSMobileClient = AWSMobileClient.getInstance()
     val FirebaseInstance = FirebaseFirestore.getInstance()
+    var rekognitionClient: AmazonRekognition = AmazonRekognitionClient(AWSInstance)
+    lateinit var kinesisVideoClient: KinesisVideoClient
 
-    fun initAWS(applicationContext : Context) {
+    //Network FIELDS
+    private val region: Regions = Regions.US_EAST_2
+    private const val FRAMERATE_20 = 20
+    private const val BITRATE_384_KBPS = 384 * 1024
+    private const val RETENTION_PERIOD_48_HOURS = 2 * 24
+    private val RESOLUTION_320x240 = Size(320, 240)
+
+    //// AWS Initialization and Destruction
+
+    /*
+     * Initializes AWS Services at the start of the application
+     */
+    fun initAWS(appContext: Context) {
         // Initializing the AWS Amplify instance
-        AWSInstance.initialize(applicationContext, object : Callback<UserStateDetails> {
-                override fun onResult(userStateDetails: UserStateDetails) {
-                    try {
-                        Amplify.addPlugin(AWSS3StoragePlugin())
-                        applicationContext.startService(
-                            Intent(
-                                applicationContext,
-                                TransferService::class.java
-                            )
+        AWSInstance.initialize(appContext, object : Callback<UserStateDetails> {
+            override fun onResult(userStateDetails: UserStateDetails) {
+                try {
+                    Amplify.addPlugin(AWSS3StoragePlugin())
+                    //TODO Change Amplify storage to use Transfer Service
+                    appContext.startService(
+                        Intent(
+                            appContext,
+                            TransferService::class.java
                         )
-                        Amplify.configure(applicationContext)
-                        when(userStateDetails.userState){
-                            UserState.SIGNED_IN -> AWSMobileClient.getInstance().signOut()
-                            UserState.SIGNED_OUT -> AWSMobileClient.getInstance().tokens
-                        }
-
-                    } catch (e: java.lang.Exception) {
-                        Log.e("ApiQuickstart", e.message)
+                    )
+                    Amplify.configure(appContext)
+                    when (userStateDetails.userState) {
+                        SIGNED_IN -> AWSMobileClient.getInstance().signOut()
                     }
-                }
-
-                override fun onError(e: Exception?) {
-                    Log.e("INIT", "Initialization error.", e)
+                } catch (e: java.lang.Exception) {
+                    Log.e("ApiQuickstart", e.message)
                 }
             }
-            )
 
+            override fun onError(e: Exception?) {
+                Log.e("INIT", "Initialization error.", e)
+            }
+        }
+        )
     }
 
+    /*
+     * Signs out of the AWS Service
+     */
     fun signOutAWS() {
         AWSInstance.signOut(
             SignOutOptions.builder().signOutGlobally(true).build(),
@@ -69,7 +107,235 @@ object DBUtility {
             })
     }
 
-    suspend fun addFirebaseUser(user : HashMap<String, String>, collectionName:String, cognitoAttribute: String, userPicture: Pair<File, Uri>) {
+    //// KINESIS REQUESTS
+
+    /**
+     * Sets up the configuration for the Data sent to the Video Stream
+     * @return
+     */
+    fun getCurrentConfiguration(appContext: Context): AndroidCameraMediaSourceConfiguration? {
+
+        // 0 gives back camera, 1 gives front
+        val cameras = getCameras(kinesisVideoClient)
+        val resolutions = getSupportedResolutions(appContext, cameras[1].cameraId)
+        val mimeTypes = getSupportedMimeTypes()
+        var select1080p = 0
+        var selectHEVC = 0
+
+        // Setting the stream resolution to 1080p
+        for ((index, size) in resolutions.withIndex()) {
+            if (size.width == 1920 && size.height == 1080) {
+                select1080p = index
+            }
+        }
+
+        // Setting the streaming mime type to hevc
+        for ((index, mime) in mimeTypes.withIndex()) {
+            if (mime.mimeType.toString() == "video/hevc") {
+                selectHEVC = index
+            }
+        }
+
+        return AndroidCameraMediaSourceConfiguration(
+            AndroidCameraMediaSourceConfiguration.builder()
+                .withCameraId(cameras[1].cameraId)
+                .withCameraFacing(cameras[1].cameraFacing)
+                .withIsEncoderHardwareAccelerated(
+                    cameras[1].isEndcoderHardwareAccelerated
+                )
+                .withCameraOrientation(-cameras[1].cameraOrientation)
+                .withEncodingMimeType(mimeTypes[selectHEVC].mimeType)
+                .withHorizontalResolution(resolutions[select1080p].width)
+                .withVerticalResolution(resolutions[select1080p].height)
+                .withFrameRate(FRAMERATE_20)
+                .withRetentionPeriodInHours(RETENTION_PERIOD_48_HOURS)
+                .withEncodingBitRate(BITRATE_384_KBPS)
+                .withNalAdaptationFlags(StreamInfo.NalAdaptationFlags.NAL_ADAPTATION_ANNEXB_CPD_AND_FRAME_NALS)
+                .withIsAbsoluteTimecode(false)
+        )
+    }
+
+    /**
+     * Creates the Video Source for the Video Stream
+     */
+    fun createMediaSource(appContext: Context): AndroidCameraMediaSource {
+        return kinesisVideoClient
+            .createMediaSource("CoinVideoStream", getCurrentConfiguration(appContext))
+                as AndroidCameraMediaSource
+    }
+
+    /**
+     * Creates the Kinesis Video Client
+     * Rekogntion Client is initialized here
+     */
+    fun createKinesisVideoClient(appContext: Context) {
+        // Creates the Kinesis Video Instance
+        try {
+            kinesisVideoClient = KinesisVideoAndroidClientFactory.createKinesisVideoClient(
+                appContext,
+                region,
+                AWSInstance
+            )
+            //val credentialsProvider = CognitoCachingCredentialsProvider(
+            // appContext, "us-east-2:9ebbd566-0241-4444-bae5-89f6fce31385", region)
+            //rekognitionClient = AmazonRekognitionClient(credentialsProvider)
+
+            initializeRekogntionClient()
+
+        } catch (e: KinesisVideoException) {
+            Log.e(
+                TAG,
+                "Failed to create Kinesis Video client",
+                e
+            )
+        }
+    }
+
+    //// REKOGNITION REQUESTS
+    private fun initializeRekogntionClient() {
+        rekognitionClient = AmazonRekognitionClient(AWSInstance.credentials)
+        rekognitionClient.setEndpoint("rekognition.us-east-2.amazonaws.com")
+        rekognitionClient.setRegion(Region.getRegion(Regions.US_EAST_2))
+    }
+
+    /**
+     * Detects the faces in a given image using Rekognition
+     */
+   fun detectFaces(image: Image): DetectFacesResult? {
+        val facesRequest = DetectFacesRequest().withImage(image)
+        var result: DetectFacesResult? = null
+        try {
+            result = rekognitionClient.detectFaces(facesRequest)
+        } catch (e: Exception) {
+            Log.d(TAG, e.toString())
+        }
+
+        return result
+    }
+
+    /**
+     * Creates a Face Collection in the Rekognition region
+     */
+    fun createCollection(appContext: Context) {
+        val request = CreateCollectionRequest().withCollectionId(getCollectionID(appContext))
+        val collectionResult = rekognitionClient.createCollection(request)
+    }
+
+    /**
+     * Deletes a specified face id from the collection
+     */
+    fun deleteFaceFromCollection(appContext: Context) {
+        val deleteFacesRequest = DeleteFacesRequest()
+            .withCollectionId(getCollectionID(appContext))
+            .withFaceIds("")
+        val deleteFacesResult = rekognitionClient.deleteFaces(deleteFacesRequest)
+    }
+
+    /**
+     * Deletes the collection
+     */
+    fun deleteCollection(appContext: Context) {
+        val request = DeleteCollectionRequest()
+            .withCollectionId(getCollectionID(appContext))
+        val deleteCollectionResult = rekognitionClient.deleteCollection(request)
+    }
+
+    /**
+     * Adds the user to the face collection from their image in the S3 Collection
+     * Saves the face id (externalImageId) as their email before the @
+    !! All faces in a picture will be saved with the same externalImageId
+     */
+    fun addFaceToCollection(appContext: Context) {
+        val image = retrieveImageFromS3()
+
+        try {
+            val indexFacesRequest = IndexFacesRequest()
+                .withImage(image)
+                .withQualityFilter(QualityFilter.AUTO)
+                .withMaxFaces(1)
+                .withCollectionId(getCollectionID(appContext))
+                .withExternalImageId(retrieveName())
+                .withDetectionAttributes("DEFAULT")
+
+            val indexFacesResult = rekognitionClient.indexFaces(indexFacesRequest)
+            val faceRecords = indexFacesResult.faceRecords
+            for (faceRecord in faceRecords) {
+                continue
+            }
+
+            val unindexedFaces = indexFacesResult.unindexedFaces
+            for (unindexedFace in unindexedFaces) {
+                continue
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error: $e.toString()")
+        }
+    }
+
+    /**
+     * Lists all the faces in the face collection
+     */
+    fun listCollection(appContext: Context) {
+        var facesResult: ListFacesResult? = null
+        var paginationToken: String? = null
+        do {
+            if (facesResult != null) {
+                paginationToken = facesResult.nextToken
+            }
+            val facesRequest = ListFacesRequest()
+                .withCollectionId(getCollectionID(appContext))
+                .withMaxResults(1)
+                .withNextToken(paginationToken)
+
+            facesResult = rekognitionClient.listFaces(facesRequest)
+            val faces = facesResult.faces
+            for (face in faces) {
+                continue
+            }
+        } while (facesResult != null && facesResult.nextToken != null)
+
+    }
+
+    /**
+     * Searches for a face in a collection
+     */
+    fun searchCollection(appContext: Context, image: Image): List<FaceMatch> {
+        val searchFace = SearchFacesByImageRequest()
+            .withCollectionId(getCollectionID(appContext))
+            .withImage(image)
+            .withFaceMatchThreshold(93f)
+            .withMaxFaces(1)
+
+        val searchFacesResult =
+            rekognitionClient.searchFacesByImage(searchFace)
+
+        return searchFacesResult.faceMatches
+    }
+
+    /**
+     * Retrieves the users image from the S3 collection
+     */
+    private fun retrieveImageFromS3(): Image {
+        val pictureName = "${AWSInstance.userAttributes.getValue("custom:FireStoreID")}.jpg"
+
+        return Image()
+            .withS3Object(
+                S3Object()
+                    .withBucket("coinbucket00940-coinback")
+                    .withName(pictureName)
+            )
+    }
+
+    //// DATABASE REQUESTS
+
+    /**
+     * Adds the user to Firebase
+     */
+    suspend fun addFirebaseUser(
+        user: HashMap<String, String>, collectionName: String,
+        cognitoAttribute: String,
+        userPicture: Pair<File, Uri>
+    ) {
         FirebaseInstance.collection(collectionName)
             .add(user)
             .addOnSuccessListener {
@@ -90,15 +356,13 @@ object DBUtility {
             }
     }
 
-
     /**
      * Updates the user's Firestore ID in Cognito
      */
-    private suspend fun updateCognito(attribute:String, id:String) = withContext(Dispatchers.IO){
-        try{
+    private suspend fun updateCognito(attribute: String, id: String) = withContext(Dispatchers.IO) {
+        try {
             AWSInstance.updateUserAttributes(hashMapOf(attribute to id))
-            // Adding the users image to the S3 collection
-        }catch(e:Exception){
+        } catch (e: Exception) {
             Log.e(TAG, "Unable to add key", e)
         }
         Log.d(TAG, "User key finished adding")
@@ -108,11 +372,11 @@ object DBUtility {
     /**
      * Uploads the file to the Amazon s3 collection
      */
-    private fun uploadFile(userFile: Pair<File, Uri>, firebaseID:String){
+    private fun uploadFile(userFile: Pair<File, Uri>, firebaseID: String) {
         Amplify.Storage.uploadFile(
-            firebaseID,
+            "$firebaseID.jpg",
             userFile.first.absolutePath,
-            object: ResultListener<StorageUploadFileResult> {
+            object : ResultListener<StorageUploadFileResult> {
                 override fun onResult(result: StorageUploadFileResult?) {
                     Log.d(TAG, "File added successfully")
                 }
@@ -123,6 +387,58 @@ object DBUtility {
             }
         )
     }
+
+    //TODO Retrieve users social media handles and store them locally
+
+    // TODO Change to Firebase name
+    fun retrieveName(): String {
+        return AWSInstance.username.substring(0, AWSInstance.username.indexOf("@"))
+    }
+
+    /**
+     * Retrieves the users Instagram handle from Firestore
+     */
+    fun retrieveInstagram(appContext: Context): String {
+        var igHandle = "500"
+        val document = AWSInstance.userAttributes
+            .getValue(appContext.getString(R.string.cognito_firestore))
+
+        val docRef =
+            FirebaseInstance.collection(appContext.getString(R.string.firestore_table))
+                .document(document)
+
+        docRef.get()
+            .addOnSuccessListener { doc ->
+                val user = doc.data
+                if (user != null) {
+                    igHandle = user["igHandle"] as String
+                }
+
+            }
+            .addOnFailureListener{ exception ->
+                Toast.makeText(appContext, "Failed to get IG: $exception", Toast.LENGTH_LONG).show()
+            }
+
+        return igHandle
+    }
+
+    fun retrieveTwitter(appContext: Context) {
+    }
+
+    fun retrieveSnapchat(appContext: Context) {
+    }
+
+    private fun getUserPictureKey(appContext: Context): String{
+        return "${AWSInstance.userAttributes.getValue(appContext.getString(R.string.cognito_firestore))}.jpg"
+    }
+
+    /**
+     * Returns the ID of the Face Collection
+     */
+    private fun getCollectionID(appContext: Context): String{
+        return appContext.getString(R.string.face_collection_name)
+    }
+
 }
 
 
