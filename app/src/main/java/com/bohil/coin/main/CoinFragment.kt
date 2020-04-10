@@ -18,9 +18,6 @@ import com.amazonaws.services.rekognition.model.Image
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCoinBinding
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 
 private lateinit var viewModel: CoinViewModel
@@ -31,6 +28,8 @@ private lateinit var surfaceView: SurfaceView
 private lateinit var mHolder:SurfaceHolder
 private lateinit var picture:Drawable
 private lateinit var canvas:Canvas
+private lateinit var userIG:String
+private var textChanged = false
 
 
 @Suppress("DEPRECATION")
@@ -59,6 +58,9 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         surfaceView.setZOrderOnTop(true)
         mHolder = surfaceView.holder
         mHolder.setFormat(PixelFormat.TRANSPARENT)
+
+        // TextView for Users Instagram
+        binding.tempUserText.setOnClickListener { viewModel.navigateToInstagram(context!!) }
 
         //TODO Change network requests to background threads in viewmodel
         // Temporarily changing the thread mode to allow network requests on main
@@ -127,9 +129,15 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
             if (mCameraMediaSource == null) {
                 return
             }
+
             mCameraMediaSource.start()
+            Thread.sleep(1000)
+            try{
+                DBUtility.addFaceToCollection(context!!)
+            }catch(e:Exception){
+                Log.d(TAG, e.toString())
+            }
             makeToast("resumed streaming", 0)
-            //viewModel.addFaceToCollection(context!!)
             binding.coinStreamButton.text = activity!!.getText(R.string.stop_streaming)
         } catch (e: KinesisVideoException) {
             Log.e(TAG, "unable to resume streaming", e)
@@ -151,18 +159,6 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         }
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // Adds users face to face collection
-
-        runBlocking {
-            val addFacesJob = GlobalScope.launch {
-                val results = DBUtility.addFaceToCollection(context!!)
-            }
-            addFacesJob.join()
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -220,12 +216,15 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                 val facesFound = viewModel.searchCollection(context!!, image)
                 for (face in facesFound) {
                     val handle = viewModel.retrieveInstagram(context!!)
-                    if(handle != "500"){
-                        binding.tempUserText.text = viewModel.retrieveInstagram(context!!)
-                        binding.tempUserText.setOnClickListener { viewModel.navigateToInstagram(context!!) }
+                    if(handle != "500" && !textChanged){
+
+                        userIG = viewModel.retrieveInstagram(context!!)
+                        binding.tempUserText.text = userIG
+                        textChanged = true
+                        binding.invalidateAll()
                     }
 
-                    makeToast("Face ID: $face", 1)
+                    //makeToast("Face ID: $face", 1)
                 }
             }
 

@@ -22,10 +22,10 @@ class RegisterViewModel: ViewModel() {
      */
     fun addUser(fName:String, lName:String, language:String, country:String,
                 sex:String, dob:String, instagramHandle:String, twitterHandle:String, snapchatHandle:String,
-                collectionName:String, cognitoAttribute:String, userPicture: Pair<File, Uri>){
+                collectionName:String, cognitoFirestore:String, userPicture: Pair<File, Uri>){
         GlobalScope.launch{
             createUser(fName, lName, language, country, sex, dob, instagramHandle, twitterHandle, snapchatHandle,
-                collectionName, cognitoAttribute, userPicture)
+                collectionName, cognitoFirestore, userPicture)
         }
     }
 

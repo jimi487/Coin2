@@ -130,7 +130,6 @@ class CoinViewModel : ViewModel() {
     }
 
     fun retrieveInstagram(appContext: Context): String{
-        return DBUtility.retrieveInstagram(appContext)
         runBlocking {
             val getHandleJob = GlobalScope.launch {
                 handle = DBUtility.retrieveInstagram(appContext)

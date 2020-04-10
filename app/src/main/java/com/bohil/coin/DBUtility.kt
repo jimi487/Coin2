@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import android.util.Size
-import android.widget.Toast
 import com.amazonaws.kinesisvideo.client.KinesisVideoClient
 import com.amazonaws.kinesisvideo.common.exception.KinesisVideoException
 import com.amazonaws.kinesisvideo.producer.StreamInfo
@@ -341,7 +340,7 @@ object DBUtility {
      */
     suspend fun addFirebaseUser(
         user: HashMap<String, String>, collectionName: String,
-        cognitoAttribute: String,
+        cognitoFirestore: String,
         userPicture: Pair<File, Uri>
     ) {
         FirebaseInstance.collection(collectionName)
@@ -351,7 +350,7 @@ object DBUtility {
                 try {
                     Log.d(TAG, "Updating the user Firestore Key")
                     GlobalScope.launch {
-                        updateCognito(cognitoAttribute, it.id)
+                        updateCognito(cognitoFirestore, user["igHandle"]!!, it.id)
                         uploadFile(userPicture, it.id)
                     }
                 } catch (e: Exception) {
@@ -366,11 +365,12 @@ object DBUtility {
 
 
     /**
-     * Updates the user's Firestore ID in Cognito
+     * Updates the user's Firestore ID in Cognito and adds to Face Collection
      */
-    private suspend fun updateCognito(attribute: String, id: String) = withContext(Dispatchers.IO) {
+    private suspend fun updateCognito(attribute: String, igHandle:String, id: String) = withContext(Dispatchers.IO) {
         try {
-            AWSInstance.updateUserAttributes(hashMapOf(attribute to id))
+            AWSInstance.updateUserAttributes(hashMapOf(attribute to id,
+             "custom:instagramHandle" to igHandle))
         } catch (e: Exception) {
             Log.e(TAG, "Unable to add key", e)
         }
@@ -456,7 +456,9 @@ object DBUtility {
      * Retrieves the users Instagram handle from Firestore
      */
     fun retrieveInstagram(appContext: Context): String {
-        var igHandle = "500"
+        return  AWSInstance.userAttributes.getValue("custom:instagramHandle")
+
+        /*
         val document = AWSInstance.userAttributes
             .getValue(appContext.getString(R.string.cognito_firestore))
 
@@ -466,6 +468,7 @@ object DBUtility {
 
         docRef.get()
             .addOnSuccessListener { doc ->
+                Toast.makeText(appContext, "Retrieved document", Toast.LENGTH_LONG).show()
                 val user = doc.data
                 if (user != null) {
                     igHandle = user["igHandle"] as String
@@ -476,7 +479,7 @@ object DBUtility {
                 Toast.makeText(appContext, "Failed to get IG: $exception", Toast.LENGTH_LONG).show()
             }
 
-        return igHandle
+        return igHandle*/
     }
 
     fun retrieveTwitter(appContext: Context) {
