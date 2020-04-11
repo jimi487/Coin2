@@ -26,6 +26,10 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import com.bohil.coin.settings.UserManager
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class CombinedRegister : Fragment() {
 
@@ -109,6 +113,7 @@ class CombinedRegister : Fragment() {
             //Add user to AWS
             viewModel.addUser(firstName,lastName, lang, country,sex, dob, instagramHandle, twitterHandle, snapchatHandle,
                 getString(R.string.firestore_table), getString(R.string.cognito_firestore), userFile)
+
             findNavController().navigate(CombinedRegisterDirections.actionCombinedFragmentToCoinActivity())
         }
     }

@@ -1,5 +1,6 @@
 package com.bohil.coin.main
 
+import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -10,6 +11,8 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.ActivityNavigator
+import androidx.navigation.fragment.findNavController
 import com.amazonaws.kinesisvideo.common.exception.KinesisVideoException
 import com.amazonaws.mobileconnectors.kinesisvideo.client.KinesisVideoAndroidClientFactory
 import com.amazonaws.mobileconnectors.kinesisvideo.mediasource.android.AndroidCameraMediaSource
@@ -18,6 +21,8 @@ import com.amazonaws.services.rekognition.model.Image
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCoinBinding
+import com.bohil.coin.login.title.TitleFragmentDirections
+import com.bohil.coin.settings.UserSettingsFragment
 
 
 private lateinit var viewModel: CoinViewModel
@@ -66,6 +71,11 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         // Temporarily changing the thread mode to allow network requests on main
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
+
+        binding.button2.setOnClickListener{
+            pauseStreaming()
+           findNavController().navigate(CoinFragmentDirections.actionCoinFragmentToUserSettingsFragment())
+        }
 
         return binding.root
     }

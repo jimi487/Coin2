@@ -15,6 +15,7 @@
         <action
                 android:id="@+id/action_titleFragment_to_coinActivity"
                 app:destination="@id/coinActivity" />
+
     </fragment>
 
     <fragment android:id="@+id/disclaimerFragment"
@@ -54,6 +55,11 @@
             android:id="@+id/coinActivity"
             android:name="com.bohil.coin.main.CoinActivity"
             tools:layout="@layout/activity_coin"
-            android:label="CoinActivity" />
+            android:label="CoinActivity"
+            />
+    <fragment
+            android:id="@+id/userSettingsFragment"
+            android:name="com.bohil.coin.settings.UserSettingsFragment"
+            android:label="UserSettingsFragment" />
 
 </navigation>

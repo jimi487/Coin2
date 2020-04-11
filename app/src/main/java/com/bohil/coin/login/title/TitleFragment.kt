@@ -15,6 +15,7 @@ import com.amazonaws.mobile.client.results.SignInState
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
+import com.bohil.coin.settings.UserManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -118,37 +119,9 @@ class TitleFragment : Fragment() {
 
 
     private fun navigateToMainActivity() {
-
-        runBlocking {
-            val getUserAttributeJob = GlobalScope.launch {
-                //DBUtility.UserID = DBUtility.AWSInstance.userAttributes[context!!.getString(R.string.cognito_firestore)].toString()
-            }
-
-            //Wait for job to complete
-            getUserAttributeJob.join()
-
-            //Retrieve firestore document for logged in user
-            val doc = DBUtility.FirebaseInstance.collection(context!!.getString(R.string.firestore_table)).document(
-                //DBUtility.UserID
-            )
-
-            doc.get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-
-                        //Convert document to object of type Users and assign it to UserData
-                        //DBUtility.UserData = document.toObject<DBUtility.Users>()
-                        findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
-                        //findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToSettings())
-
-                    } else {
-                        Log.d("SETTINGS", "No such document")
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.d("SETTINGS", "get failed with ", exception)
-                }
-        }
+        findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
+        //findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToUserSettings())
     }
+
 }
 
