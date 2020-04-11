@@ -22,18 +22,18 @@ import kotlinx.coroutines.runBlocking
 class UserSettingsFragment : Fragment() {
 
     private lateinit var binding: FragmentUserSettingsBinding
-    private var _userData : UserManager.User? = UserManager.CurrentUser
+    private var _userData : MutableMap<String?, Any>? = UserManager.UserDocs[UserManager.UserID]
 
-    /*private val _fName = _userData?.first
-    private val _lName = _userData?.last
-    private val _birthday = _userData?.birthdate
-    private val _country = _userData?.country
-    private val _igHandle = _userData?.igHandle
-    private val _snapHandle = _userData?.snapchatHandle
-    private val _twitterHandle = _userData?.twitterHandle
-    private val _sex = _userData?.sex
-    private val _language = _userData?.language
-    */
+    private val _fName = _userData?.get("first").toString()
+    private val _lName = _userData?.get("last").toString()
+    private val _birthday = _userData?.get("birthdate").toString()
+    private val _country = _userData?.get("country").toString()
+    private val _igHandle = _userData?.get("igHandle").toString()
+    private val _snapHandle = _userData?.get("snapchatHandle").toString()
+    private val _twitterHandle = _userData?.get("twitterHandle").toString()
+    private val _sex = _userData?.get("sex").toString()
+    private val _language = _userData?.get("language").toString()
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -51,23 +51,24 @@ class UserSettingsFragment : Fragment() {
     }
 
     private fun setTextboxes() {
-        Log.e("SETTINGS/*/*/*/", "Updating textboxes...")
-        binding.TxtFName.setText(_userData?.first)
-        binding.TxtLName.setText(_userData?.last)
-        binding.TxtDOB.setText(_userData?.birthdate)
-        binding.countrySpinner.setSelection(resources.getStringArray(R.array.country_array).indexOf(_userData?.country))
-        binding.TxtIgHandle.setText(_userData?.igHandle)
-        binding.TxtSnapHandle.setText(_userData?.snapchatHandle)
-        binding.TxtTwitterHandle.setText(_userData?.twitterHandle)
-        binding.sexSpinner.setSelection(resources.getStringArray(R.array.sex_array).indexOf(_userData?.sex))
-        binding.languageSpinner.setSelection(resources.getStringArray(R.array.language_array).indexOf(_userData?.language))
+        Log.e(TAG, "Updating textboxes...")
+        binding.TxtFName.setText(_fName)
+        binding.TxtLName.setText(_lName)
+        binding.TxtDOB.setText(_birthday)
+        binding.countrySpinner.setSelection(resources.getStringArray(R.array.country_array).indexOf(_country))
+        binding.TxtIgHandle.setText(_igHandle)
+        binding.TxtSnapHandle.setText(_snapHandle)
+        binding.TxtTwitterHandle.setText(_twitterHandle)
+        binding.sexSpinner.setSelection(resources.getStringArray(R.array.sex_array).indexOf(_sex))
+        binding.languageSpinner.setSelection(resources.getStringArray(R.array.language_array).indexOf(_language))
+        Log.e(TAG, "Set textboxes successfully")
     }
 
     private fun saveInfo() {
         val doc = DBUtility.FirebaseInstance.collection(context!!.getString(R.string.firestore_table)).document(UserManager.UserID)
 
 
-        val user : Map<String, String> = hashMapOf(
+        val userInfo : MutableMap<String?, Any> = hashMapOf(
             "first" to binding.TxtFName.text.toString(),
             "last" to binding.TxtLName.text.toString(),
             "language" to binding.languageSpinner.selectedItem.toString(),
@@ -79,17 +80,21 @@ class UserSettingsFragment : Fragment() {
             "snapchatHandle" to binding.TxtSnapHandle.text.toString()
         )
 
-        val updateJob = doc.update(user)
+        //Change the data of current user to updated data
+        UserManager.UserDocs[UserManager.UserID] = userInfo
+
+        val updateJob = doc.update(userInfo)
 
         updateJob.addOnSuccessListener {
             Toast.makeText(context, "Save successful!", Toast.LENGTH_SHORT).show()
-
-            //Update the doc ref in DBUtility
-            //DBUtility.updateUserInfo(doc)
         }
 
         updateJob.addOnFailureListener{
             Toast.makeText(context, "Error with save", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    companion object {
+        const val TAG = "SETTINGS"
     }
 }

@@ -22,6 +22,7 @@ import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCoinBinding
 import com.bohil.coin.login.title.TitleFragmentDirections
+import com.bohil.coin.settings.UserManager
 import com.bohil.coin.settings.UserSettingsFragment
 
 
@@ -142,11 +143,11 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
             mCameraMediaSource.start()
             Thread.sleep(1000)
-            try{
+            /*try{
                 DBUtility.addFaceToCollection(context!!)
             }catch(e:Exception){
                 Log.d(TAG, e.toString())
-            }
+            }*/
             makeToast("resumed streaming", 0)
             binding.coinStreamButton.text = activity!!.getText(R.string.stop_streaming)
         } catch (e: KinesisVideoException) {
@@ -225,9 +226,14 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                 // Identifying users in the image
                 val facesFound = viewModel.searchCollection(context!!, image)
                 for (face in facesFound) {
-                    val handle = viewModel.retrieveInstagram(context!!)
-                    if(handle != "500" && !textChanged){
 
+                    //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
+                    val userData = UserManager.UserDocs[face.face.externalImageId]
+
+                    //Get the relevant info we want by calling userData?.get("")
+                    val handle = userData?.get("igHandle")
+
+                    if(handle != "500" && !textChanged){
                         userIG = viewModel.retrieveInstagram(context!!)
                         binding.tempUserText.text = userIG
                         textChanged = true

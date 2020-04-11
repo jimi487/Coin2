@@ -22,10 +22,10 @@ class RegisterViewModel: ViewModel() {
      */
     fun addUser(fName:String, lName:String, language:String, country:String,
                 sex:String, dob:String, instagramHandle:String, twitterHandle:String, snapchatHandle:String,
-                collectionName:String, cognitoFirestore:String, userPicture: Pair<File, Uri>){
+                collectionName:String, cognitoFirestore:String, userPicture: Pair<File, Uri>, appContext: Context){
         GlobalScope.launch{
             createUser(fName, lName, language, country, sex, dob, instagramHandle, twitterHandle, snapchatHandle,
-                collectionName, cognitoFirestore, userPicture)
+                collectionName, cognitoFirestore, userPicture, appContext)
         }
     }
 
@@ -37,7 +37,7 @@ class RegisterViewModel: ViewModel() {
      */
     private suspend fun createUser(fName:String, lName:String, language:String, country:String,
                                    sex:String, dob:String, instagramHandle:String, twitterHandle:String, snapchatHandle:String,
-                                   collectionName:String, cognitoAttribute: String, userPicture: Pair<File, Uri>) = withContext(Dispatchers.IO){
+                                   collectionName:String, cognitoAttribute: String, userPicture: Pair<File, Uri>, appContext: Context) = withContext(Dispatchers.IO){
 
         user = hashMapOf(
             "first" to fName,
@@ -51,7 +51,7 @@ class RegisterViewModel: ViewModel() {
             "snapchatHandle" to snapchatHandle
         )
 
-        DBUtility.addFirebaseUser(user, collectionName, cognitoAttribute, userPicture)
+        DBUtility.addFirebaseUser(user, collectionName, cognitoAttribute, userPicture, appContext)
 
     }
 

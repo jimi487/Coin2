@@ -31,6 +31,7 @@ import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.ResultListener
 import com.amplifyframework.storage.result.StorageUploadFileResult
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
+import com.bohil.coin.settings.UserManager
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -252,8 +253,8 @@ object DBUtility {
      * Saves the face id (externalImageId) as their email before the @
     !! All faces in a picture will be saved with the same externalImageId
      */
-    fun addFaceToCollection(appContext: Context) {
-        val image = retrieveImageFromS3()
+    fun addFaceToCollection(appContext: Context, id : String) {
+        val image = retrieveImageFromS3(id)
 
         try {
             val indexFacesRequest = IndexFacesRequest()
@@ -261,7 +262,7 @@ object DBUtility {
                 .withQualityFilter(QualityFilter.AUTO)
                 .withMaxFaces(1)
                 .withCollectionId(getCollectionID(appContext))
-                .withExternalImageId(getName())
+                .withExternalImageId(id)
                 .withDetectionAttributes("DEFAULT")
 
             val indexFacesResult = rekognitionClient.indexFaces(indexFacesRequest)
@@ -291,7 +292,7 @@ object DBUtility {
             }
             val facesRequest = ListFacesRequest()
                 .withCollectionId(getCollectionID(appContext))
-                .withMaxResults(1)
+                .withMaxResults(100)
                 .withNextToken(paginationToken)
 
             facesResult = rekognitionClient.listFaces(facesRequest)
@@ -322,8 +323,8 @@ object DBUtility {
     /**
      * Retrieves the users image from the S3 collection
      */
-    private fun retrieveImageFromS3(): Image {
-        val pictureName = "${AWSInstance.userAttributes.getValue("custom:FireStoreID")}.jpg"
+    private fun retrieveImageFromS3(id : String): Image {
+        val pictureName = "public/${id}.jpg"
 
         return Image()
             .withS3Object(
@@ -341,7 +342,8 @@ object DBUtility {
     suspend fun addFirebaseUser(
         user: HashMap<String, String>, collectionName: String,
         cognitoFirestore: String,
-        userPicture: Pair<File, Uri>
+        userPicture: Pair<File, Uri>,
+        appContext: Context
     ) {
         FirebaseInstance.collection(collectionName)
             .add(user)
@@ -350,8 +352,8 @@ object DBUtility {
                 try {
                     Log.d(TAG, "Updating the user Firestore Key")
                     GlobalScope.launch {
-                        updateCognito(cognitoFirestore, user["igHandle"]!!, it.id)
-                        uploadFile(userPicture, it.id)
+                        updateCognito(cognitoFirestore, it.id, appContext)
+                        uploadFile(userPicture, it.id, appContext)
                     }
                 } catch (e: Exception) {
                     Log.d(TAG, e.toString())
@@ -367,10 +369,10 @@ object DBUtility {
     /**
      * Updates the user's Firestore ID in Cognito and adds to Face Collection
      */
-    private suspend fun updateCognito(attribute: String, igHandle:String, id: String) = withContext(Dispatchers.IO) {
+    private suspend fun updateCognito(attribute: String, id: String, appContext: Context) = withContext(Dispatchers.IO) {
         try {
-            AWSInstance.updateUserAttributes(hashMapOf(attribute to id,
-             "custom:instagramHandle" to igHandle))
+            UserManager.setUserId(appContext, id)
+            AWSInstance.updateUserAttributes(hashMapOf(attribute to id))
         } catch (e: Exception) {
             Log.e(TAG, "Unable to add key", e)
         }
@@ -381,13 +383,14 @@ object DBUtility {
     /**
      * Uploads the file to the Amazon s3 collection
      */
-    private fun uploadFile(userFile: Pair<File, Uri>, firebaseID: String) {
+    private fun uploadFile(userFile: Pair<File, Uri>, firebaseID: String, appContext: Context) {
         Amplify.Storage.uploadFile(
             "$firebaseID.jpg",
             userFile.first.absolutePath,
             object : ResultListener<StorageUploadFileResult> {
                 override fun onResult(result: StorageUploadFileResult?) {
                     Log.d(TAG, "File added successfully")
+                    addFaceToCollection(appContext, firebaseID)
                 }
 
                 override fun onError(error: Throwable?) {
@@ -401,7 +404,8 @@ object DBUtility {
 
     // TODO Change to Firebase name
     fun getName(): String {
-        return AWSInstance.username.substring(0, AWSInstance.username.indexOf("@"))
+        //return AWSInstance.username.substring(0, AWSInstance.username.indexOf("@"))
+        return UserManager.UserID
     }
 
     /**

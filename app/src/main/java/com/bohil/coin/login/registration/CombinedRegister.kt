@@ -112,7 +112,7 @@ class CombinedRegister : Fragment() {
             val userFile = capturedImage
             //Add user to AWS
             viewModel.addUser(firstName,lastName, lang, country,sex, dob, instagramHandle, twitterHandle, snapchatHandle,
-                getString(R.string.firestore_table), getString(R.string.cognito_firestore), userFile)
+                getString(R.string.firestore_table), getString(R.string.cognito_firestore), userFile, context!!)
 
             findNavController().navigate(CombinedRegisterDirections.actionCombinedFragmentToCoinActivity())
         }

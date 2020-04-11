@@ -114,12 +114,12 @@ class CoinViewModel : ViewModel() {
         }
     }
 
-    fun addFaceToCollection(appContext: Context){
+   /*fun addFaceToCollection(appContext: Context){
         GlobalScope.launch{
             DBUtility.addFaceToCollection(appContext)
         }
 
-    }
+    }*/
 
     fun searchCollection(appContext:Context, image:Image): List<FaceMatch>{
         return DBUtility.searchCollection(appContext, image)

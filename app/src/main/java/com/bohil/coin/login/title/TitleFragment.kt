@@ -119,6 +119,7 @@ class TitleFragment : Fragment() {
 
 
     private fun navigateToMainActivity() {
+        UserManager.setUserId(context)
         findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
         //findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToUserSettings())
     }
