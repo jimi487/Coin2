@@ -22,18 +22,17 @@ import kotlinx.coroutines.runBlocking
 class UserSettingsFragment : Fragment() {
 
     private lateinit var binding: FragmentUserSettingsBinding
-    private var _userData : MutableMap<String?, Any>? = UserManager.UserDocs[UserManager.UserID]
+    private var _userData : UserManager.User? = UserManager.UserDocs[UserManager.UserID]
 
-    private val _fName = _userData?.get("first").toString()
-    private val _lName = _userData?.get("last").toString()
-    private val _birthday = _userData?.get("birthdate").toString()
-    private val _country = _userData?.get("country").toString()
-    private val _igHandle = _userData?.get("igHandle").toString()
-    private val _snapHandle = _userData?.get("snapchatHandle").toString()
-    private val _twitterHandle = _userData?.get("twitterHandle").toString()
-    private val _sex = _userData?.get("sex").toString()
-    private val _language = _userData?.get("language").toString()
-
+    private val _fName = _userData?.first
+    private val _lName = _userData?.last
+    private val _birthday = _userData?.birthdate
+    private val _country = _userData?.country
+    private val _igHandle = _userData?.igHandle
+    private val _snapHandle = _userData?.snapchatHandle
+    private val _twitterHandle = _userData?.twitterHandle
+    private val _sex = _userData?.sex
+    private val _language = _userData?.language
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -68,22 +67,22 @@ class UserSettingsFragment : Fragment() {
         val doc = DBUtility.FirebaseInstance.collection(context!!.getString(R.string.firestore_table)).document(UserManager.UserID)
 
 
-        val userInfo : MutableMap<String?, Any> = hashMapOf(
-            "first" to binding.TxtFName.text.toString(),
-            "last" to binding.TxtLName.text.toString(),
-            "language" to binding.languageSpinner.selectedItem.toString(),
-            "country" to binding.countrySpinner.selectedItem.toString(),
-            "sex" to binding.sexSpinner.selectedItem.toString(),
-            "birthdate" to binding.TxtDOB.text.toString(),
-            "igHandle" to binding.TxtIgHandle.text.toString(),
-            "twitterHandle" to binding.TxtTwitterHandle.text.toString(),
-            "snapchatHandle" to binding.TxtSnapHandle.text.toString()
+        val userInfo = UserManager.User(
+            binding.TxtDOB.text.toString(),
+            binding.countrySpinner.selectedItem.toString(),
+            binding.TxtFName.text.toString(),
+            binding.TxtLName.text.toString(),
+            binding.TxtIgHandle.text.toString(),
+            binding.TxtTwitterHandle.text.toString(),
+            binding.TxtSnapHandle.text.toString(),
+            binding.sexSpinner.selectedItem.toString(),
+            binding.languageSpinner.selectedItem.toString()
         )
 
         //Change the data of current user to updated data
         UserManager.UserDocs[UserManager.UserID] = userInfo
 
-        val updateJob = doc.update(userInfo)
+        val updateJob = doc.set(userInfo)
 
         updateJob.addOnSuccessListener {
             Toast.makeText(context, "Save successful!", Toast.LENGTH_SHORT).show()

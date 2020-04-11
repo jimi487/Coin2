@@ -10,6 +10,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.model.Document
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -31,7 +32,7 @@ object UserManager {
         val language: String? = null
     )
 
-    var UserDocs : MutableMap<String, MutableMap<String?, Any>> = mutableMapOf()
+    var UserDocs : MutableMap<String, User> = mutableMapOf()
     var UserID : String = ""
 
     const val TAG  = "UserManager"
@@ -59,7 +60,7 @@ object UserManager {
             .addOnSuccessListener { documents ->
                 Log.i(TAG, "Retrieved all firestore docs successfully")
                 for(doc in documents) {
-                    UserDocs[doc.id] = doc.data
+                    UserDocs[doc.id] = doc.toObject()
                 }
             }
 

@@ -231,7 +231,8 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                     val userData = UserManager.UserDocs[face.face.externalImageId]
 
                     //Get the relevant info we want by calling userData?.get("")
-                    val handle = userData?.get("igHandle")
+                    //val handle = userData?.get("igHandle")
+                    val handle = userData?.igHandle
 
                     if(handle != "500" && !textChanged){
                         userIG = viewModel.retrieveInstagram(context!!)
