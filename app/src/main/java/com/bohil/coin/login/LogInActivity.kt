@@ -19,6 +19,15 @@ class LogInActivity : AppCompatActivity() {
         DBUtility.initAWS(applicationContext)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if(DBUtility.AWSInstance.isSignedIn) {
+            DBUtility.signOutAWS()
+        }
+
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         // Signs the user out

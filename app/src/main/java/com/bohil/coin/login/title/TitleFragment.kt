@@ -39,6 +39,10 @@ class TitleFragment : Fragment() {
             findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToDisclosureFragment())
         }
 
+        binding.forgotPassword.setOnClickListener {
+            findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToForgotPasswordFragment())
+        }
+
         binding.loginButton.setOnClickListener {
             binding.TxtErrors.text = ""
             email = binding.emailField.text.toString()
@@ -52,7 +56,6 @@ class TitleFragment : Fragment() {
         binding.lifecycleOwner = this
         return binding.root
     }
-
 
     // Sets the background video for the main screen
     private fun setBackgroundVideo(binding: FragmentTitleBinding) {
