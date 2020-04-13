@@ -37,23 +37,28 @@ object UserManager {
 
     const val TAG  = "UserManager"
 
-    fun setUserId(context : Context?, id : String? = null) {
+    fun setUserId(context : Context?, id : String) {
         Log.i(TAG, "Setting user id...")
-        runBlocking {
+        /*runBlocking {
             val getAttrJob = GlobalScope.launch {
                 UserID = id ?: DBUtility.AWSInstance.userAttributes["custom:FireStoreID"].toString()
                 Log.i(TAG, "User id set to $UserID")
             }
 
             getAttrJob.join()
-            getAllFirestoreDocs()
-        }
+            //getAllFirestoreDocs()
+        }*/
+
+        UserID = id
+        Log.i(TAG, "User id set to $UserID")
+        getAllFirestoreDocs()
+
     }
 
     /**
      * Get all the firestore documents and store them in the UserDocs var
      */
-    private fun getAllFirestoreDocs() {
+    fun getAllFirestoreDocs() {
         Log.i(TAG, "Getting all firestore docs....")
         DBUtility.FirebaseInstance.collection("CoinBank")
             .get()

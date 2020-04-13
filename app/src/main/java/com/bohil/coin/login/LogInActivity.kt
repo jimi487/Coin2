@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.amazonaws.mobile.client.*
 import com.bohil.coin.R
 import com.bohil.coin.DBUtility
+import com.bohil.coin.settings.UserManager
 
 
 /**
@@ -19,14 +20,6 @@ class LogInActivity : AppCompatActivity() {
         DBUtility.initAWS(applicationContext)
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        if(DBUtility.AWSInstance.isSignedIn) {
-            DBUtility.signOutAWS()
-        }
-
-    }
 
     override fun onDestroy() {
         super.onDestroy()

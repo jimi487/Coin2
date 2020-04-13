@@ -502,7 +502,6 @@ object DBUtility {
     private fun getCollectionID(appContext: Context): String{
         return appContext.getString(R.string.face_collection_name)
     }
-
 }
 
 
