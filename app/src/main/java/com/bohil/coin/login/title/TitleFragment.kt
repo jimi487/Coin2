@@ -9,15 +9,20 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.amazonaws.mobile.client.AWSMobileClient
 import com.amazonaws.mobile.client.Callback
 import com.amazonaws.mobile.client.results.SignInResult
 import com.amazonaws.mobile.client.results.SignInState
+import com.amazonaws.mobile.client.results.SignUpResult
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentTitleBinding
+import com.bohil.coin.login.recovery.ReActivateAccount
+import com.bohil.coin.settings.UserManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+
 
 private val TAG = TitleFragment::class.java.simpleName
 
@@ -38,6 +43,10 @@ class TitleFragment : Fragment() {
             findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToDisclosureFragment())
         }
 
+        binding.forgotPassword.setOnClickListener {
+            findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToForgotPasswordFragment())
+        }
+
         binding.loginButton.setOnClickListener {
             binding.TxtErrors.text = ""
             email = binding.emailField.text.toString()
@@ -51,7 +60,6 @@ class TitleFragment : Fragment() {
         binding.lifecycleOwner = this
         return binding.root
     }
-
 
     // Sets the background video for the main screen
     private fun setBackgroundVideo(binding: FragmentTitleBinding) {
@@ -71,7 +79,24 @@ class TitleFragment : Fragment() {
                             SignInState.NEW_PASSWORD_REQUIRED -> makeToast("Please confirm sign-in with new password.")
                             else -> makeToast("Unsupported sign-in confirmation: " + signInResult.signInState)
                             */
-                            SignInState.DONE -> navigateToMainActivity()
+                            SignInState.DONE -> {
+                              var userId : String? = null
+                                runBlocking {
+                                    val job = GlobalScope.launch {
+                                        userId = DBUtility.AWSInstance.userAttributes["custom:FireStoreID"]
+                                    }
+
+                                    job.join()
+
+                                    if (userId.isNullOrEmpty()) {
+                                        findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCombinedFragment())
+                                    } else {
+                                        UserManager.setUserId(context, userId!!)
+                                        navigateToMainActivity()
+                                    }
+
+                                }
+                            }
                             SignInState.SMS_MFA -> Log.e("SMS_MFA", "")
                             SignInState.NEW_PASSWORD_REQUIRED -> Log.e("NEW_PASS_REQ", "")
                             else -> Log.e(TAG, "Unsupported sign-in confirmation: " + signInResult.signInState)
@@ -102,8 +127,9 @@ class TitleFragment : Fragment() {
                                         binding.passwordField.error = null
                                     }
                                 }
-                                contains("UserNotConfirmedException") -> binding.TxtErrors.text =
-                                    "Your e-mail must be confirmed before signing in."
+                                contains("UserNotConfirmedException") -> {
+                                    resendCode()
+                                }
                                 contains("NotAuthorizedException") -> binding.TxtErrors.text =
                                     "Incorrect e-mail or password."
                                 contains("HTTP") -> binding.TxtErrors.text =
@@ -116,39 +142,39 @@ class TitleFragment : Fragment() {
             })
     }
 
+    private fun resendCode() {
+        DBUtility.AWSInstance.resendSignUp(email, object : Callback<SignUpResult> {
+                override fun onResult(signUpResult: SignUpResult) {
+                    Log.i(
+                        TAG, "A verification code has been sent via" +
+                                signUpResult.userCodeDeliveryDetails.deliveryMedium
+                                    .toString() + " at " +
+                                signUpResult.userCodeDeliveryDetails.destination
+                    )
+
+                    findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToReActivateAccount(email, password))
+                }
+
+                override fun onError(e: java.lang.Exception) {
+                    Log.e(TAG, e.message.toString())
+                }
+            })
+    }
+
 
     private fun navigateToMainActivity() {
-
-        runBlocking {
-            val getUserAttributeJob = GlobalScope.launch {
-                //DBUtility.UserID = DBUtility.AWSInstance.userAttributes[context!!.getString(R.string.cognito_firestore)].toString()
-            }
-
-            //Wait for job to complete
-            getUserAttributeJob.join()
-
-            //Retrieve firestore document for logged in user
-            val doc = DBUtility.FirebaseInstance.collection(context!!.getString(R.string.firestore_table)).document(
-                //DBUtility.UserID
-            )
-
-            doc.get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-
-                        //Convert document to object of type Users and assign it to UserData
-                        //DBUtility.UserData = document.toObject<DBUtility.Users>()
-                        findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
-                        //findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToSettings())
-
-                    } else {
-                        Log.d("SETTINGS", "No such document")
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.d("SETTINGS", "get failed with ", exception)
-                }
-        }
+        //UserManager.setUserId(context)
+        findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToCoinActivity())
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        if(DBUtility.AWSInstance.isSignedIn) {
+            DBUtility.signOutAWS()
+        }
+
+    }
+
 }
 

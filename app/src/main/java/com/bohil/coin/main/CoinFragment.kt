@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import com.amazonaws.kinesisvideo.common.exception.KinesisVideoException
 import com.amazonaws.mobileconnectors.kinesisvideo.client.KinesisVideoAndroidClientFactory
 import com.amazonaws.mobileconnectors.kinesisvideo.mediasource.android.AndroidCameraMediaSource
@@ -18,6 +19,7 @@ import com.amazonaws.services.rekognition.model.Image
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCoinBinding
+import com.bohil.coin.settings.UserManager
 
 
 private lateinit var viewModel: CoinViewModel
@@ -29,7 +31,6 @@ private lateinit var mHolder:SurfaceHolder
 private lateinit var picture:Drawable
 private lateinit var canvas:Canvas
 private lateinit var userIG:String
-private var textChanged = false
 
 
 @Suppress("DEPRECATION")
@@ -66,8 +67,29 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         // Temporarily changing the thread mode to allow network requests on main
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-
         return binding.root
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.simple_nav, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setHasOptionsMenu(true)
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.action_settings -> {
+                pauseStreaming()
+                findNavController().navigate(CoinFragmentDirections.actionCoinFragmentToUserSettingsFragment())
+                return true
+            }
+
+            else -> return super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -132,11 +154,11 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
             mCameraMediaSource.start()
             Thread.sleep(1000)
-            try{
+            /*try{
                 DBUtility.addFaceToCollection(context!!)
             }catch(e:Exception){
                 Log.d(TAG, e.toString())
-            }
+            }*/
             makeToast("resumed streaming", 0)
             binding.coinStreamButton.text = activity!!.getText(R.string.stop_streaming)
         } catch (e: KinesisVideoException) {
@@ -197,7 +219,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
             // App slowed from this network request
             //Scanning the image to retrieve faces
             val results = viewModel.detectFaces(image)
-            if (results != null) {
+            if (results?.faceDetails?.size!! > 0) {
                 // Drawing The Bounding box on found faces
                 val faceDetails = results.faceDetails
 
@@ -215,16 +237,18 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                 // Identifying users in the image
                 val facesFound = viewModel.searchCollection(context!!, image)
                 for (face in facesFound) {
-                    val handle = viewModel.retrieveInstagram(context!!)
-                    if(handle != "500" && !textChanged){
 
-                        userIG = viewModel.retrieveInstagram(context!!)
+                    //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
+                    val userData = UserManager.UserDocs[face.face.externalImageId]
+
+                    //Get the relevant info we want by calling userData?.get("")
+                    val handle = userData?.igHandle
+
+                    if(handle != "500"){
+                        userIG = handle!!
                         binding.tempUserText.text = userIG
-                        textChanged = true
                         binding.invalidateAll()
                     }
-
-                    //makeToast("Face ID: $face", 1)
                 }
             }
 

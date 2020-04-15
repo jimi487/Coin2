@@ -15,6 +15,16 @@
         <action
                 android:id="@+id/action_titleFragment_to_coinActivity"
                 app:destination="@id/coinActivity" />
+        <action
+                android:id="@+id/action_titleFragment_to_forgotPasswordFragment"
+                app:destination="@id/forgotPasswordFragment" />
+        <action
+                android:id="@+id/action_titleFragment_to_reActivateAccount"
+                app:destination="@id/reActivateAccount" />
+        <action
+                android:id="@+id/action_titleFragment_to_combinedFragment"
+                app:destination="@id/combinedFragment" />
+
     </fragment>
 
     <fragment android:id="@+id/disclaimerFragment"
@@ -54,6 +64,33 @@
             android:id="@+id/coinActivity"
             android:name="com.bohil.coin.main.CoinActivity"
             tools:layout="@layout/activity_coin"
-            android:label="CoinActivity" />
+            android:label="CoinActivity"
+            />
+    <fragment
+            android:id="@+id/userSettingsFragment"
+            android:name="com.bohil.coin.settings.UserSettingsFragment"
+            android:label="UserSettingsFragment" />
+    <fragment
+            android:id="@+id/forgotPasswordFragment"
+            android:name="com.bohil.coin.login.recovery.ForgotPasswordFragment"
+            android:label="ForgotPasswordFragment" >
+        <action
+                android:id="@+id/action_forgotPasswordFragment_to_titleFragment"
+                app:destination="@id/titleFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/reActivateAccount"
+            android:name="com.bohil.coin.login.recovery.ReActivateAccount"
+            android:label="ReActivateAccount" >
+        <argument
+                android:name="email"
+                app:argType="string" />
+        <argument
+                android:name="password"
+                app:argType="string" />
+        <action
+                android:id="@+id/action_reActivateAccount_to_combinedFragment"
+                app:destination="@id/combinedFragment" />
+    </fragment>
 
 </navigation>

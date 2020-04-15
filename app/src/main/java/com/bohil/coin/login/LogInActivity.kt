@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.amazonaws.mobile.client.*
 import com.bohil.coin.R
 import com.bohil.coin.DBUtility
+import com.bohil.coin.settings.UserManager
 
 
 /**
@@ -18,6 +19,7 @@ class LogInActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         DBUtility.initAWS(applicationContext)
     }
+
 
     override fun onDestroy() {
         super.onDestroy()

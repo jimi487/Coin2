@@ -10,5 +10,17 @@
             android:id="@+id/coinFragment"
             android:name="com.bohil.coin.main.CoinFragment"
             android:label="CoinFragment"
-            tools:layout="@layout/fragment_coin"/>
+            tools:layout="@layout/fragment_coin">
+        <action
+                android:id="@+id/action_coinFragment_to_userSettingsFragment"
+                app:destination="@id/userSettingsFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/userSettingsFragment"
+            android:name="com.bohil.coin.settings.UserSettingsFragment"
+            android:label="UserSettingsFragment" >
+        <action
+                android:id="@+id/action_userSettingsFragment_to_coinFragment"
+                app:destination="@id/coinFragment" />
+    </fragment>
 </navigation>
