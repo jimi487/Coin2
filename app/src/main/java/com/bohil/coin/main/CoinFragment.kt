@@ -1,6 +1,5 @@
 package com.bohil.coin.main
 
-import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.ActivityNavigator
 import androidx.navigation.fragment.findNavController
 import com.amazonaws.kinesisvideo.common.exception.KinesisVideoException
 import com.amazonaws.mobileconnectors.kinesisvideo.client.KinesisVideoAndroidClientFactory
@@ -21,9 +19,7 @@ import com.amazonaws.services.rekognition.model.Image
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCoinBinding
-import com.bohil.coin.login.title.TitleFragmentDirections
 import com.bohil.coin.settings.UserManager
-import com.bohil.coin.settings.UserSettingsFragment
 
 
 private lateinit var viewModel: CoinViewModel
@@ -35,7 +31,6 @@ private lateinit var mHolder:SurfaceHolder
 private lateinit var picture:Drawable
 private lateinit var canvas:Canvas
 private lateinit var userIG:String
-private var textChanged = false
 
 
 @Suppress("DEPRECATION")
@@ -247,17 +242,13 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                     val userData = UserManager.UserDocs[face.face.externalImageId]
 
                     //Get the relevant info we want by calling userData?.get("")
-                    //val handle = userData?.get("igHandle")
                     val handle = userData?.igHandle
 
-                    if(handle != "500" && !textChanged){
-                        userIG = viewModel.retrieveInstagram(context!!)
+                    if(handle != "500"){
+                        userIG = handle!!
                         binding.tempUserText.text = userIG
-                        textChanged = true
                         binding.invalidateAll()
                     }
-
-                    //makeToast("Face ID: $face", 1)
                 }
             }
 
