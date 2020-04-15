@@ -108,15 +108,21 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
         canvas = mHolder.lockCanvas()
         canvas.drawColor(0, PorterDuff.Mode.CLEAR)
-        val paint = Paint()
+        /*val paint = Paint()
         paint.style = Paint.Style.STROKE
         paint.color = color
-        paint.strokeWidth = 5f
+        paint.strokeWidth = 5f*/
 
         left = width * box.left
         top = height * box.top
 
-        canvas.drawRect(left, top, left + (width * box.width), top + (height * box.height), paint)
+        val d = resources.getDrawable(R.drawable.face_square, null)
+        d.setBounds(left.toInt(), top.toInt(), (left + (width * box.width)).toInt(),
+            (top + (height * box.height)).toInt()
+        )
+        d.draw(canvas)
+
+        //canvas.drawRect(left, top, left + (width * box.width), top + (height * box.height), paint)
         mHolder.unlockCanvasAndPost(canvas)
 
     }
