@@ -1,16 +1,21 @@
 package com.bohil.coin.settings
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -24,9 +29,11 @@ import com.amazonaws.services.s3.AmazonS3URI
 import com.amazonaws.services.s3.S3ClientOptions
 import com.amazonaws.util.IOUtils
 import com.amplifyframework.core.Amplify
+import com.amplifyframework.core.ResultListener
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentUserSettingsBinding
+import com.bohil.coin.login.registration.CombinedRegister
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -41,6 +48,8 @@ import java.util.*
 class UserSettingsFragment : Fragment() {
 
     private lateinit var binding: FragmentUserSettingsBinding
+    private lateinit var photoURI: Uri
+    private lateinit var capturedImage: Pair<File, Uri>
     private var _userData : UserManager.User? = UserManager.UserDocs[UserManager.UserID]
     private var imgLoc : String = ""
     private val _fName = _userData?.first
@@ -56,14 +65,10 @@ class UserSettingsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_user_settings, container, false)
+        binding.BtnSave.setOnClickListener { saveInfo() }
+        binding.BtnBack.setOnClickListener{ findNavController().navigate(UserSettingsFragmentDirections.actionUserSettingsFragmentToCoinFragment()) }
+        binding.faceImage.setOnClickListener { captureImage() }
 
-        binding.BtnSave.setOnClickListener {
-            saveInfo()
-        }
-
-        binding.BtnBack.setOnClickListener{
-            findNavController().navigate(UserSettingsFragmentDirections.actionUserSettingsFragmentToCoinFragment())
-        }
         setTextboxes()
         retrieveImg()
         return binding.root
@@ -137,9 +142,101 @@ class UserSettingsFragment : Fragment() {
         updateJob.addOnFailureListener{
             Toast.makeText(context, "Error with save", Toast.LENGTH_SHORT).show()
         }
+
+        if(oneFace) DBUtility.uploadFile(capturedImage, UserManager.UserID, context!!)
+
+
+    }
+
+    /**
+     * Captures the image
+     */
+    private fun captureImage(){
+
+        val packageManager = context!!.packageManager
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            takePictureIntent.resolveActivity(packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    Log.d(TAG, "Error creating the file")
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    photoURI= FileProvider.getUriForFile(
+                        context!!,
+                        "com.bohil.coin.fileprovider",
+                        it
+                    )
+
+                    capturedImage = Pair(photoFile, photoURI)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles when the user is brought back to the app from taking a picture
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK){
+            val imageBitmap = BitmapFactory.decodeFile(capturedImage.first.path)
+            val screenImage = Bitmap.createScaledBitmap(imageBitmap, 100, 100, false)
+
+            val faces = verifyPicture(context!!, screenImage)
+
+            if (faces == 1){
+                oneFace = true
+                changeThumbnail(imageBitmap)
+            }else{
+                oneFace = false
+                makeToast("Unable to replace picture since no faces were detected!")
+            }
+
+        }
+    }
+
+
+    /**
+     * Changes the thumbnails in the preview screen
+     */
+    private fun changeThumbnail(thumb: Bitmap){
+        binding.faceImage.setImageBitmap(thumb)
+    }
+
+    /**
+     * Uses Firebase to verify if a face was detected in a picture
+     */
+    fun verifyPicture(appContext: Context, screenImage: Bitmap): Int{
+        var facesFound = 0
+        val image = Image().withBytes(DBUtility.convertToByteBuffer(appContext, screenImage))
+
+        runBlocking {
+            val detectFacesJob = GlobalScope.launch {
+                val results = DBUtility.detectFaces(image)
+                facesFound = results?.faceDetails!!.size
+            }
+            detectFacesJob.join()
+        }
+
+        return facesFound
+    }
+
+    private fun makeToast(msg: String, length: Int = 0) {
+        if (length == 0)
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show() else
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+
     }
 
     companion object {
         const val TAG = "SETTINGS"
+        private var oneFace = false
+        private const val REQUEST_TAKE_PHOTO = 1001
     }
 }
