@@ -323,7 +323,7 @@ object DBUtility {
     /**
      * Retrieves the users image from the S3 collection
      */
-    private fun retrieveImageFromS3(id : String): Image {
+    fun retrieveImageFromS3(id : String): Image {
         val pictureName = "public/${id}.jpg"
 
         return Image()

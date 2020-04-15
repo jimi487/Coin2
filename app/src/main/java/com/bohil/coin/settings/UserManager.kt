@@ -58,7 +58,7 @@ object UserManager {
     /**
      * Get all the firestore documents and store them in the UserDocs var
      */
-    fun getAllFirestoreDocs() {
+    private fun getAllFirestoreDocs() {
         Log.i(TAG, "Getting all firestore docs....")
         DBUtility.FirebaseInstance.collection("CoinBank")
             .get()

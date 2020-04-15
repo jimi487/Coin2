@@ -72,13 +72,29 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         // Temporarily changing the thread mode to allow network requests on main
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-
-        binding.button2.setOnClickListener{
-            pauseStreaming()
-           findNavController().navigate(CoinFragmentDirections.actionCoinFragmentToUserSettingsFragment())
-        }
-
         return binding.root
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.simple_nav, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setHasOptionsMenu(true)
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.action_settings -> {
+                pauseStreaming()
+                findNavController().navigate(CoinFragmentDirections.actionCoinFragmentToUserSettingsFragment())
+                return true
+            }
+
+            else -> return super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -208,7 +224,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
             // App slowed from this network request
             //Scanning the image to retrieve faces
             val results = viewModel.detectFaces(image)
-            if (results != null) {
+            if (results?.faceDetails?.size!! > 0) {
                 // Drawing The Bounding box on found faces
                 val faceDetails = results.faceDetails
 
