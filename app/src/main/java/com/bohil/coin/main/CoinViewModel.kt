@@ -28,7 +28,6 @@ private const val TAG = "CoinViewModel"
  * Holds and initiates the configurations for the Kinesis Stream
  */
 class CoinViewModel : ViewModel() {
-    var handle = ""
     init{
 
     }
@@ -125,30 +124,8 @@ class CoinViewModel : ViewModel() {
         return DBUtility.searchCollection(appContext, image)
     }
 
-    fun retrieveName(): String{
-        return DBUtility.getName()
-    }
 
-    fun retrieveInstagram(appContext: Context): String{
-        runBlocking {
-            val getHandleJob = GlobalScope.launch {
-                handle = DBUtility.retrieveInstagram(appContext)
-            }
-            getHandleJob.join()
-        }
-        return handle
-    }
-
-    fun retrieveTwitter(appContext: Context){
-        return DBUtility.retrieveTwitter(appContext)
-    }
-    fun retrieveSnapchat(appContext: Context){
-        return DBUtility.retrieveSnapchat(appContext)
-
-    }
-
-    fun navigateToInstagram(appContext: Context){
-        val igHandle = DBUtility.retrieveInstagram(appContext)
+    fun navigateToInstagram(appContext: Context, handle : String){
         val uri = Uri.parse("http://instagram.com/_u/$handle")
         val insta = Intent(Intent.ACTION_VIEW, uri)
         insta.setPackage("com.instagram.android")
