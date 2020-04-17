@@ -40,6 +40,7 @@ private lateinit var image : Image
 private lateinit var layout : FrameLayout
 private lateinit var igTextView : TextView
 private lateinit var nameView : TextView
+private var currentDetectedFaceID : String? = null
 private var topCoord : Float = 0.0f
 private var bottomCoord: Float = 0.0f
 private var leftCoord : Float = 0.0f
@@ -61,10 +62,10 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
         layout = binding.mainFrame
         igTextView = TextView(context)
-        igTextView.textSize = 20f
-        igTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ig_icon, 0, 0, 0)
+        igTextView.textSize = 30f
+        //igTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ig_icon, 0, 0, 0)
         nameView = TextView(context)
-        nameView.textSize = 20f
+        nameView.textSize = 30f
 
         // Binding TextureView
         textureView = binding.coinTextureView
@@ -241,7 +242,6 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     ////
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-        layout.removeView(igTextView)
 
         // Creating screenshot of the screen
         val screenFrame = Bitmap.createBitmap(textureView.width, textureView.height, Bitmap.Config.ARGB_8888)
@@ -274,28 +274,39 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                 // Identifying users in the image
                 val facesFound = viewModel.searchCollection(context!!, image)
                 for (face in facesFound) {
-                    //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
-                    val userData = UserManager.UserDocs[face.face.externalImageId]
 
-                    //Get the relevant info we want by calling userData?.get("")
-                    val handle = userData?.igHandle
-                    val name = "${userData?.first} ${userData?.last}"
+                    //Only display the views if there's a new face detected
+                    if(currentDetectedFaceID != face.face.externalImageId) {
+                        currentDetectedFaceID = face.face.externalImageId
 
-                    if(!handle.isNullOrEmpty()){
-                        userIG = handle
-                        igTextView.text = "@${userIG}"
-                        nameView.text = name
-                        igTextView.setOnClickListener { viewModel.navigateToInstagram(context!!, handle) }
+                        //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
+                        val userData = UserManager.UserDocs[face.face.externalImageId]
 
-                        val params = FrameLayout.LayoutParams(layout.width,layout.height)
-                        params.leftMargin = rightCoord.toInt()
-                        params.topMargin = bottomCoord.toInt()
-                        layout.addView(igTextView, params)
+                        //Get the relevant info we want by calling userData?.get("")
+                        val handle = userData?.igHandle
+                        val name = "${userData?.first} ${userData?.last}"
 
-                        val params2 = FrameLayout.LayoutParams(layout.width,layout.height)
-                        params2.rightMargin = leftCoord.toInt()
-                        params2.topMargin = topCoord.toInt()
-                        layout.addView(nameView, params2)
+                        if (!handle.isNullOrEmpty()) {
+                            userIG = handle
+                            igTextView.text = "@${userIG}"
+                            nameView.text = name
+                            igTextView.setOnClickListener {
+                                viewModel.navigateToInstagram(
+                                    context!!,
+                                    handle
+                                )
+                            }
+
+                            val params = FrameLayout.LayoutParams(layout.width, layout.height)
+                            params.leftMargin = rightCoord.toInt()
+                            params.topMargin = bottomCoord.toInt()
+                            layout.addView(nameView, params)
+
+                            val params2 = FrameLayout.LayoutParams(layout.width, layout.height)
+                            params2.leftMargin = rightCoord.toInt()
+                            params2.topMargin = bottomCoord.toInt() + nameView.textSize.toInt()
+                            layout.addView(igTextView, params2)
+                        }
                     }
                 }
             }
