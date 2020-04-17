@@ -13,26 +13,28 @@
                 <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="637dp"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:id="@+id/mainFrame">
 
-                    <TextureView
-                            android:id="@+id/coinTextureView"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1" />
 
-                    <SurfaceView
-                            android:id="@+id/surfaceView"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1" />
+                        <TextureView
+                                android:id="@+id/coinTextureView"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1" />
 
-                    <TextView
-                            android:id="@+id/tempUserText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="TextView"
-                            android:textSize="30sp" />
+                        <SurfaceView
+                                android:id="@+id/surfaceView"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1" />
+
+                       <!-- <TextView
+                                android:id="@+id/tempUserText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="TextView"
+                                android:textSize="30sp" /> -->
 
                 </FrameLayout>
 

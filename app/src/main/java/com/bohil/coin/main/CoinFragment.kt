@@ -5,7 +5,11 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
+import android.util.TypedValue
 import android.view.*
+import android.widget.FrameLayout
+import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -20,6 +24,7 @@ import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCoinBinding
 import com.bohil.coin.settings.UserManager
+import com.google.android.gms.vision.Frame
 
 
 private lateinit var viewModel: CoinViewModel
@@ -31,6 +36,15 @@ private lateinit var mHolder:SurfaceHolder
 private lateinit var picture:Drawable
 private lateinit var canvas:Canvas
 private lateinit var userIG:String
+private lateinit var image : Image
+private lateinit var layout : FrameLayout
+private lateinit var igTextView : TextView
+private lateinit var nameView : TextView
+private var currentDetectedFaceID : String? = null
+private var topCoord : Float = 0.0f
+private var bottomCoord: Float = 0.0f
+private var leftCoord : Float = 0.0f
+private var rightCoord : Float = 0.0f
 
 
 @Suppress("DEPRECATION")
@@ -45,6 +59,13 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_coin, container, false)
         binding.lifecycleOwner = this
+
+        layout = binding.mainFrame
+        igTextView = TextView(context)
+        igTextView.textSize = 30f
+        //igTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ig_icon, 0, 0, 0)
+        nameView = TextView(context)
+        nameView.textSize = 30f
 
         // Binding TextureView
         textureView = binding.coinTextureView
@@ -61,7 +82,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         mHolder.setFormat(PixelFormat.TRANSPARENT)
 
         // TextView for Users Instagram
-        binding.tempUserText.setOnClickListener { viewModel.navigateToInstagram(context!!) }
+        //binding.tempUserText.setOnClickListener { viewModel.navigateToInstagram(context!!) }
 
         //TODO Change network requests to background threads in viewmodel
         // Temporarily changing the thread mode to allow network requests on main
@@ -78,6 +99,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
+        image = DBUtility.retrieveImageFromS3(UserManager.UserID)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -108,15 +130,28 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
         canvas = mHolder.lockCanvas()
         canvas.drawColor(0, PorterDuff.Mode.CLEAR)
-        val paint = Paint()
+        /*val paint = Paint()
         paint.style = Paint.Style.STROKE
         paint.color = color
-        paint.strokeWidth = 5f
+        paint.strokeWidth = 5f*/
+
 
         left = width * box.left
         top = height * box.top
 
-        canvas.drawRect(left, top, left + (width * box.width), top + (height * box.height), paint)
+        val d = resources.getDrawable(R.drawable.face_square, null)
+        d.setBounds(left.toInt(), top.toInt(), (left + (width * box.width)).toInt(),
+            (top + (height * box.height)).toInt()
+        )
+
+        d.draw(canvas)
+
+        leftCoord = left
+        rightCoord = left + (width * box.width)
+        topCoord = top
+        bottomCoord = top + (height * box.height)
+
+        //canvas.drawRect(left, top, left + (width * box.width), top + (height * box.height), paint)
         mHolder.unlockCanvasAndPost(canvas)
 
     }
@@ -201,18 +236,20 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     }
 
 
+
     ////
     // TextureView.SurfaceTextureListener methods
     ////
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+
         // Creating screenshot of the screen
         val screenFrame = Bitmap.createBitmap(textureView.width, textureView.height, Bitmap.Config.ARGB_8888)
         val screenImage = Bitmap.createScaledBitmap(screenFrame, 100, 100, false)
         textureView.getBitmap(screenImage)
 
         // Converts to AWS Image
-        val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
+        //val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
 
         // Scanning the capture for faces
         try {
@@ -238,16 +275,38 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                 val facesFound = viewModel.searchCollection(context!!, image)
                 for (face in facesFound) {
 
-                    //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
-                    val userData = UserManager.UserDocs[face.face.externalImageId]
+                    //Only display the views if there's a new face detected
+                    if(currentDetectedFaceID != face.face.externalImageId) {
+                        currentDetectedFaceID = face.face.externalImageId
 
-                    //Get the relevant info we want by calling userData?.get("")
-                    val handle = userData?.igHandle
+                        //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
+                        val userData = UserManager.UserDocs[face.face.externalImageId]
 
-                    if(handle != "500"){
-                        userIG = handle!!
-                        binding.tempUserText.text = userIG
-                        binding.invalidateAll()
+                        //Get the relevant info we want by calling userData?.get("")
+                        val handle = userData?.igHandle
+                        val name = "${userData?.first} ${userData?.last}"
+
+                        if (!handle.isNullOrEmpty()) {
+                            userIG = handle
+                            igTextView.text = "@${userIG}"
+                            nameView.text = name
+                            igTextView.setOnClickListener {
+                                viewModel.navigateToInstagram(
+                                    context!!,
+                                    handle
+                                )
+                            }
+
+                            val params = FrameLayout.LayoutParams(layout.width, layout.height)
+                            params.leftMargin = rightCoord.toInt()
+                            params.topMargin = bottomCoord.toInt()
+                            layout.addView(nameView, params)
+
+                            val params2 = FrameLayout.LayoutParams(layout.width, layout.height)
+                            params2.leftMargin = rightCoord.toInt()
+                            params2.topMargin = bottomCoord.toInt() + nameView.textSize.toInt()
+                            layout.addView(igTextView, params2)
+                        }
                     }
                 }
             }

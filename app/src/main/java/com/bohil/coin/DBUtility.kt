@@ -383,7 +383,7 @@ object DBUtility {
     /**
      * Uploads the file to the Amazon s3 collection
      */
-    private fun uploadFile(userFile: Pair<File, Uri>, firebaseID: String, appContext: Context) {
+    fun uploadFile(userFile: Pair<File, Uri>, firebaseID: String, appContext: Context) {
         Amplify.Storage.uploadFile(
             "$firebaseID.jpg",
             userFile.first.absolutePath,
