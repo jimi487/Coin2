@@ -5,12 +5,8 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
-import android.util.TypedValue
 import android.view.*
-import android.widget.FrameLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -24,7 +20,7 @@ import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentCoinBinding
 import com.bohil.coin.settings.UserManager
-import com.google.android.gms.vision.Frame
+import com.bohil.coin.settings.UserSettingsFragment
 
 
 private lateinit var viewModel: CoinViewModel
@@ -35,22 +31,32 @@ private lateinit var surfaceView: SurfaceView
 private lateinit var mHolder:SurfaceHolder
 private lateinit var picture:Drawable
 private lateinit var canvas:Canvas
+//private lateinit var recyclerView: RecyclerView
+//private lateinit var viewAdapter:RecyclerView.Adapter<*>
+//private lateinit var viewManager:RecyclerView.LayoutManager
 private lateinit var userIG:String
 private lateinit var image : Image
 private lateinit var layout : FrameLayout
 private lateinit var igTextView : TextView
 private lateinit var nameView : TextView
+private var previewwTexture:SurfaceTexture? = null
 private var currentDetectedFaceID : String? = null
 private var topCoord : Float = 0.0f
 private var bottomCoord: Float = 0.0f
 private var leftCoord : Float = 0.0f
 private var rightCoord : Float = 0.0f
 
+// Variable to determine whether the user has started the stream
+private var startStream = false
+// Determines when the stream timer has finished
+private var timeUp = true
 
 @Suppress("DEPRECATION")
 class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     companion object {
         const val TAG = "CoinFragment"
+        // List containing all the users found so far
+        private val facesFoundList: MutableList<Pair<String, String>> = mutableListOf<Pair<String, String>>()
     }
 
     override fun onCreateView(
@@ -71,20 +77,27 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         textureView = binding.coinTextureView
         textureView.surfaceTextureListener = this
 
-        //TODO Implement bounding box with this xml
-        //Bouding Box to draw on canvas
-        picture = resources.getDrawable(R.drawable.boundingbox)
-
         // SurfaceView
         surfaceView = binding.surfaceView
         surfaceView.setZOrderOnTop(true)
         mHolder = surfaceView.holder
         mHolder.setFormat(PixelFormat.TRANSPARENT)
 
+        // Stream button
+        binding.coinStreamButton.text = activity!!.getText(R.string.start_streaming)
+
+        // Change Camera Icon
+        //binding.changeCamera.setOnClickListener { changeCameraDirection() }
+
         // TextView for Users Instagram
         //binding.tempUserText.setOnClickListener { viewModel.navigateToInstagram(context!!) }
 
-        //TODO Change network requests to background threads in viewmodel
+        // Setting the RecylcerView for found users
+        //viewManager = LinearLayoutManager(context)
+        //recyclerView.layoutManager = viewManager
+        //viewAdapter = MyAdapter(myDataset)
+
+
         // Temporarily changing the thread mode to allow network requests on main
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -156,71 +169,83 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
     }
 
-    private fun clearFocusRect(){
+    private fun clearCanvas(){
         canvas = mHolder.lockCanvas()
         canvas.drawColor(0, PorterDuff.Mode.CLEAR)
         mHolder.unlockCanvasAndPost(canvas)
     }
 
     /**
-     * Initiates the Kinesis Video Client
+     * Initiates the Kinesis Video Client and starts the stream
      */
     private fun createClientAndStartStreaming(previewTexture: SurfaceTexture) {
         try {
             DBUtility.createKinesisVideoClient(context!!)
 
             // Media Source to send data to Video Stream
-            mCameraMediaSource = DBUtility.createMediaSource(context!!)
+            mCameraMediaSource = DBUtility.createMediaSource(context!!, 1)
             mCameraMediaSource.setPreviewSurfaces(Surface(previewTexture))
 
-            // Starts streaming
-            resumeStreaming()
+            if (mCameraMediaSource == null) {
+                return
+            }
+            mCameraMediaSource.start()
         } catch (e: KinesisVideoException) {
             Log.e(TAG, "unable to start streaming")
             throw RuntimeException("unable to start streaming", e)
         }
     }
 
+    /**
+     * Starts the stream
+     */
     private fun resumeStreaming() {
         try {
-            if (mCameraMediaSource == null) {
-                return
-            }
-
-            mCameraMediaSource.start()
-            Thread.sleep(1000)
-            /*try{
-                DBUtility.addFaceToCollection(context!!)
-            }catch(e:Exception){
-                Log.d(TAG, e.toString())
-            }*/
-            makeToast("resumed streaming", 0)
+            startStream = true
             binding.coinStreamButton.text = activity!!.getText(R.string.stop_streaming)
+            // Starts the Timer for the stream
+            timeUp = false
+            /*
+            GlobalScope.launch {
+                delay(5000)
+                timeUp = true
+                startStream = false
+                clearCanvas()
+                updateListView()
+            }*/
         } catch (e: KinesisVideoException) {
             Log.e(TAG, "unable to resume streaming", e)
             makeToast("failed to resume streaming", 1)
         }
     }
 
+    /**
+     * Pauses the stream
+     */
     private fun pauseStreaming() {
         try {
             if (mCameraMediaSource == null) {
                 return
             }
-            mCameraMediaSource.stop()
+            startStream = false
+            clearCanvas()
+            updateListView()
+
             makeToast("stopped streaming",0)
             binding.coinStreamButton.text = activity!!.getText(R.string.start_streaming)
         } catch (e: KinesisVideoException) {
             Log.e(TAG, "unable to pause streaming", e)
             makeToast("failed to pause streaming", 1)
         }
-    }
+        binding.coinStreamButton.text = activity!!.getText(R.string.start_streaming)
 
+
+    }
 
     override fun onResume() {
         super.onResume()
         try{
-            resumeStreaming()
+            mCameraMediaSource.start()
         }catch(e: Exception){
             Log.d(TAG ,e.toString())
         }
@@ -228,96 +253,176 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
     override fun onPause() {
         super.onPause()
-        pauseStreaming()
+        mCameraMediaSource.stop()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.coinStreamButton.setOnClickListener{pauseStreaming()}
+        binding.coinStreamButton.setOnClickListener{streamButtonClick()}
     }
 
+    /**
+     * On click for the stream button
+      */
+    private fun streamButtonClick(){
+        if(!startStream) resumeStreaming()
+        else pauseStreaming()
+    }
 
+    /**
+     * Navigates to the users Instagram
+     * Handles stopping the streaming instance
+     */
+    private fun navigateToInstagram(handle: String){
+        try {
+            if (mCameraMediaSource == null) {
+                return
+            }
+            mCameraMediaSource.stop()
+            viewModel.navigateToInstagram(context!!, handle)
+        } catch (e: KinesisVideoException) {
+            Log.e(TAG, "unable to pause streaming", e)
+            makeToast("failed to pause streaming", 1)
+        }
+
+    }
+
+    private fun updateListView(){
+        val layout = binding.facesFoundLayout
+        for(faces in facesFoundList){
+            val userSettings = UserSettingsFragment()
+            var userBitmap = DBUtility.retrieveImageFromS3Bitmap(context!!, faces.first)
+            userBitmap = Bitmap.createScaledBitmap(userBitmap, 400, 400, false)
+            val userImage = ImageButton(context)
+            userImage.layoutParams = LinearLayout.LayoutParams(400,400)
+            userImage.rotation = 90F
+            userImage.x = 20F
+            userImage.y = 20F
+            userImage.setImageBitmap(userBitmap)
+            userImage.setOnClickListener { navigateToInstagram(faces.second) }
+            layout.addView(userImage)
+        }
+    }
+
+    //TODO Properly implement
+    /**
+     * Changes the direction of the camera
+     */
+    private fun changeCameraDirection(){
+        try {
+            if (mCameraMediaSource != null) mCameraMediaSource.stop()
+            if (DBUtility.kinesisVideoClient != null) DBUtility.kinesisVideoClient.stopAllMediaSources()
+            KinesisVideoAndroidClientFactory.freeKinesisVideoClient()
+
+            DBUtility.createKinesisVideoClient(context!!)
+            mCameraMediaSource = viewModel.changeCameraDirection(context!!)
+            mCameraMediaSource.setPreviewSurfaces(Surface(previewwTexture))
+
+            if (mCameraMediaSource == null) {
+                return
+            }
+            mCameraMediaSource.start()
+        } catch (e: KinesisVideoException) {
+            Log.e(TAG, "failed to release kinesis video client", e)
+        }
+
+    }
 
     ////
     // TextureView.SurfaceTextureListener methods
     ////
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+        //Scan the users face after the start stream button has been tapped
+        if(startStream  && !timeUp){
+            // Updates when a face has been found
+            var faceFound = false
 
-        // Creating screenshot of the screen
-        val screenFrame = Bitmap.createBitmap(textureView.width, textureView.height, Bitmap.Config.ARGB_8888)
-        val screenImage = Bitmap.createScaledBitmap(screenFrame, 100, 100, false)
-        textureView.getBitmap(screenImage)
+            // Creating screenshot of the screen
+            val screenFrame = Bitmap.createBitmap(textureView.width, textureView.height, Bitmap.Config.ARGB_8888)
+            val screenImage = Bitmap.createScaledBitmap(screenFrame, 100, 100, false)
+            textureView.getBitmap(screenImage)
 
-        // Converts to AWS Image
-        //val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
+            // Converts to AWS Image
+            val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
 
-        // Scanning the capture for faces
-        try {
-            // App slowed from this network request
-            //Scanning the image to retrieve faces
-            val results = viewModel.detectFaces(image)
-            if (results?.faceDetails?.size!! > 0) {
-                // Drawing The Bounding box on found faces
-                val faceDetails = results.faceDetails
+            // Scanning the capture for faces
+            try {
+                // App slowed from this network request
+                //Scanning the image to retrieve faces
+                val results = viewModel.detectFaces(image)
+                if (results?.faceDetails?.size!! > 0) {
+                    faceFound = true
+                    // Drawing The Bounding box on found faces
+                    val faceDetails = results.faceDetails
 
-                // Clears the canvas if no faces are recognized
-                if(faceDetails.size == 0)
-                    clearFocusRect()
+                    // Clears the canvas if no faces are recognized
+                    if(faceDetails.size == 0)
+                        clearCanvas()
 
-                for (face in faceDetails) {
-                    // Drawing Box around users face
-                    val box = face.boundingBox
-                    drawFocusRect(screenFrame, box, Color.WHITE)
+                    for (face in faceDetails) {
+                        // Drawing Box around users face
+                        val box = face.boundingBox
+                        drawFocusRect(screenFrame, box, Color.WHITE)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.d(TAG, e.toString())
+            }
 
-                // TODO Put in own try block and handle network request?
-                // Identifying users in the image
-                val facesFound = viewModel.searchCollection(context!!, image)
-                for (face in facesFound) {
+            if(faceFound){
+                try{
+                    // Identifying users in the image
+                    val facesFound = viewModel.searchCollection(context!!, image)
+                    for (face in facesFound) {
 
-                    //Only display the views if there's a new face detected
-                    if(currentDetectedFaceID != face.face.externalImageId) {
-                        currentDetectedFaceID = face.face.externalImageId
+                        //Only display the views if there's a new face detected
+                        if(currentDetectedFaceID != face.face.externalImageId) {
+                            currentDetectedFaceID = face.face.externalImageId
 
-                        //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
-                        val userData = UserManager.UserDocs[face.face.externalImageId]
+                            //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
+                            val userData = UserManager.UserDocs[face.face.externalImageId]
+                            //Get the relevant info we want by calling userData?.get("")
+                            val handle = userData?.igHandle
+                            val name = "${userData?.first} ${userData?.last}"
 
-                        //Get the relevant info we want by calling userData?.get("")
-                        val handle = userData?.igHandle
-                        val name = "${userData?.first} ${userData?.last}"
+                            if (!handle.isNullOrEmpty()) {
+                                //userIG = handle
+                                // Add the users ig to the list of found users
+                                if(Pair(face.face.externalImageId, handle) !in facesFoundList) facesFoundList.add(Pair(face.face.externalImageId, handle))
+                                igTextView.text = "@${handle}"
+                                nameView.text = name
+                                igTextView.setOnClickListener {
+                                    navigateToInstagram(handle)
+                                }
 
-                        if (!handle.isNullOrEmpty()) {
-                            userIG = handle
-                            igTextView.text = "@${userIG}"
-                            nameView.text = name
-                            igTextView.setOnClickListener {
-                                viewModel.navigateToInstagram(
-                                    context!!,
-                                    handle
-                                )
+                                val params = FrameLayout.LayoutParams(layout.width, layout.height)
+                                params.leftMargin = rightCoord.toInt()
+                                params.topMargin = bottomCoord.toInt()
+                                layout.addView(nameView, params)
+
+                                val params2 = FrameLayout.LayoutParams(layout.width, layout.height)
+                                params2.leftMargin = rightCoord.toInt()
+                                params2.topMargin = bottomCoord.toInt() + nameView.textSize.toInt()
+                                layout.addView(igTextView, params2)
                             }
-
-                            val params = FrameLayout.LayoutParams(layout.width, layout.height)
-                            params.leftMargin = rightCoord.toInt()
-                            params.topMargin = bottomCoord.toInt()
-                            layout.addView(nameView, params)
-
-                            val params2 = FrameLayout.LayoutParams(layout.width, layout.height)
-                            params2.leftMargin = rightCoord.toInt()
-                            params2.topMargin = bottomCoord.toInt() + nameView.textSize.toInt()
-                            layout.addView(igTextView, params2)
                         }
                     }
+                }catch(e:Exception){
+                    makeToast(e.toString(),1)
+                    Log.e(TAG,e.toString())
                 }
             }
 
-        } catch (e: Exception) {
-            Log.d(TAG, e.toString())
         }
+
     }
 
+    /**
+     * Created after the onCreateView
+     */
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
         surface!!.setDefaultBufferSize(1280, 720)
+        previewwTexture = surface
         createClientAndStartStreaming(surface)
     }
     override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {

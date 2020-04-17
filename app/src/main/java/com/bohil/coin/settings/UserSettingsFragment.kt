@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,26 +15,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.room.util.DBUtil
 import com.amazonaws.services.rekognition.model.Image
-import com.amazonaws.services.rekognition.model.S3Object
-import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.AmazonS3URI
-import com.amazonaws.services.s3.S3ClientOptions
 import com.amazonaws.util.IOUtils
-import com.amplifyframework.core.Amplify
-import com.amplifyframework.core.ResultListener
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
 import com.bohil.coin.databinding.FragmentUserSettingsBinding
-import com.bohil.coin.login.registration.CombinedRegister
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -238,5 +227,6 @@ class UserSettingsFragment : Fragment() {
         const val TAG = "SETTINGS"
         private var oneFace = false
         private const val REQUEST_TAKE_PHOTO = 1001
+
     }
 }
