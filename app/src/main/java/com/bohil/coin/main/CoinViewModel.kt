@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.amazonaws.mobileconnectors.kinesisvideo.mediasource.android.AndroidCameraMediaSource
 import com.amazonaws.services.rekognition.model.DetectFacesResult
 import com.amazonaws.services.rekognition.model.FaceMatch
 import com.amazonaws.services.rekognition.model.Image
@@ -28,6 +29,18 @@ private const val TAG = "CoinViewModel"
  * Holds and initiates the configurations for the Kinesis Stream
  */
 class CoinViewModel : ViewModel() {
+    //The Direction of the Camera. Back Camera: 0 Front Camera: 1
+    private var cameraDirection = 1
+
+    //TODO Properly implement
+    /**
+     * Changes the direction of the camera
+     */
+    fun changeCameraDirection(appContext: Context): AndroidCameraMediaSource{
+        cameraDirection = if(cameraDirection == 0) 1 else 0
+        return DBUtility.createMediaSource(appContext, cameraDirection)
+    }
+
     init{
 
     }
@@ -74,13 +87,6 @@ class CoinViewModel : ViewModel() {
     }
 
     /**
-     * Creates the Bounding Box over the recognized face
-     */
-    fun createBox(){
-
-    }
-
-    /**
      * Detects the faces present in a Rekognition Image
      */
     fun detectFaces(image: Image): DetectFacesResult?{
@@ -121,7 +127,16 @@ class CoinViewModel : ViewModel() {
     }*/
 
     fun searchCollection(appContext:Context, image:Image): List<FaceMatch>{
-        return DBUtility.searchCollection(appContext, image)
+
+        var results:List<FaceMatch>? = null
+        runBlocking {
+            val getFacesDetectedJob = GlobalScope.launch {
+                results =  DBUtility.searchCollection(appContext,image)
+            }
+            // Wait for job to complete
+            getFacesDetectedJob.join()
+        }
+        return results!!
     }
 
 
@@ -131,7 +146,7 @@ class CoinViewModel : ViewModel() {
         insta.setPackage("com.instagram.android")
 
         if(isIntentAvailable(insta, appContext)) appContext.startActivity(insta)
-        else appContext.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://instagram.com/hvnchoj")))
+        else appContext.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://instagram.com/${handle}")))
 
     }
 

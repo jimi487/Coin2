@@ -3,7 +3,9 @@ package com.bohil.coin
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import android.util.Size
 import com.amazonaws.kinesisvideo.client.KinesisVideoClient
@@ -26,6 +28,7 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.rekognition.AmazonRekognition
 import com.amazonaws.services.rekognition.AmazonRekognitionClient
 import com.amazonaws.services.rekognition.model.*
+import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.util.IOUtils
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.ResultListener
@@ -42,6 +45,8 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.system.exitProcess
 
 /**
@@ -121,11 +126,11 @@ object DBUtility {
      * Sets up the configuration for the Data sent to the Video Stream
      * @return
      */
-    fun getCurrentConfiguration(appContext: Context): AndroidCameraMediaSourceConfiguration? {
+    fun getCurrentConfiguration(appContext: Context, cameraDirection: Int): AndroidCameraMediaSourceConfiguration? {
 
         // 0 gives back camera, 1 gives front
         val cameras = getCameras(kinesisVideoClient)
-        val resolutions = getSupportedResolutions(appContext, cameras[1].cameraId)
+        val resolutions = getSupportedResolutions(appContext, cameras[cameraDirection].cameraId)
         val mimeTypes = getSupportedMimeTypes()
         var select1080p = 0
         var selectHEVC = 0
@@ -146,12 +151,12 @@ object DBUtility {
 
         return AndroidCameraMediaSourceConfiguration(
             AndroidCameraMediaSourceConfiguration.builder()
-                .withCameraId(cameras[1].cameraId)
-                .withCameraFacing(cameras[1].cameraFacing)
+                .withCameraId(cameras[cameraDirection].cameraId)
+                .withCameraFacing(cameras[cameraDirection].cameraFacing)
                 .withIsEncoderHardwareAccelerated(
-                    cameras[1].isEndcoderHardwareAccelerated
+                    cameras[cameraDirection].isEndcoderHardwareAccelerated
                 )
-                .withCameraOrientation(-cameras[1].cameraOrientation)
+                .withCameraOrientation(-cameras[cameraDirection].cameraOrientation)
                 .withEncodingMimeType(mimeTypes[selectHEVC].mimeType)
                 .withHorizontalResolution(resolutions[select1080p].width)
                 .withVerticalResolution(resolutions[select1080p].height)
@@ -166,9 +171,9 @@ object DBUtility {
     /**
      * Creates the Video Source for the Video Stream
      */
-    fun createMediaSource(appContext: Context): AndroidCameraMediaSource {
+    fun createMediaSource(appContext: Context, cameraDirection: Int): AndroidCameraMediaSource {
         return kinesisVideoClient
-            .createMediaSource("CoinVideoStream", getCurrentConfiguration(appContext))
+            .createMediaSource("CoinVideoStream", getCurrentConfiguration(appContext, cameraDirection))
                 as AndroidCameraMediaSource
     }
 
@@ -308,16 +313,21 @@ object DBUtility {
      * Searches for a face in a collection
      */
     fun searchCollection(appContext: Context, image: Image): List<FaceMatch> {
-        val searchFace = SearchFacesByImageRequest()
-            .withCollectionId(getCollectionID(appContext))
-            .withImage(image)
-            .withFaceMatchThreshold(93f)
-            .withMaxFaces(1)
+        try {
+            val searchFace = SearchFacesByImageRequest()
+                .withCollectionId(getCollectionID(appContext))
+                .withImage(image)
+                .withFaceMatchThreshold(93f)
+                .withMaxFaces(1)
 
-        val searchFacesResult =
-            rekognitionClient.searchFacesByImage(searchFace)
+            val searchFacesResult =
+                rekognitionClient.searchFacesByImage(searchFace)
 
-        return searchFacesResult.faceMatches
+            return searchFacesResult.faceMatches
+        } catch (e : Exception) {
+            Log.e(TAG, e.message)
+            return emptyList()
+        }
     }
 
     /**
@@ -333,6 +343,34 @@ object DBUtility {
                     .withName(pictureName)
             )
     }
+
+    fun retrieveImageFromS3Bitmap(appContext: Context, id: String): Bitmap{
+        val pictureName = "public/${id}.jpg"
+        var currentPhotoPath = ""
+        val image = Image().withS3Object(
+            S3Object()
+                .withBucket("coinbucket00940-coinback")
+                .withName(pictureName))
+
+        val imageContent = AmazonS3Client(AWSInstance.credentials).getObject(image.s3Object.bucket, "public/${id}.jpg").objectContent
+
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File? = appContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val userFile = File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+
+        IOUtils.copy(imageContent, FileOutputStream(currentPhotoPath))
+        val imageBitmap = BitmapFactory.decodeFile(File(currentPhotoPath).absolutePath)
+        return imageBitmap
+    }
+
 
     //// DATABASE REQUESTS
 

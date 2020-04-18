@@ -3,7 +3,7 @@
     <string name="firestore_table">CoinBank</string>
     <string name="firebase_project">coin-b80f5</string>
     <string name="cognito_firestore">custom:FireStoreID</string>
-    <string name="version">Version: Alpha</string>
+    <string name="version">Version: Alpha 0.3</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="capture_button_description">Icon to capture the picture</string>
 
@@ -95,8 +95,8 @@
 
     <string name="action_settings">My Settings</string>
 
-    <string name="start_streaming">Start Streaming</string>
-    <string name="stop_streaming">Stop Streaming</string>
+    <string name="start_streaming">Start</string>
+    <string name="stop_streaming">Stop</string>
 
     <string name="camera_back_facing">Back Facing Camera</string>
     <string name="camera_front_facing">Front Facing Camera</string>
@@ -110,4 +110,9 @@
     <!-- Coin View Model Strings -->
     <string name="kinesis_video_name">CoinVideoStream</string>
     <string name="face_collection_name">CoinBank</string>
+
+    <!-- Coin Fragment Strings -->
+
+
+
 </resources>
