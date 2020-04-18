@@ -35,16 +35,9 @@ private lateinit var surfaceView: SurfaceView
 private lateinit var mHolder:SurfaceHolder
 private lateinit var picture:Drawable
 private lateinit var canvas:Canvas
-private lateinit var userIG:String
 private lateinit var image : Image
 private lateinit var layout : FrameLayout
-private lateinit var igTextView : TextView
-private lateinit var nameView : TextView
-private var currentDetectedFaceID : String? = null
-private var topCoord : Float = 0.0f
-private var bottomCoord: Float = 0.0f
-private var leftCoord : Float = 0.0f
-private var rightCoord : Float = 0.0f
+private var textViews : MutableList<TextView> = mutableListOf()
 
 
 @Suppress("DEPRECATION")
@@ -61,11 +54,13 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         binding.lifecycleOwner = this
 
         layout = binding.mainFrame
-        igTextView = TextView(context)
+
+        /*igTextView = TextView(context)
         igTextView.textSize = 30f
         //igTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ig_icon, 0, 0, 0)
         nameView = TextView(context)
         nameView.textSize = 30f
+        */
 
         // Binding TextureView
         textureView = binding.coinTextureView
@@ -99,7 +94,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
-        image = DBUtility.retrieveImageFromS3(UserManager.UserID)
+        //image = DBUtility.retrieveImageFromS3(UserManager.UserID)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -122,7 +117,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     /**
      * Draws the rectangle over the image
      */
-    private fun drawFocusRect(bg:Bitmap, box:BoundingBox, color:Int){
+    private fun drawFocusRect(bg:Bitmap, box:BoundingBox, name : String, instagram : String?){
         var left = 0f
         var top = 0f
         val height = bg.height
@@ -130,10 +125,6 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
         canvas = mHolder.lockCanvas()
         canvas.drawColor(0, PorterDuff.Mode.CLEAR)
-        /*val paint = Paint()
-        paint.style = Paint.Style.STROKE
-        paint.color = color
-        paint.strokeWidth = 5f*/
 
 
         left = width * box.left
@@ -146,10 +137,8 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
         d.draw(canvas)
 
-        leftCoord = left
-        rightCoord = left + (width * box.width)
-        topCoord = top
-        bottomCoord = top + (height * box.height)
+        createNameView(name, left + (width * box.width), top + (height * box.height))
+        createInstagramView(instagram,  left + (width * box.width), top + (height * box.height) + 35f)
 
         //canvas.drawRect(left, top, left + (width * box.width), top + (height * box.height), paint)
         mHolder.unlockCanvasAndPost(canvas)
@@ -235,6 +224,40 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         binding.coinStreamButton.setOnClickListener{pauseStreaming()}
     }
 
+    private fun clearAllTextsFromScreen() {
+        for(textView in textViews) {
+            layout.removeView(textView)
+        }
+        layout.invalidate()
+        textViews.clear()
+    }
+
+    private fun createNameView(name : String?, leftMargin: Float, topMargin : Float) {
+        var textView = TextView(context)
+        textView.textSize = 30f
+        textView.text = name
+
+        val params = FrameLayout.LayoutParams(layout.width, layout.height)
+        params.leftMargin = leftMargin.toInt()
+        params.topMargin = topMargin.toInt()
+        layout.addView(textView, params)
+        layout.invalidate()
+        textViews.add(textView)
+    }
+
+    private fun createInstagramView(instagram : String?,leftMargin: Float, topMargin: Float) {
+        var textView = TextView(context)
+        textView.textSize = 30f
+        textView.text = instagram
+
+        val params2 = FrameLayout.LayoutParams(layout.width, layout.height)
+        params2.leftMargin = leftMargin.toInt()
+        params2.topMargin = topMargin.toInt()
+        layout.addView(textView, params2)
+        layout.invalidate()
+        textViews.add(textView)
+    }
+
 
 
     ////
@@ -242,75 +265,57 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     ////
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-
         // Creating screenshot of the screen
         val screenFrame = Bitmap.createBitmap(textureView.width, textureView.height, Bitmap.Config.ARGB_8888)
         val screenImage = Bitmap.createScaledBitmap(screenFrame, 100, 100, false)
         textureView.getBitmap(screenImage)
 
         // Converts to AWS Image
-        //val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
+        val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
 
         // Scanning the capture for faces
         try {
+            clearAllTextsFromScreen()
             // App slowed from this network request
             //Scanning the image to retrieve faces
-            val results = viewModel.detectFaces(image)
-            if (results?.faceDetails?.size!! > 0) {
+            //val results = viewModel.detectFaces(image)
+            //if (results?.faceDetails?.size!! > 0) {
+
                 // Drawing The Bounding box on found faces
-                val faceDetails = results.faceDetails
+              //  val faceDetails = results.faceDetails
 
                 // Clears the canvas if no faces are recognized
-                if(faceDetails.size == 0)
-                    clearFocusRect()
+                //if(faceDetails.size == 0)
+                //    clearFocusRect()
 
-                for (face in faceDetails) {
+                //for (face in faceDetails) {
                     // Drawing Box around users face
-                    val box = face.boundingBox
-                    drawFocusRect(screenFrame, box, Color.WHITE)
-                }
+                  //  val box = face.boundingBox
+                    //drawFocusRect(screenFrame, box, Color.WHITE)
+                //}
 
                 // TODO Put in own try block and handle network request?
                 // Identifying users in the image
                 val facesFound = viewModel.searchCollection(context!!, image)
+
+                if(facesFound.isEmpty()) {
+                    clearFocusRect()
+                    return
+                }
+
                 for (face in facesFound) {
 
-                    //Only display the views if there's a new face detected
-                    if(currentDetectedFaceID != face.face.externalImageId) {
-                        currentDetectedFaceID = face.face.externalImageId
 
-                        //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
-                        val userData = UserManager.UserDocs[face.face.externalImageId]
+                    //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
+                    val userData = UserManager.UserDocs[face.face.externalImageId]
 
-                        //Get the relevant info we want by calling userData?.get("")
-                        val handle = userData?.igHandle
-                        val name = "${userData?.first} ${userData?.last}"
+                    //Get the relevant info we want by calling userData?.get(""
+                    val name = "${userData?.first} ${userData?.last}"
+                    val handle = userData?.igHandle
 
-                        if (!handle.isNullOrEmpty()) {
-                            userIG = handle
-                            igTextView.text = "@${userIG}"
-                            nameView.text = name
-                            igTextView.setOnClickListener {
-                                viewModel.navigateToInstagram(
-                                    context!!,
-                                    handle
-                                )
-                            }
+                    drawFocusRect(screenFrame, face.face.boundingBox, name, handle)
 
-                            val params = FrameLayout.LayoutParams(layout.width, layout.height)
-                            params.leftMargin = rightCoord.toInt()
-                            params.topMargin = bottomCoord.toInt()
-                            layout.addView(nameView, params)
-
-                            val params2 = FrameLayout.LayoutParams(layout.width, layout.height)
-                            params2.leftMargin = rightCoord.toInt()
-                            params2.topMargin = bottomCoord.toInt() + nameView.textSize.toInt()
-                            layout.addView(igTextView, params2)
-                        }
-                    }
                 }
-            }
-
         } catch (e: Exception) {
             Log.d(TAG, e.toString())
         }
