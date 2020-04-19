@@ -139,15 +139,12 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         var d = resources.getDrawable(R.drawable.face_square, null)
 
 
-
-        d.setBounds(left.toInt(), top.toInt(), (left + (width * box.width)).toInt(), (top + (height * box.height)).toInt())
-
-
+        d.setBounds(left.toInt(), top.toInt(), (box.width * bg.width).toInt(), (box.height * bg.height).toInt())
 
         d.draw(canvas)
 
-        createNameView(name, left + (width * box.width), top + (height *  box.height))
-        createInstagramView(instagram,  left + (width * box.width), top + (height * box.height) + 35f)
+        createNameView(name, left + (box.width * bg.width), top + (box.height * bg.height))
+        createInstagramView(instagram,  left + (box.width * bg.width), top + (box.height * bg.height) + 45f)
 
         //canvas.drawRect(left, top, left + (width * box.width), top + (height * box.height), paint)
         mHolder.unlockCanvasAndPost(canvas)
@@ -362,7 +359,45 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
             // Converts to AWS Image
             val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
+            try {
+                clearAllTextsFromScreen()
+                val results = viewModel.detectFaces(image)
+                for (i in results!!.faceDetails) {
+                    val faceShot = Bitmap.createBitmap(
+                        screenImage,
+                        (i.boundingBox.left * screenImage.width).toInt(),
+                        (i.boundingBox.top * screenImage.height).toInt(),
+                        (i.boundingBox.width * screenImage.width).toInt(),
+                        (i.boundingBox.height * screenImage.height).toInt()
+                    )
+                    val facesFound = viewModel.searchCollection(context!!, faceShot)
+                    if (facesFound.faceMatches.isEmpty()) {
+                        clearCanvas()
+                        continue
+                    } else {
+                        for (face in facesFound.faceMatches) {
+                            val userData = UserManager.UserDocs[face.face.externalImageId]
 
+                            //Get the relevant info we want by calling userData?.get(""
+                            val name = "${userData?.first} ${userData?.last}"
+                            val handle = userData?.igHandle
+
+                            drawFocusRect(screenFrame, i.boundingBox, name, handle)
+
+                            if (Pair(
+                                    face.face.externalImageId,
+                                    handle
+                                ) !in facesFoundList
+                            ) facesFoundList.add(Pair(face.face.externalImageId, handle!!))
+
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                //makeToast(e.toString(), 1)
+                Log.e(TAG, e.toString())
+            }
+/*
             // Scanning the capture for faces
             try {
                 clearAllTextsFromScreen()
@@ -390,7 +425,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                     val name = "${userData?.first} ${userData?.last}"
                     val handle = userData?.igHandle
 
-                    drawFocusRect(screenFrame, facesFound.searchedFaceBoundingBox, name, handle)
+                   //drawFocusRect(screenFrame, facesFound.searchedFaceBoundingBox, name, handle)
 
                     if (Pair(
                             face.face.externalImageId,
@@ -401,7 +436,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
             } catch (e: Exception) {
                 //makeToast(e.toString(), 1)
                 Log.e(TAG, e.toString())
-            }
+            }*/
         }
     }
 

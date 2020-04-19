@@ -318,7 +318,7 @@ object DBUtility {
             .withCollectionId(getCollectionID(appContext))
             .withImage(image)
             .withFaceMatchThreshold(93f)
-            .withMaxFaces(100)
+            .withMaxFaces(1)
 
         val searchFacesResult =
             rekognitionClient.searchFacesByImage(searchFace)
