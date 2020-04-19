@@ -144,7 +144,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         d.draw(canvas)
 
         createNameView(name, left + (box.width * bg.width), top + (box.height * bg.height))
-        createInstagramView(instagram,  left + (box.width * bg.width), top + (box.height * bg.height) + 45f)
+        createInstagramView(instagram,  left + (box.width * bg.width), top + (box.height * bg.height) + 55f)
 
         //canvas.drawRect(left, top, left + (width * box.width), top + (height * box.height), paint)
         mHolder.unlockCanvasAndPost(canvas)
@@ -362,6 +362,10 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
             try {
                 clearAllTextsFromScreen()
                 val results = viewModel.detectFaces(image)
+                if(results!!.faceDetails.isEmpty()) {
+                    clearCanvas()
+                    return
+                }
                 for (i in results!!.faceDetails) {
                     val faceShot = Bitmap.createBitmap(
                         screenImage,
@@ -372,7 +376,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                     )
                     val facesFound = viewModel.searchCollection(context!!, Image().withBytes((viewModel.convertToImage(context!!, faceShot))))
                     if (facesFound.faceMatches.isEmpty()) {
-                        clearCanvas()
+                        drawFocusRect(screenFrame, i.boundingBox, "Face not recognized", "")
                         continue
                     } else {
                         for (face in facesFound.faceMatches) {
