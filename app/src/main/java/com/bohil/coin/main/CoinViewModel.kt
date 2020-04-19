@@ -10,6 +10,7 @@ import com.amazonaws.mobileconnectors.kinesisvideo.mediasource.android.AndroidCa
 import com.amazonaws.services.rekognition.model.DetectFacesResult
 import com.amazonaws.services.rekognition.model.FaceMatch
 import com.amazonaws.services.rekognition.model.Image
+import com.amazonaws.services.rekognition.model.SearchFacesByImageResult
 import com.amazonaws.util.IOUtils
 import com.bohil.coin.DBUtility
 import kotlinx.coroutines.GlobalScope
@@ -126,9 +127,9 @@ class CoinViewModel : ViewModel() {
 
     }*/
 
-    fun searchCollection(appContext:Context, image:Image): List<FaceMatch>{
+    fun searchCollection(appContext:Context, image:Image): SearchFacesByImageResult{
 
-        var results:List<FaceMatch>? = null
+        var results:SearchFacesByImageResult? = null
         runBlocking {
             val getFacesDetectedJob = GlobalScope.launch {
                 results =  DBUtility.searchCollection(appContext,image)

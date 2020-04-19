@@ -2,11 +2,13 @@ package com.bohil.coin.main
 
 import android.graphics.*
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.ScaleDrawable
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.core.graphics.drawable.toBitmap
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -15,6 +17,7 @@ import com.amazonaws.kinesisvideo.common.exception.KinesisVideoException
 import com.amazonaws.mobileconnectors.kinesisvideo.client.KinesisVideoAndroidClientFactory
 import com.amazonaws.mobileconnectors.kinesisvideo.mediasource.android.AndroidCameraMediaSource
 import com.amazonaws.services.rekognition.model.BoundingBox
+import com.amazonaws.services.rekognition.model.CompareFacesRequest
 import com.amazonaws.services.rekognition.model.Image
 import com.bohil.coin.DBUtility
 import com.bohil.coin.R
@@ -97,7 +100,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
-        image = DBUtility.retrieveImageFromS3(UserManager.UserID)
+        image = DBUtility.retrieveImageFromS3("test")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -133,10 +136,13 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         left = width * box.left
         top = height * box.top
 
-        val d = resources.getDrawable(R.drawable.face_square, null)
-        d.setBounds(left.toInt(), top.toInt(), (left + (width * box.width)).toInt(),
-            (top + (height * box.height)).toInt()
-        )
+        var d = resources.getDrawable(R.drawable.face_square, null)
+
+
+
+        d.setBounds(left.toInt(), top.toInt(), (left + (width * box.width)).toInt(), (top + (height * box.height)).toInt())
+
+
 
         d.draw(canvas)
 
@@ -344,7 +350,6 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     ////
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-
         //Scan the users face after the start stream button has been tapped
         if (startStream && !timeUp) {
             // Updates when a face has been found
@@ -356,7 +361,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
             textureView.getBitmap(screenImage)
 
             // Converts to AWS Image
-            //val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
+            val image = Image().withBytes(viewModel.convertToImage(context!!, screenImage))
 
             // Scanning the capture for faces
             try {
@@ -364,9 +369,20 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                 // TODO Put in own try block and handle network request?
                 // Identifying users in the image
 
-                val facesFound = viewModel.searchCollection(context!!, image)
-                for (face in facesFound) {
+                /*val results = viewModel.detectFaces(image)
+                if (results?.faceDetails!!.isEmpty()) {
+                    clearCanvas()
+                    return
+                }*/
 
+                val facesFound = viewModel.searchCollection(context!!, image)
+
+                if(facesFound.faceMatches.isEmpty()) {
+                    clearCanvas()
+                    return
+                }
+
+                for (face in facesFound.faceMatches) {
                     //Get the users information by passing the externalImageId, which corresponds to the UserID, as key to UserManager.UserDocs
                     val userData = UserManager.UserDocs[face.face.externalImageId]
 
@@ -374,16 +390,16 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                     val name = "${userData?.first} ${userData?.last}"
                     val handle = userData?.igHandle
 
-                    drawFocusRect(screenFrame, face.face.boundingBox, name, handle)
+                    drawFocusRect(screenFrame, facesFound.searchedFaceBoundingBox, name, handle)
+
                     if (Pair(
                             face.face.externalImageId,
                             handle
                         ) !in facesFoundList
                     ) facesFoundList.add(Pair(face.face.externalImageId, handle!!))
-
                 }
             } catch (e: Exception) {
-                makeToast(e.toString(), 1)
+                //makeToast(e.toString(), 1)
                 Log.e(TAG, e.toString())
             }
         }

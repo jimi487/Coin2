@@ -204,7 +204,7 @@ object DBUtility {
         }
     }
 
-    //// REKOGNITION REQUESTS
+    //// REKOGNITION REQUESTSd
     private fun initializeRekogntionClient() {
         rekognitionClient = AmazonRekognitionClient(AWSInstance.credentials)
         rekognitionClient.setEndpoint("rekognition.us-east-2.amazonaws.com")
@@ -312,22 +312,18 @@ object DBUtility {
     /**
      * Searches for a face in a collection
      */
-    fun searchCollection(appContext: Context, image: Image): List<FaceMatch> {
-        try {
-            val searchFace = SearchFacesByImageRequest()
-                .withCollectionId(getCollectionID(appContext))
-                .withImage(image)
-                .withFaceMatchThreshold(93f)
-                .withMaxFaces(1)
+    fun searchCollection(appContext: Context, image: Image): SearchFacesByImageResult {
 
-            val searchFacesResult =
-                rekognitionClient.searchFacesByImage(searchFace)
+        val searchFace = SearchFacesByImageRequest()
+            .withCollectionId(getCollectionID(appContext))
+            .withImage(image)
+            .withFaceMatchThreshold(93f)
+            .withMaxFaces(100)
 
-            return searchFacesResult.faceMatches
-        } catch (e : Exception) {
-            Log.e(TAG, e.message)
-            return emptyList()
-        }
+        val searchFacesResult =
+            rekognitionClient.searchFacesByImage(searchFace)
+
+        return searchFacesResult
     }
 
     /**
