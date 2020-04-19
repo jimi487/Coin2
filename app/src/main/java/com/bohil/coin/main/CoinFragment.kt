@@ -139,7 +139,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         var d = resources.getDrawable(R.drawable.face_square, null)
 
 
-        d.setBounds(left.toInt(), top.toInt(), (box.width * bg.width).toInt(), (box.height * bg.height).toInt())
+        d.setBounds((box.left * bg.width).toInt(), (box.top * bg.height).toInt(), (box.width * bg.width).toInt(), (box.height * bg.height).toInt())
 
         d.draw(canvas)
 
@@ -362,6 +362,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
             try {
                 clearAllTextsFromScreen()
                 val results = viewModel.detectFaces(image)
+                Log.i(TAG, "Detected ${results!!.faceDetails.size} faces")
                 if(results!!.faceDetails.isEmpty()) {
                     clearCanvas()
                     return
@@ -375,8 +376,10 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                         (i.boundingBox.height * screenImage.height).toInt()
                     )
                     val facesFound = viewModel.searchCollection(context!!, Image().withBytes((viewModel.convertToImage(context!!, faceShot))))
+                    Log.i(TAG, "Searching collection for face @ ${i.boundingBox}")
                     if (facesFound.faceMatches.isEmpty()) {
-                        drawFocusRect(screenFrame, i.boundingBox, "Face not recognized", "")
+                        Log.i(TAG, "Face not found in collection")
+                        drawFocusRect(screenImage, i.boundingBox, "Face not recognized", "")
                         continue
                     } else {
                         for (face in facesFound.faceMatches) {
@@ -386,7 +389,9 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                             val name = "${userData?.first} ${userData?.last}"
                             val handle = userData?.igHandle
 
-                            drawFocusRect(screenFrame, i.boundingBox, name, handle)
+                            Log.i(TAG, "Face found in collection with name $name (id: ${face.face.externalImageId}")
+
+                            drawFocusRect(screenImage, i.boundingBox, name, handle)
 
                             if (Pair(
                                     face.face.externalImageId,
