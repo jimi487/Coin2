@@ -370,7 +370,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                         (i.boundingBox.width * screenImage.width).toInt(),
                         (i.boundingBox.height * screenImage.height).toInt()
                     )
-                    val facesFound = viewModel.searchCollection(context!!, faceShot)
+                    val facesFound = viewModel.searchCollection(context!!, Image().withBytes((viewModel.convertToImage(context!!, faceShot))))
                     if (facesFound.faceMatches.isEmpty()) {
                         clearCanvas()
                         continue
