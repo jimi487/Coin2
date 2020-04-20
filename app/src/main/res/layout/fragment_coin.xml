@@ -66,6 +66,17 @@
                             android:padding="10dp"
                             android:text="Stream" />
 
+
+                    <TextView
+                            android:id="@+id/TxtFacesDetected"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 face(s) detected"
+                            android:layout_alignParentTop="true"
+                            android:textSize="15dp"
+                            android:textAlignment="center"
+                            />
+
                     <ImageButton
                             android:id="@+id/change_camera"
                             android:layout_width="77dp"

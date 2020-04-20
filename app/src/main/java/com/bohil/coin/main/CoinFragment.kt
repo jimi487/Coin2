@@ -1,5 +1,6 @@
 package com.bohil.coin.main
 
+import android.annotation.SuppressLint
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ScaleDrawable
@@ -139,12 +140,17 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
         var d = resources.getDrawable(R.drawable.face_square, null)
 
 
-        d.setBounds((box.left * bg.width).toInt(), (box.top * bg.height).toInt(), (box.width * bg.width).toInt(), (box.height * bg.height).toInt())
-
+        d.setBounds(left.toInt(), top.toInt(), (left + (width * box.width)).toInt(), (top + (height * box.height)).toInt())
         d.draw(canvas)
 
-        createNameView(name, left + (box.width * bg.width), top + (box.height * bg.height))
-        createInstagramView(instagram,  left + (box.width * bg.width), top + (box.height * bg.height) + 55f)
+        if(box.left < 0.5) {
+            createNameView(name, left + (box.width * bg.width), top + (box.height * bg.height))
+            createInstagramView(instagram,  left + (box.width * bg.width), top + (box.height * bg.height) + 60)
+        } else {
+            createNameView(name, left, top + (box.height * bg.height))
+            createInstagramView(instagram,  left, top + (box.height * bg.height) + 60)
+        }
+
 
         //canvas.drawRect(left, top, left + (width * box.width), top + (height * box.height), paint)
         mHolder.unlockCanvasAndPost(canvas)
@@ -212,7 +218,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
             startStream = false
             clearCanvas()
             updateListView()
-
+            binding.TxtFacesDetected.text = "0 face(s) detected"
             makeToast("stopped streaming",0)
             binding.coinStreamButton.text = activity!!.getText(R.string.start_streaming)
         } catch (e: KinesisVideoException) {
@@ -346,6 +352,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
     // TextureView.SurfaceTextureListener methods
     ////
 
+    @SuppressLint("SetTextI18n")
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
         //Scan the users face after the start stream button has been tapped
         if (startStream && !timeUp) {
@@ -363,6 +370,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                 clearAllTextsFromScreen()
                 val results = viewModel.detectFaces(image)
                 Log.i(TAG, "Detected ${results!!.faceDetails.size} faces")
+                binding.TxtFacesDetected.text = "${results!!.faceDetails.size} face(s) detected"
                 if(results!!.faceDetails.isEmpty()) {
                     clearCanvas()
                     return
@@ -379,7 +387,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
                     Log.i(TAG, "Searching collection for face @ ${i.boundingBox}")
                     if (facesFound.faceMatches.isEmpty()) {
                         Log.i(TAG, "Face not found in collection")
-                        drawFocusRect(screenImage, i.boundingBox, "Face not recognized", "")
+                        drawFocusRect(screenFrame, i.boundingBox, "Face not recognized", "")
                         continue
                     } else {
                         for (face in facesFound.faceMatches) {
@@ -391,7 +399,7 @@ class CoinFragment : Fragment(), TextureView.SurfaceTextureListener {
 
                             Log.i(TAG, "Face found in collection with name $name (id: ${face.face.externalImageId}")
 
-                            drawFocusRect(screenImage, i.boundingBox, name, handle)
+                            drawFocusRect(screenFrame, i.boundingBox, name, "@${handle}")
 
                             if (Pair(
                                     face.face.externalImageId,
